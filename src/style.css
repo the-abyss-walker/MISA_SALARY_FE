@@ -1,0 +1,9 @@
+html,
+body,
+#app {
+  font-family: 'Inter', Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
