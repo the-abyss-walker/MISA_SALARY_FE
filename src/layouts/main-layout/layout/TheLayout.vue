@@ -1,67 +1,33 @@
 <template>
-  <div id="page">
-    <DxResponsiveBox :screen-by-width="screen" single-column-screen="sm">
-      <DxRow :ratio="0" base-size="48" />
-      <DxRow :ratio="1" />
+  <div id="layout" class="flex flex-col h-full min-h-[300px]">
+    <div class="h-[48px] w-full bg-gray-800 flex items-center">
+      <TheHeader />
+    </div>
 
-      <DxCol :ratio="0" base-size="220" />
-      <DxCol :ratio="2" screen="lg" />
-      <DxItem>
-        <DxLocation :row="0" :col="0" :colspan="3" screen="lg" />
-        <DxLocation :row="0" :col="0" :colspan="2" screen="sm" />
-        <div class="header item">
-          <p>Header</p>
-        </div>
-      </DxItem>
-      <DxItem>
-        <DxLocation :row="1" :col="1" screen="lg" />
-        <DxLocation :row="1" :col="0" :colspan="2" screen="sm" />
-        <div class="content item">
-          <p>Content</p>
-        </div>
-      </DxItem>
-      <DxItem>
-        <DxLocation :row="1" :col="0" screen="lg" />
-        <DxLocation :row="2" :col="0" screen="sm" />
-        <div class="left-side-bar item">
-          <p>Left Bar</p>
-        </div>
-      </DxItem>
-    </DxResponsiveBox>
+    <div class="flex flex-1">
+      <TheSideBar :collapsed="isCollapsed" @toggle="toggleSidebar" />
+
+      <div class="flex-1 p-4 bg-yellow-100/80">
+        <router-view />
+      </div>
+    </div>
   </div>
 </template>
+
 <script setup lang="ts">
-import { DxResponsiveBox, DxItem, DxLocation, DxCol, DxRow } from 'devextreme-vue/responsive-box'
+import { ref } from 'vue'
+import TheHeader from '../header/TheHeader.vue'
+import TheSideBar from '../sidebar/TheSideBar.vue'
 
-const screen = ((width: number) => (width < 300 ? 'sm' : 'lg')) as unknown as () => void
+const isCollapsed = ref(false)
+
+function toggleSidebar() {
+  isCollapsed.value = !isCollapsed.value
+}
 </script>
-<style>
-#app,
-#page {
+
+<style scoped>
+#layout {
   height: 100%;
-  min-height: 300px;
-}
-
-.header {
-  background-color: rgba(243, 158, 108, 0.8);
-  text-align: center;
-}
-
-.content {
-  background-color: rgba(245, 229, 166, 0.8);
-}
-
-.left-side-bar {
-  background-color: rgba(148, 215, 199, 0.8);
-}
-
-.item {
-  height: 100%;
-}
-
-#page p {
-  font-size: 20px;
-  padding-top: 10px;
-  text-align: center;
 }
 </style>
