@@ -12,7 +12,7 @@
       WebkitMaskRepeat: 'no-repeat',
       WebkitMaskSize: 'auto',
       WebkitMaskPosition: positionMap[name] || '0 0',
-      backgroundColor: color || 'currentColor',
+      color: color || 'currentColor',
     }"
   ></span>
 </template>
@@ -40,6 +40,7 @@ const positionMap: Record<string, string> = {
   settings: '-140px -778px',
   dropdown: '-186px -781px',
   sidebar_zoom: '-162px -779px',
+  search: '0 0',
 }
 
 const sizeMap: Record<string, { width: number; height: number }> = {
@@ -53,6 +54,7 @@ const sizeMap: Record<string, { width: number; height: number }> = {
   settings: { width: 20, height: 18 },
   dropdown: { width: 7.4625, height: 12 },
   sidebar_zoom: { width: 16, height: 16 },
+  search: { width: 20, height: 20 },
 }
 
 const iconSize = computed(() => sizeMap[props.name] || { width: 20, height: 20 })

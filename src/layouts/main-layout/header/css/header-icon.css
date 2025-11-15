@@ -1,0 +1,81 @@
+.switch-icon {
+  width: 24px;
+  height: 24px;
+  background-image: url('@/assets/icons/icon-switch.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  cursor: pointer;
+}
+
+.logo {
+  width: 32px;
+  height: 32px;
+  background-image: url('@/assets/icons/icon-payroll-logo.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.icon-notification-version {
+  width: 24px;
+  height: 24px;
+  background-image: url('@/assets/icons/icon-notification-version.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.icon-store {
+  width: 20px;
+  height: 20px;
+  background-image: url('@/assets/icons/cs-icon-store.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.icon-invite {
+  width: 24px;
+  height: 24px;
+  background-image: url('@/assets/icons/invite-icon.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.icon-message {
+  width: 24px;
+  height: 24px;
+  background-image: url('@/assets/icons/message-icon.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.icon-notification-user {
+  width: 24px;
+  height: 24px;
+  background-image: url('@/assets/icons/notification-user-icon.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.icon-more-menu {
+  width: 24px;
+  height: 24px;
+  background-image: url('@/assets/icons/more-menu-icon.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.icon-knowledge {
+  width: 24px;
+  height: 24px;
+  background-image: url('@/assets/icons/knowledge-icon.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}

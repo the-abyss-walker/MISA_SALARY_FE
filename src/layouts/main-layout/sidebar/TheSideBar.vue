@@ -1,35 +1,42 @@
 <template>
   <div
     class="left-side-bar h-full pt-7 bg-[#161a17] flex flex-col transition-all duration-300"
-    :class="collapsed ? 'w-[60px]' : 'w-[220px]'"
+    :class="collapsed ? 'collapsed w-[60px]' : 'w-[220px]'"
   >
     <!-- MENU -->
     <div class="flex-1 flex flex-col gap-2 px-2">
       <div
         v-for="item in menuItems"
         :key="item.id"
-        class="flex items-center gap-3 h-10 rounded-lg cursor-pointer hover:bg-[#198f3b] transition"
+        class="sidebar-item flex items-center gap-3 h-10 rounded-lg cursor-pointer hover:bg-[#02b936] transition-all"
         :class="collapsed ? 'justify-center px-0' : 'px-4'"
         @click="onItemClick(item)"
       >
-        <MSIcon :name="item.icon" :color="'#FFFFFFB2'" />
-        <span v-if="!collapsed" class="text-[#FFFFFFB2] whitespace-nowrap">
+        <MSIcon
+          :name="item.icon"
+          class="transition-all duration-300"
+          :class="collapsed ? 'mx-auto' : ''"
+          :color="'#FFFFFFB2'"
+        />
+
+        <!-- LABEL -->
+        <span
+          class="text-[#FFFFFFB2] whitespace-nowrap transition-all duration-300 sidebar-label"
+          :class="collapsed ? 'opacity-0 -translate-x-2.5 w-0' : 'opacity-100 translate-x-0 w-auto'"
+        >
           {{ item.label }}
         </span>
       </div>
     </div>
 
-    <!-- WRAPPER DIV NÚT THU GỌN -->
-    <div
-      class="flex justify-center mb-4 mt-auto transition-all duration-300 mx-auto"
-      :style="{ width: collapsed ? '36px' : '176px', height: '36px' }"
-    >
+    <!-- NÚT THU GỌN -->
+    <div class="flex justify-center mb-4 mt-auto mx-auto">
       <DxButton
         :height="36"
         :width="collapsed ? 36 : 176"
         stylingMode="contained"
         type="default"
-        class="flex items-center justify-center bg-[rgba(255,255,255,0.08)] hover:bg-[rgba(255,255,255,0.14)] transition-colors rounded-lg"
+        class="button flex items-center justify-center bg-[#ffffff1f] hover:bg-[#FFFFFF)] transition-colors rounded-lg cursor-pointer"
         @click="$emit('toggle')"
       >
         <template #content>
@@ -40,7 +47,9 @@
               class="transition-transform duration-300"
               :style="{ transform: collapsed ? 'none' : 'scaleX(-1)' }"
             />
-            <span v-if="!collapsed" class="text-[#FFFFFFB2]">Thu gọn</span>
+            <span v-if="!collapsed" class="text-[#FFFFFFB2] transition-opacity duration-300">
+              Thu gọn
+            </span>
           </div>
         </template>
       </DxButton>
@@ -73,7 +82,7 @@ function onItemClick(item: any) {
 </script>
 
 <style scoped>
-.left-side-bar {
-  overflow: visible;
+.sidebar-item:hover :deep(span) {
+  color: #ffffff !important;
 }
 </style>
