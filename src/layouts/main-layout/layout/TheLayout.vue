@@ -32,6 +32,6 @@ function toggleSidebar() {
 }
 .content {
   padding: 16px 24px;
-  background-color: #f6f6f6;
+  background-color: #f4f5f8;
 }
 </style>

@@ -11,29 +11,14 @@
       @export="$emit('export')"
       @search="onSearchInput"
     />
-
-    <DxDataGrid
-      id="gridContainer"
-      :data-source="employees"
-      :show-borders="true"
-      key-expr="ID"
-      :hover-state-enabled="true"
-    >
-      <DxPaging :enabled="false" />
-      <DxColumn data-field="Prefix" caption="Title" />
-      <DxColumn data-field="FirstName" />
-      <DxColumn data-field="LastName" />
-      <DxColumn :width="130" data-field="Position" />
-      <DxColumn :width="125" data-field="StateID" caption="State" />
-      <!-- Fixed action column -->
-      <DxColumn
-        width="120"
-        type="buttons"
-        :fixed="true"
-        fixed-position="right"
-        :buttons="actionButtons"
-      />
-    </DxDataGrid>
+    <!-- Temporary: show pagination for visual check -->
+    <MSPagination
+      :totalRecords="tableData.length"
+      v-model:currentPage="page"
+      v-model:pageSize="pageSize"
+      @page-change="onPageChange"
+      @size-change="onSizeChange"
+    />
   </div>
 </template>
 
@@ -50,6 +35,7 @@ import {
 } from 'devextreme-vue/data-grid'
 
 import MSTableHeader from './table-header/MSTableHeader.vue'
+import MSPagination from '@/components/pagination/MSPagination.vue'
 import salaryData from '../../data/salarycomposition.json'
 
 import type { DropdownOption } from '@/types/dropdown'
@@ -60,7 +46,6 @@ const props = withDefaults(
     data?: any[]
     columns?: Array<Record<string, any>>
     pageSize?: number
-    allowedPageSizes?: number[]
     leftOptions?: DropdownOption[]
     rightOptions?: DropdownOption[]
     leftPlaceholder?: string
@@ -72,8 +57,7 @@ const props = withDefaults(
   {
     data: () => [],
     columns: () => [],
-    pageSize: 5,
-    allowedPageSizes: () => [5, 10, 20],
+    pageSize: 15,
     // NOTE: intentionally do NOT provide defaults for header-related props here
     // so `MSTableHeader` can use its own defaults. If a parent of `MSTable`
     // passes these props, they will be forwarded below.
@@ -96,6 +80,7 @@ const searchQuery = ref('')
 const leftDropdown = ref(null as any)
 const rightDropdown = ref(null as any)
 const pageSize = ref(props.pageSize)
+const page = ref(1)
 
 const headerBindings = computed(() => {
   const b: Record<string, any> = {}
@@ -118,6 +103,7 @@ const gridColumns = [
   { dataField: 'TaxDeduction', caption: 'Giảm trừ khi tính thuế' },
   { dataField: 'Quota', caption: 'Định mức' },
   { dataField: 'ValueType', caption: 'Kiểu giá trị' },
+  { dataField: 'Value', caption: 'Giá trị' },
   { dataField: 'Description', caption: 'Mô tả' },
   { dataField: 'OptionShowPaycheck', caption: 'Hiển thị trên phiếu lương' },
   { dataField: 'Formula', caption: 'Nguồn tạo' },
@@ -162,6 +148,19 @@ function onLeftSelect(opt: any) {
 
 function onRightSelect(opt: any) {
   emit('filter-change', { left: leftDropdown.value, right: opt })
+}
+
+function onPageChange(p: number) {
+  page.value = p
+  // emit to parent if needed
+  emit('page-change', p)
+}
+
+function onSizeChange(s: number) {
+  pageSize.value = s
+  // when size changes, reset page to 1 for visual check
+  page.value = 1
+  emit('page-change', 1)
 }
 
 watch(
