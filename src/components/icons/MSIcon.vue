@@ -12,7 +12,8 @@
       WebkitMaskRepeat: 'no-repeat',
       WebkitMaskSize: 'auto',
       WebkitMaskPosition: positionMap[name] || '0 0',
-      color: color || 'currentColor',
+      /* color uses a CSS variable fallback so parent can override --ms-icon-color */
+      color: `var(--ms-icon-color, ${defaultColor})`,
     }"
   ></span>
 </template>
@@ -26,7 +27,7 @@ interface Props {
   color?: string
 }
 const props = withDefaults(defineProps<Props>(), {
-  color: 'white',
+  color: undefined,
 })
 
 const positionMap: Record<string, string> = {
@@ -38,9 +39,13 @@ const positionMap: Record<string, string> = {
   payment: '-60px -778px',
   report: '-80px -778px',
   settings: '-140px -778px',
-  dropdown: '-186px -781px',
   sidebar_zoom: '-162px -779px',
   search: '0 0',
+  rule: '-260px -100px',
+  plus: '-220px 0',
+  dropdown: '-100px 0',
+  filter: '-20px 0',
+  setting: '-48px -120px',
 }
 
 const sizeMap: Record<string, { width: number; height: number }> = {
@@ -52,12 +57,37 @@ const sizeMap: Record<string, { width: number; height: number }> = {
   payment: { width: 20, height: 18 },
   report: { width: 20, height: 18 },
   settings: { width: 20, height: 18 },
-  dropdown: { width: 7.4625, height: 12 },
   sidebar_zoom: { width: 16, height: 16 },
   search: { width: 20, height: 20 },
+  rule: { width: 20, height: 20 },
+  plus: { width: 20, height: 20 },
+  dropdown: { width: 20, height: 20 },
+  filter: { width: 20, height: 20 },
+  setting: { width: 24, height: 24 },
 }
 
 const iconSize = computed(() => sizeMap[props.name] || { width: 20, height: 20 })
+
+// default color per icon (you can expand this map)
+const colorMap: Record<string, string> = {
+  dashboard: '#6E737A',
+  salary_composition: '#6E737A',
+  salary_template: '#6E737A',
+  salary_data: '#6E737A',
+  salary_table: '#6E737A',
+  payment: '#6E737A',
+  report: '#6E737A',
+  settings: '#6E737A',
+  sidebar_zoom: '#FFFFFF',
+  search: '#6E737A',
+  rule: '#6E737A',
+  plus: '#FFFFFF',
+  dropdown: '#FFFFFF',
+  filter: '#6E737A',
+  setting: '#6E737A',
+}
+
+const defaultColor = computed(() => props.color ?? colorMap[props.name] ?? 'currentColor')
 </script>
 
 <style scoped>

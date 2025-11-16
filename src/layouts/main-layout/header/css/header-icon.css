@@ -71,6 +71,15 @@
   background-position: center;
 }
 
+.icon-help {
+  width: 24px;
+  height: 24px;
+  background-image: url('@/assets/icons/help-icon.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
 .icon-knowledge {
   width: 24px;
   height: 24px;

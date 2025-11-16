@@ -8,7 +8,7 @@
       <div
         v-for="item in menuItems"
         :key="item.id"
-        class="sidebar-item flex items-center gap-3 h-10 rounded-lg cursor-pointer hover:bg-[#02b936] transition-all"
+        class="sidebar-item flex items-center gap-3 h-10 rounded-lg cursor-pointer hover:bg-[#34b05740] transition-all"
         :class="collapsed ? 'justify-center px-0' : 'px-4'"
         @click="onItemClick(item)"
       >
@@ -67,7 +67,12 @@ const props = defineProps({
 
 const menuItems = [
   { label: 'Tổng quan', id: 'dashboard', icon: 'dashboard' },
-  { label: 'Thành phần lương', id: 'salary_composition', icon: 'salary_composition' },
+  {
+    label: 'Thành phần lương',
+    id: 'salary_composition',
+    icon: 'salary_composition',
+    path: '/salarycomposition',
+  },
   { label: 'Mẫu bảng lương', id: 'salary_template', icon: 'salary_template' },
   { label: 'Dữ liệu tính lương', id: 'salary_data', icon: 'salary_data' },
   { label: 'Tính lương', id: 'salary_table', icon: 'salary_table' },
@@ -76,8 +81,15 @@ const menuItems = [
   { label: 'Thiết lập', id: 'settings', icon: 'settings' },
 ]
 
+import { useRouter } from 'vue-router'
+const router = useRouter()
+
 function onItemClick(item: any) {
-  console.log('Clicked:', item)
+  if (item.path) {
+    router.push(item.path)
+  } else {
+    console.log('Clicked (no route):', item)
+  }
 }
 </script>
 

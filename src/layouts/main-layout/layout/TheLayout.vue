@@ -7,7 +7,7 @@
     <div class="flex flex-1">
       <TheSideBar :collapsed="isCollapsed" @toggle="toggleSidebar" />
 
-      <div class="flex-1 p-4 bg-yellow-100/80">
+      <div class="content flex-1">
         <router-view />
       </div>
     </div>
@@ -29,5 +29,9 @@ function toggleSidebar() {
 <style scoped>
 #layout {
   height: 100%;
+}
+.content {
+  padding: 16px 24px;
+  background-color: #f6f6f6;
 }
 </style>

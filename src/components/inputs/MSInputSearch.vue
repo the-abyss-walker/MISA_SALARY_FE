@@ -1,11 +1,8 @@
 <template>
   <div
     class="flex items-center rounded-md border transition-all duration-150 cursor-text"
-    :class="[
-      isHover ? hoverClass : baseClass,
-      disabled ? 'opacity-50 pointer-events-none' : '',
-      sizeClass,
-    ]"
+    :class="[isHover ? hoverClass : baseClass, disabled ? 'opacity-50 pointer-events-none' : '']"
+    :style="sizeStyle"
     @mouseenter="isHover = true"
     @mouseleave="isHover = false"
     @click="focusInput"
@@ -19,7 +16,7 @@
     <input
       ref="inputRef"
       :placeholder="placeholder"
-      class="flex-1 bg-transparent outline-none text-[14px] px-3"
+      class="flex-1 bg-transparent outline-none text-[13px] font-medium px-3"
       :class="placeholderClass"
       v-model="modelValueLocal"
       @input="$emit('update:modelValue', modelValueLocal)"
@@ -59,8 +56,11 @@ const isHover = ref(false)
 const inputRef = ref<HTMLInputElement | null>(null)
 const modelValueLocal = ref(props.modelValue)
 
-const sizeClass = computed(() => {
-  return `w-[${props.width}px] h-[${props.height}px]`
+const sizeStyle = computed(() => {
+  return {
+    width: `${props.width}px`,
+    height: `${props.height}px`,
+  }
 })
 
 const focusInput = () => {
