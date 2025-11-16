@@ -47,7 +47,7 @@ const props = withDefaults(defineProps<Props>(), {
   width: 300,
   height: 32,
   baseClass: 'bg-[#F6F6F6] border-none',
-  hoverClass: 'bg-gray-200 ',
+  hoverClass: 'border-[#34b057] ',
   placeholderClass: 'placeholder-gray-500',
   disabled: false,
 })

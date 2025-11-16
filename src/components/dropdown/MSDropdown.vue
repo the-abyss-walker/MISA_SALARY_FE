@@ -2,16 +2,16 @@
   <div ref="root" :style="containerStyle" class="relative inline-block">
     <button
       type="button"
-      class="w-full flex items-center justify-between px-3 py-2 rounded bg-white text-left"
+      class="w-full flex items-center justify-between px-3 py-2 rounded bg-white text-left cursor-pointer"
       :class="{ 'opacity-60 pointer-events-none': disabled }"
       @click="toggle"
       :aria-expanded="open"
       :aria-disabled="disabled"
     >
-      <span class="truncate" :title="selectedLabel || placeholder">{{
-        selectedLabel || placeholder
-      }}</span>
-      <span class="ml-2 flex items-center">
+      <span class="truncate flex-1 text-right pr-1" :title="selectedLabel || placeholder">
+        {{ selectedLabel || placeholder }}
+      </span>
+      <span class="ml-1 flex items-center">
         <MSIcon name="dropdown" color="#6e737a" />
       </span>
     </button>
@@ -32,12 +32,12 @@
         />
       </div>
 
-      <ul class="max-h-60 overflow-auto">
+      <ul class="max-h-60 overflow-auto p-2">
         <li
           v-for="opt in filteredOptions"
           :key="opt.value"
-          class="px-3 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2"
-          :class="{ 'opacity-60 pointer-events-none': opt.disabled }"
+          class="option-item p-2 cursor-pointer flex items-center gap-2"
+          :class="{ 'opacity-60 pointer-events-none': opt.disabled, selected: isSelected(opt) }"
           @click="select(opt)"
           role="option"
           :aria-selected="isSelected(opt)"
@@ -45,9 +45,13 @@
           <slot name="option" :option="opt">
             <span class="truncate">{{ opt.label }}</span>
           </slot>
+
+          <span class="option-icon w-7 shrink-0 flex items-center justify-center ml-auto">
+            <MSIcon v-if="isSelected(opt)" name="check" color="#34B057" />
+          </span>
         </li>
 
-        <li v-if="filteredOptions.length === 0" class="px-3 py-2 text-sm text-gray-500">
+        <li v-if="filteredOptions.length === 0" class="py-2 text-sm text-gray-500">
           Không có kết quả
         </li>
       </ul>
@@ -162,5 +166,22 @@ watch(
 }
 .max-h-60 {
   max-height: 15rem;
+}
+
+/* Dropdown option hover and selected styles */
+.option-item:hover {
+  background: #eafbf2;
+}
+.option-item.selected {
+  background: #eafbf2;
+  color: #34b057;
+}
+.option-item.selected .truncate {
+  color: #34b057;
+}
+.option-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 </style>

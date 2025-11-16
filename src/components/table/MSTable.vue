@@ -4,11 +4,7 @@
       v-model:left="leftDropdown"
       v-model:right="rightDropdown"
       v-model:search="searchQuery"
-      :leftOptions="props.leftOptions"
-      :rightOptions="props.rightOptions"
-      :leftPlaceholder="props.leftPlaceholder"
-      :rightPlaceholder="props.rightPlaceholder"
-      :searchPlaceholder="props.searchPlaceholder"
+      v-bind="headerBindings"
       @left-select="onLeftSelect"
       @right-select="onRightSelect"
       @add="$emit('add')"
@@ -42,7 +38,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue'
+import { ref, watch, computed } from 'vue'
 import {
   DxDataGrid,
   DxColumn,
@@ -56,9 +52,8 @@ import {
 import MSTableHeader from './table-header/MSTableHeader.vue'
 import salaryData from '../../data/salarycomposition.json'
 
+import type { DropdownOption } from '@/types/dropdown'
 import { employees as defaultEmployees, states, getMaxID, type Employee } from '../../data/data.ts'
-
-type Opt = { label: string; value: any; disabled?: boolean }
 
 const props = withDefaults(
   defineProps<{
@@ -66,8 +61,8 @@ const props = withDefaults(
     columns?: Array<Record<string, any>>
     pageSize?: number
     allowedPageSizes?: number[]
-    leftOptions?: Opt[]
-    rightOptions?: Opt[]
+    leftOptions?: DropdownOption[]
+    rightOptions?: DropdownOption[]
     leftPlaceholder?: string
     rightPlaceholder?: string
     searchPlaceholder?: string
@@ -79,11 +74,9 @@ const props = withDefaults(
     columns: () => [],
     pageSize: 5,
     allowedPageSizes: () => [5, 10, 20],
-    leftOptions: () => [],
-    rightOptions: () => [],
-    leftPlaceholder: 'Lọc 1',
-    rightPlaceholder: 'Lọc 2',
-    searchPlaceholder: 'Tìm kiếm',
+    // NOTE: intentionally do NOT provide defaults for header-related props here
+    // so `MSTableHeader` can use its own defaults. If a parent of `MSTable`
+    // passes these props, they will be forwarded below.
     gridHeight: '400px',
     remoteOperations: false,
   },
@@ -103,6 +96,16 @@ const searchQuery = ref('')
 const leftDropdown = ref(null as any)
 const rightDropdown = ref(null as any)
 const pageSize = ref(props.pageSize)
+
+const headerBindings = computed(() => {
+  const b: Record<string, any> = {}
+  if (props.leftOptions !== undefined) b.leftOptions = props.leftOptions
+  if (props.rightOptions !== undefined) b.rightOptions = props.rightOptions
+  if (props.leftPlaceholder !== undefined) b.leftPlaceholder = props.leftPlaceholder
+  if (props.rightPlaceholder !== undefined) b.rightPlaceholder = props.rightPlaceholder
+  if (props.searchPlaceholder !== undefined) b.searchPlaceholder = props.searchPlaceholder
+  return b
+})
 
 // Columns requested by the user, mapped to data fields in the temporary JSON
 const gridColumns = [

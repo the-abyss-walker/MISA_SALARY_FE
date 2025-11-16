@@ -47,6 +47,7 @@ const positionMap: Record<string, string> = {
   filter: '-20px 0',
   setting: '-48px -120px',
   arrow_left: '-180px 0',
+  check: '-120px -60px',
 }
 
 const sizeMap: Record<string, { width: number; height: number }> = {
@@ -66,6 +67,7 @@ const sizeMap: Record<string, { width: number; height: number }> = {
   filter: { width: 20, height: 20 },
   setting: { width: 24, height: 24 },
   arrow_left: { width: 20, height: 20 },
+  check: { width: 20, height: 20 },
 }
 
 const iconSize = computed(() => sizeMap[props.name] || { width: 20, height: 20 })
@@ -88,6 +90,7 @@ const colorMap: Record<string, string> = {
   filter: '#6E737A',
   setting: '#6E737A',
   arrow_left: '#6E737A',
+  check: '#34b057',
 }
 
 const defaultColor = computed(() => props.color ?? colorMap[props.name] ?? 'currentColor')

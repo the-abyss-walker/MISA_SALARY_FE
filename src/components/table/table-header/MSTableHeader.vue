@@ -24,27 +24,26 @@
         @select="onRightSelect"
       />
 
-      <MSButton variant="icon" icon="filter" @click="$emit('export')" />
-      <MSButton variant="icon" icon="setting" @click="$emit('add')" />
+      <MSButton variant="icon" icon="filter" @click="$emit('filter')" />
+      <MSButton variant="icon" icon="setting" @click="$emit('config')" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import type { DropdownOption } from '@/types/dropdown'
 import MSInputSearch from '@/components/inputs/MSInputSearch.vue'
 import MSButton from '@/components/button/MSButton.vue'
 import MSDropdown from '@/components/dropdown/MSDropdown.vue'
-
-type Opt = { label: string; value: any; disabled?: boolean }
 
 const props = withDefaults(
   defineProps<{
     left?: any
     right?: any
     search?: string
-    leftOptions?: Opt[]
-    rightOptions?: Opt[]
+    leftOptions?: DropdownOption[]
+    rightOptions?: DropdownOption[]
     leftPlaceholder?: string
     rightPlaceholder?: string
     searchPlaceholder?: string
@@ -53,10 +52,18 @@ const props = withDefaults(
     left: undefined,
     right: undefined,
     search: undefined,
-    leftOptions: () => [],
-    rightOptions: () => [],
-    leftPlaceholder: 'Lọc 1',
-    rightPlaceholder: 'Lọc 2',
+    leftOptions: () => [
+      { label: 'Tất cả trạng thái', value: null },
+      { label: 'Đang hoạt động', value: 'active' },
+      { label: 'Ngừng hoạt động', value: 'inactive' },
+    ],
+    rightOptions: () => [
+      { label: 'Phòng nhân sự', value: 'hr' },
+      { label: 'Phòng kế toán', value: 'accounting' },
+      { label: 'Phòng IT', value: 'it' },
+    ],
+    leftPlaceholder: 'Tất cả trạng thái',
+    rightPlaceholder: 'Tất cả đơn vị',
     searchPlaceholder: 'Tìm kiếm',
   },
 )
@@ -67,8 +74,8 @@ const emit = defineEmits([
   'update:search',
   'left-select',
   'right-select',
-  'add',
-  'export',
+  'config',
+  'filter',
   'search',
 ])
 

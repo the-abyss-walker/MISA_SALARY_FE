@@ -1,7 +1,7 @@
 <template>
   <div
     class="left-side-bar h-full pt-7 bg-[#161a17] flex flex-col transition-all duration-300"
-    :class="collapsed ? 'collapsed w-[60px]' : 'w-[220px]'"
+    :class="collapsed ? 'collapsed' : ''"
   >
     <!-- MENU -->
     <div class="flex-1 flex flex-col gap-2 px-2">
@@ -34,35 +34,30 @@
 
     <!-- NÚT THU GỌN -->
     <div class="flex justify-center mb-4 mt-auto mx-auto">
-      <DxButton
-        :height="36"
-        :width="collapsed ? 36 : 176"
-        stylingMode="contained"
-        type="default"
-        class="button flex items-center justify-center bg-[#ffffff1f] hover:bg-[#FFFFFF)] transition-colors rounded-lg cursor-pointer"
+      <button
+        class="sidebar-collapse-btn flex items-center justify-center transition-colors rounded-lg cursor-pointer"
+        :style="{ width: collapsed ? '36px' : '176px', height: '36px' }"
         @click="$emit('toggle')"
+        aria-label="Thu gọn sidebar"
       >
-        <template #content>
-          <div class="flex items-center gap-2 justify-center">
-            <MSIcon
-              name="sidebar_zoom"
-              color="#FFFFFFB2"
-              class="transition-transform duration-300"
-              :style="{ transform: collapsed ? 'none' : 'scaleX(-1)' }"
-            />
-            <span v-if="!collapsed" class="text-[#FFFFFFB2] transition-opacity duration-300">
-              Thu gọn
-            </span>
-          </div>
-        </template>
-      </DxButton>
+        <div class="flex items-center gap-2 justify-center">
+          <MSIcon
+            name="sidebar_zoom"
+            color="#FFFFFFB2"
+            class="transition-transform duration-300 sidebar-collapse-icon"
+            :style="{ transform: collapsed ? 'none' : 'scaleX(-1)' }"
+          />
+          <span v-if="!collapsed" class="sidebar-collapse-label transition-opacity duration-300">
+            Thu gọn
+          </span>
+        </div>
+      </button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import MSIcon from '@/components/icons/MSIcon.vue'
-import { DxButton } from 'devextreme-vue/button'
 import { ref } from 'vue'
 
 const props = defineProps({
@@ -116,5 +111,97 @@ function onItemClick(item: any) {
 .sidebar-item.active :deep(svg) {
   color: #ffffff !important;
   fill: #ffffff !important;
+}
+
+.sidebar-collapse-btn {
+  background: #ffffff1d;
+  border: none;
+  color: #ffffffb2;
+  padding: 0 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.sidebar-collapse-btn:hover {
+  background: #ffffff1f;
+}
+.sidebar-collapse-btn:hover .sidebar-collapse-label,
+.sidebar-collapse-btn:hover .sidebar-collapse-icon {
+  color: #ffffff !important;
+}
+
+/* ensure svg inside button becomes white on hover */
+.sidebar-collapse-btn:hover :deep(svg) {
+  color: #ffffff !important;
+  fill: #ffffff !important;
+}
+
+.sidebar-collapse-label {
+  color: #ffffffb2;
+}
+.sidebar-collapse-icon {
+  color: #ffffffb2;
+}
+
+/* enforce exact sidebar widths and center icons when collapsed */
+.left-side-bar {
+  flex: 0 0 220px;
+  min-width: 220px;
+  max-width: 220px;
+}
+.left-side-bar.collapsed {
+  flex: 0 0 60px;
+  min-width: 60px;
+  max-width: 60px;
+}
+
+/* center icons and remove extra gaps when collapsed */
+.left-side-bar.collapsed .sidebar-item {
+  justify-content: center !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  gap: 0 !important;
+}
+
+/* make each item a 36x36 square and centered when collapsed */
+.left-side-bar.collapsed .sidebar-item {
+  width: 36px !important;
+  height: 36px !important;
+  border-radius: 6px !important;
+  margin-left: auto !important;
+  margin-right: auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* force vertical list container to center items horizontally when collapsed */
+.left-side-bar.collapsed .flex-1 {
+  align-items: center;
+}
+
+/* shrink svg/icon inside collapsed items to fit 36x36 */
+.left-side-bar.collapsed .sidebar-item :deep(svg) {
+  width: 20px !important;
+  height: 20px !important;
+  display: block;
+  margin: 0 auto !important;
+}
+
+/* hide labels completely when collapsed for perfect centering */
+.left-side-bar.collapsed .sidebar-label {
+  opacity: 0 !important;
+  width: 0 !important;
+  transform: translateX(-10px) !important;
+  pointer-events: none;
+}
+
+/* ensure the icon centers inside the small sidebar - force svg and icon wrapper to center */
+.left-side-bar.collapsed .sidebar-item > * {
+  margin: 0 auto !important;
+}
+.left-side-bar.collapsed .sidebar-item :deep(svg) {
+  display: block;
+  margin: 0 auto !important;
 }
 </style>
