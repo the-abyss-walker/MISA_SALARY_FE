@@ -6,6 +6,11 @@ const routes = [
     name: 'SalaryComposition',
     component: () => import('@/pages/salary-composition/SalaryComposition.vue'),
   },
+  {
+    path: '/dashboard',
+    name: 'Dashboard',
+    component: () => import('@/pages/dashboard/Dashboard.vue'),
+  },
 ]
 
 const router = createRouter({

@@ -9,20 +9,23 @@
         v-for="item in menuItems"
         :key="item.id"
         class="sidebar-item flex items-center gap-3 h-10 rounded-lg cursor-pointer hover:bg-[#34b05740] transition-all"
-        :class="collapsed ? 'justify-center px-0' : 'px-4'"
+        :class="[collapsed ? 'justify-center px-0' : 'px-4', activeId === item.id ? 'active' : '']"
         @click="onItemClick(item)"
       >
         <MSIcon
           :name="item.icon"
           class="transition-all duration-300"
           :class="collapsed ? 'mx-auto' : ''"
-          :color="'#FFFFFFB2'"
+          :color="activeId === item.id ? '#FFFFFF' : '#FFFFFFB2'"
         />
 
         <!-- LABEL -->
         <span
           class="text-[#FFFFFFB2] whitespace-nowrap transition-all duration-300 sidebar-label"
-          :class="collapsed ? 'opacity-0 -translate-x-2.5 w-0' : 'opacity-100 translate-x-0 w-auto'"
+          :class="[
+            collapsed ? 'opacity-0 -translate-x-2.5 w-0' : 'opacity-100 translate-x-0 w-auto',
+            activeId === item.id ? 'text-white' : '',
+          ]"
         >
           {{ item.label }}
         </span>
@@ -60,13 +63,16 @@
 <script setup lang="ts">
 import MSIcon from '@/components/icons/MSIcon.vue'
 import { DxButton } from 'devextreme-vue/button'
+import { ref } from 'vue'
 
 const props = defineProps({
   collapsed: Boolean,
 })
 
+const activeId = ref<string | null>(null)
+
 const menuItems = [
-  { label: 'Tổng quan', id: 'dashboard', icon: 'dashboard' },
+  { label: 'Tổng quan', id: 'dashboard', icon: 'dashboard', path: '/dashboard' },
   {
     label: 'Thành phần lương',
     id: 'salary_composition',
@@ -85,6 +91,7 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 
 function onItemClick(item: any) {
+  activeId.value = item.id
   if (item.path) {
     router.push(item.path)
   } else {
@@ -96,5 +103,18 @@ function onItemClick(item: any) {
 <style scoped>
 .sidebar-item:hover :deep(span) {
   color: #ffffff !important;
+}
+
+.sidebar-item.active {
+  background-color: #34b057 !important;
+}
+
+.sidebar-item.active :deep(span) {
+  color: #ffffff !important;
+}
+
+.sidebar-item.active :deep(svg) {
+  color: #ffffff !important;
+  fill: #ffffff !important;
 }
 </style>

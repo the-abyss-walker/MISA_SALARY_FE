@@ -1,5 +1,5 @@
 <template>
-  <div class="theader flex items-center justify-between mb-3">
+  <div class="theader flex items-center justify-between">
     <div class="flex items-center gap-2 w-1/2">
       <MSInputSearch
         :height="36"

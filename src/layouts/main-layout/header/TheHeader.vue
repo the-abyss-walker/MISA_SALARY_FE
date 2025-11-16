@@ -1,6 +1,5 @@
 <template>
   <header class="w-full h-14 flex items-center mx-4">
-    <!-- LEFT -->
     <div class="flex items-center h-full flex-none">
       <div class="flex items-center w-[205px] gap-4.5">
         <div class="switch-icon" />
@@ -8,19 +7,14 @@
         <span class="font-semibold text-[18px] whitespace-nowrap">Tiền lương</span>
       </div>
 
-      <!-- Search input -->
       <MSInputSearch icon="search" placeholder="Tìm kiếm" />
     </div>
 
-    <!-- RIGHT -->
     <div class="flex items-center justify-end flex-1 pr-1 space-x-6">
-      <!-- Group 1 -->
       <div class="icon-notification-version" />
 
-      <!-- Group 2 -->
       <div class="icon-store" />
 
-      <!-- Group 3 -->
       <div class="flex items-center space-x-6">
         <div class="icon-invite" />
         <div class="icon-message" />

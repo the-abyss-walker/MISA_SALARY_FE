@@ -1,25 +1,72 @@
 <template>
   <div class="flex flex-col gap-4">
-    <!-- Header: title + actions -->
+    <!-- Header: changes depending on child route -->
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-4">
-        <h2 class="text-[20px] font-semibold">Thành phần lương</h2>
+        <button v-if="isAdd" class="m-2 rounded flex items-center" @click="goBack">
+          <MSIcon name="arrow_left" />
+        </button>
+
+        <h2 class="text-[20px] font-semibold">{{ title }}</h2>
       </div>
 
       <div class="flex items-center gap-3">
-        <MSButton variant="secondary" icon="rule">Danh của mục hệ thống</MSButton>
+        <MSButton v-if="!isAdd" variant="secondary" icon="rule">Danh của mục hệ thống</MSButton>
 
-        <MSButton variant="combo" icon="plus">Thêm mới</MSButton>
+        <MSButton v-if="!isAdd" variant="combo" icon="plus" @click="openAdd"> Thêm mới </MSButton>
+
+        <template v-if="isAdd">
+          <MSButton variant="secondary" @click="goBack">Hủy bỏ</MSButton>
+          <MSButton variant="secondary">Lưu và thêm</MSButton>
+          <MSButton variant="primary" @click="onSaveFromHeader">Lưu</MSButton>
+        </template>
       </div>
     </div>
 
-    <!-- Body: table -->
-    <MSTable></MSTable>
+    <!-- Body: render list or add form via children -->
+    <div v-if="!isAdd">
+      <MSTable />
+    </div>
+
+    <div v-else>
+      <SalaryCompositionAdd @saved="onSaved" @cancel="goBack" ref="addComp" />
+    </div>
   </div>
 </template>
+
 <script setup lang="ts">
+import { ref } from 'vue'
 import MSButton from '@/components/button/MSButton.vue'
 import MSTable from '@/components/table/MSTable.vue'
+import MSIcon from '@/components/icons/MSIcon.vue'
+import SalaryCompositionAdd from './SalaryCompositionAdd.vue'
+
+const isAdd = ref(false)
+const title = ref('Thành phần lương')
+const addComp = ref<any>(null)
+
+const openAdd = () => {
+  isAdd.value = true
+  title.value = 'Thêm thành phần'
+}
+
+const goBack = () => {
+  isAdd.value = false
+  title.value = 'Thành phần lương'
+}
+
+const onSaved = (payload?: any) => {
+  // payload can contain saved item; for now return to list
+  isAdd.value = false
+  title.value = 'Thành phần lương'
+}
+
+const onSaveFromHeader = () => {
+  // call save on the child component if available
+  if (addComp.value && typeof addComp.value.submit === 'function') {
+    addComp.value.submit()
+  }
+}
 </script>
 
 <style scoped>
