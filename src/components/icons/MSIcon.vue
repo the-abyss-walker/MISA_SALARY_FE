@@ -50,6 +50,10 @@ const positionMap: Record<string, string> = {
   check: '-120px -60px',
   chevron_left: '-160px 0',
   chevron_right: '-140px 0',
+  minus_circle: '-200px -40px',
+  copy: '-80px 0',
+  pencil: '-60px 0',
+  trash: '-120px -20px',
 }
 
 const sizeMap: Record<string, { width: number; height: number }> = {
@@ -72,6 +76,10 @@ const sizeMap: Record<string, { width: number; height: number }> = {
   check: { width: 20, height: 20 },
   chevron_left: { width: 20, height: 20 },
   chevron_right: { width: 20, height: 20 },
+  minus_circle: { width: 20, height: 20 },
+  copy: { width: 20, height: 20 },
+  pencil: { width: 20, height: 20 },
+  trash: { width: 20, height: 20 },
 }
 
 const iconSize = computed(() => sizeMap[props.name] || { width: 20, height: 20 })
@@ -97,6 +105,10 @@ const colorMap: Record<string, string> = {
   check: '#34b057',
   chevron_left: '#6E737A',
   chevron_right: '#6E737A',
+  minus_circle: '#f90',
+  copy: '#6E737A',
+  pencil: '#6E737A',
+  trash: '#FF6161',
 }
 
 const defaultColor = computed(() => props.color ?? colorMap[props.name] ?? 'currentColor')

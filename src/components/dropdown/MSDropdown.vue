@@ -22,7 +22,7 @@
 
     <div
       v-if="open"
-      class="absolute left-0 mt-1 bg-white rounded shadow z-50"
+      class="absolute left-0 bg-white rounded shadow z-50"
       :style="panelStyle"
       role="listbox"
     >
@@ -75,6 +75,7 @@ const props = withDefaults(
     modelValue?: any
     placeholder?: string
     disabled?: boolean
+    placement?: 'bottom' | 'top'
     labelAlign?: 'left' | 'right'
     searchable?: boolean
     searchPlaceholder?: string
@@ -86,6 +87,7 @@ const props = withDefaults(
     modelValue: undefined,
     placeholder: 'Chọn',
     disabled: false,
+    placement: 'bottom',
     labelAlign: 'right',
     searchable: false,
     searchPlaceholder: 'Tìm kiếm...',
@@ -101,10 +103,22 @@ const open = ref(false)
 const search = ref('')
 
 const containerStyle = computed(() => ({ width: `${props.width}px` }))
-const panelStyle = computed(() => ({
-  minWidth: `${props.width}px`,
-  maxHeight: `${props.maxHeight}px`,
-}))
+const panelStyle = computed(() => {
+  const base: Record<string, string> = {
+    minWidth: `${props.width}px`,
+    maxHeight: `${props.maxHeight}px`,
+  }
+
+  if (props.placement === 'top') {
+    base.bottom = '100%'
+    base.marginBottom = '4px'
+  } else {
+    base.top = '100%'
+    base.marginTop = '4px'
+  }
+
+  return base
+})
 
 const options = computed(() => props.options || [])
 

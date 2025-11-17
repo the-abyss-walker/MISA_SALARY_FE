@@ -14,6 +14,7 @@
           :options="pageSizeOptions.map((o) => ({ label: String(o), value: o }))"
           v-model="localPageSize"
           :width="80"
+          placement="top"
           labelAlign="left"
         />
       </div>

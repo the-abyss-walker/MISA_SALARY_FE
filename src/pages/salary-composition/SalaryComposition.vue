@@ -7,11 +7,13 @@
           <MSIcon name="arrow_left" />
         </button>
 
-        <h2 class="text-[20px] font-semibold">{{ title }}</h2>
+        <h2 class="text-[20px] font-semibold">Thành phần lương</h2>
       </div>
 
       <div class="flex items-center gap-3">
-        <MSButton v-if="!isAdd" variant="secondary" icon="rule">Danh của mục hệ thống</MSButton>
+        <MSButton v-if="!isAdd" variant="secondary" icon="rule" @click="goToSystemCategory"
+          >Danh mục hệ thống</MSButton
+        >
 
         <MSButton v-if="!isAdd" variant="combo" icon="plus" @click="openAdd"> Thêm mới </MSButton>
 
@@ -36,29 +38,31 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import MSButton from '@/components/button/MSButton.vue'
 import MSIcon from '@/components/icons/MSIcon.vue'
 import SalaryCompositionAdd from './SalaryCompositionAdd.vue'
 import SalayryCompositionTable from './SalayryCompositionTable.vue'
 
 const isAdd = ref(false)
-const title = ref('Thành phần lương')
 const addComp = ref<any>(null)
+const router = useRouter()
+
+const goToSystemCategory = () => {
+  router.push({ name: 'SystemCategory' })
+}
 
 const openAdd = () => {
   isAdd.value = true
-  title.value = 'Thêm thành phần'
 }
 
 const goBack = () => {
   isAdd.value = false
-  title.value = 'Thành phần lương'
 }
 
 const onSaved = (payload?: any) => {
   // payload can contain saved item; for now return to list
   isAdd.value = false
-  title.value = 'Thành phần lương'
 }
 
 const onSaveFromHeader = () => {

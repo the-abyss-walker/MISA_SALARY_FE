@@ -4,7 +4,7 @@
       <div class="flex items-center w-[205px] gap-4.5">
         <div class="switch-icon" />
         <div class="logo" />
-        <span class="font-semibold text-[18px] whitespace-nowrap">Tiền lương</span>
+        <span class="title whitespace-nowrap">Tiền lương</span>
       </div>
 
       <MSInputSearch icon="search" placeholder="Tìm kiếm" />
@@ -34,4 +34,9 @@ import MSInputSearch from '@/components/inputs/MSInputSearch.vue'
 
 <style scoped>
 @import './css/header-icon.css';
+
+.title {
+  font-size: 18px;
+  font-weight: 700;
+}
 </style>

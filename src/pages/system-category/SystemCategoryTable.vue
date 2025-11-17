@@ -29,26 +29,23 @@ import { ref, computed } from 'vue'
 import MSTableHeader from '@/components/table/table-header/MSTableHeader.vue'
 import MSTable from '@/components/table/MSTable.vue'
 import MSPagination from '@/components/pagination/MSPagination.vue'
-import salaryData from '@/data/salarycomposition.json'
+import systemData from '@/data/systemcomposition.json'
 
 const gridColumns = [
   { dataField: 'SalaryCompositionCode', caption: 'Mã thành phần' },
   { dataField: 'SalaryCompositionName', caption: 'Tên thành phần' },
-  { dataField: 'OrganizationUnitNames', caption: 'Đơn vị áp dụng' },
   { dataField: 'CompositionType', caption: 'Loại thành phần' },
   { dataField: 'CompositionNature', caption: 'Tính chất' },
   { dataField: 'Taxable', caption: 'Chịu thuế' },
   { dataField: 'TaxDeduction', caption: 'Giảm trừ khi tính thuế' },
   { dataField: 'Quota', caption: 'Định mức' },
   { dataField: 'ValueType', caption: 'Kiểu giá trị' },
-  { dataField: 'Value', caption: 'Giá trị' },
+  { dataField: 'Formula', caption: 'Giá trị' },
   { dataField: 'Description', caption: 'Mô tả' },
   { dataField: 'OptionShowPaycheck', caption: 'Hiển thị trên phiếu lương' },
-  { dataField: 'Formula', caption: 'Nguồn tạo' },
-  { dataField: 'Status', caption: 'Trạng thái' },
 ]
 
-const tableData = ref(salaryData as any)
+const tableData = ref(systemData as any)
 
 const searchQuery = ref('')
 const leftDropdown = ref(null as any)
