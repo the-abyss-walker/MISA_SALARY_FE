@@ -1,5 +1,5 @@
 <template>
-  <header class="w-full h-14 flex items-center mx-4">
+  <header class="w-full flex items-center mx-4">
     <div class="flex items-center h-full flex-none">
       <div class="flex items-center w-[205px] gap-4.5">
         <div class="switch-icon" />

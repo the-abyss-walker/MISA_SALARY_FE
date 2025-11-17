@@ -1,6 +1,6 @@
 <template>
   <div id="layout" class="flex flex-col h-full min-h-[300px]">
-    <div class="h-[48px] w-full bg-white flex items-center">
+    <div id="header" class="w-full bg-white flex items-center">
       <TheHeader />
     </div>
 
@@ -30,6 +30,11 @@ function toggleSidebar() {
 #layout {
   height: 100%;
 }
+
+#header {
+  height: 48px;
+}
+
 .content {
   padding: 16px 24px;
   background-color: #f2f2f2;
