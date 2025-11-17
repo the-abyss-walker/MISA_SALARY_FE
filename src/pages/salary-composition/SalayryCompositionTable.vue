@@ -7,8 +7,8 @@
       v-bind="headerBindings"
       @left-select="onLeftSelect"
       @right-select="onRightSelect"
-      @add="onAdd"
-      @export="onExport"
+      @filter="onFilter"
+      @config="onConfig"
       @search="onSearchInput"
     />
 
@@ -34,20 +34,20 @@ import MSPagination from '@/components/pagination/MSPagination.vue'
 import salaryData from '@/data/salarycomposition.json'
 
 const gridColumns = [
-  { dataField: 'SalaryCompositionCode', caption: 'Mã thành phần' },
-  { dataField: 'SalaryCompositionName', caption: 'Tên thành phần' },
-  { dataField: 'OrganizationUnitNames', caption: 'Đơn vị áp dụng' },
-  { dataField: 'CompositionType', caption: 'Loại thành phần' },
-  { dataField: 'CompositionNature', caption: 'Tính chất' },
-  { dataField: 'Taxable', caption: 'Chịu thuế' },
-  { dataField: 'TaxDeduction', caption: 'Giảm trừ khi tính thuế' },
-  { dataField: 'Quota', caption: 'Định mức' },
-  { dataField: 'ValueType', caption: 'Kiểu giá trị' },
-  { dataField: 'Value', caption: 'Giá trị' },
-  { dataField: 'Description', caption: 'Mô tả' },
-  { dataField: 'OptionShowPaycheck', caption: 'Hiển thị trên phiếu lương' },
-  { dataField: 'Formula', caption: 'Nguồn tạo' },
-  { dataField: 'Status', caption: 'Trạng thái' },
+  { dataField: 'SalaryCompositionCode', caption: 'Mã thành phần', width: 220 },
+  { dataField: 'SalaryCompositionName', caption: 'Tên thành phần', width: 300 },
+  { dataField: 'OrganizationUnitNames', caption: 'Đơn vị áp dụng', width: 250 },
+  { dataField: 'CompositionType', caption: 'Loại thành phần', width: 150 },
+  { dataField: 'CompositionNature', caption: 'Tính chất', width: 150 },
+  { dataField: 'Taxable', caption: 'Chịu thuế', width: 100 },
+  { dataField: 'TaxDeduction', caption: 'Giảm trừ khi tính thuế', width: 150 },
+  { dataField: 'Quota', caption: 'Định mức', width: 120 },
+  { dataField: 'ValueType', caption: 'Kiểu giá trị', width: 120 },
+  { dataField: 'Value', caption: 'Giá trị', width: 120 },
+  { dataField: 'Description', caption: 'Mô tả', width: 300 },
+  { dataField: 'OptionShowPaycheck', caption: 'Hiển thị trên phiếu lương', width: 150 },
+  { dataField: 'Formula', caption: 'Nguồn tạo', width: 150 },
+  { dataField: 'Status', caption: 'Trạng thái', width: 150 },
 ]
 
 const tableData = ref(salaryData as any)
@@ -93,54 +93,11 @@ function onSizeChange(s: number) {
   page.value = 1
 }
 
-function onAdd() {
-  // bubble up or handle add
+function onFilter() {
+  // bubble up or handle filter
 }
 
-function onExport() {
+function onConfig() {
   // handle export
 }
 </script>
-
-<style scoped>
-.mstable .dx-datagrid {
-  background: white;
-  border: 1px solid #e5e7eb;
-}
-
-.mstable .dx-datagrid .dx-scrollable,
-.mstable .dx-datagrid .dx-scrollable-wrapper,
-.mstable .dx-datagrid .dx-scrollable-container,
-.mstable .dx-datagrid .dx-datagrid-rowsview {
-  overflow: auto !important;
-}
-
-.mstable .dx-datagrid .dx-datagrid-headers .dx-datagrid-table,
-.mstable .dx-datagrid .dx-datagrid-rowsview .dx-datagrid-table {
-  min-width: 1200px;
-  table-layout: fixed;
-}
-
-.mstable .dx-datagrid .dx-datagrid-headers .dx-row,
-.mstable .dx-datagrid .dx-datagrid-rowsview .dx-row {
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.mstable .dx-datagrid .dx-datagrid-table th,
-.mstable .dx-datagrid .dx-datagrid-table td {
-  border-right: 1px solid #e5e7eb;
-  padding: 8px 12px;
-  vertical-align: middle;
-  white-space: normal;
-}
-
-.mstable .dx-scrollable::-webkit-scrollbar {
-  height: 12px;
-  background: transparent;
-}
-
-.mstable .dx-scrollable::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.25);
-  border-radius: 6px;
-}
-</style>

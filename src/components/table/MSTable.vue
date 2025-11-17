@@ -6,17 +6,27 @@
         show-borders
         :column-auto-width="false"
         :allow-column-resizing="true"
+        :column-resizing-mode="'widget'"
         :height="gridHeight"
         :remote-operations="props.remoteOperations"
         @row-click="(e) => emit('row-click', e)"
       >
-        <DxScrolling mode="standard" :scroll-by-content="true" show-scrollbar="always" />
+        <DxScrolling mode="virtual" :scroll-by-content="true" show-scrollbar="always" />
 
         <DxColumn
           v-for="col in usedColumns"
           :key="col.dataField"
           :data-field="col.dataField"
           :caption="col.caption"
+          :width="col.width"
+          :allow-resizing="col.allowResizing !== false"
+        />
+        <DxColumn
+          width="120"
+          type="buttons"
+          :fixed="true"
+          fixed-position="right"
+          :buttons="actionButtons"
         />
       </DxDataGrid>
     </div>
@@ -46,71 +56,35 @@ const props = withDefaults(
 
 const emit = defineEmits(['row-click', 'page-change'])
 
-const gridColumns = [
-  { dataField: 'SalaryCompositionCode', caption: 'Mã thành phần' },
-  { dataField: 'SalaryCompositionName', caption: 'Tên thành phần' },
-  { dataField: 'OrganizationUnitNames', caption: 'Đơn vị áp dụng' },
-  { dataField: 'CompositionType', caption: 'Loại thành phần' },
-  { dataField: 'CompositionNature', caption: 'Tính chất' },
-  { dataField: 'Taxable', caption: 'Chịu thuế' },
-  { dataField: 'TaxDeduction', caption: 'Giảm trừ khi tính thuế' },
-  { dataField: 'Quota', caption: 'Định mức' },
-  { dataField: 'ValueType', caption: 'Kiểu giá trị' },
-  { dataField: 'Value', caption: 'Giá trị' },
-  { dataField: 'Description', caption: 'Mô tả' },
-  { dataField: 'OptionShowPaycheck', caption: 'Hiển thị trên phiếu lương' },
-  { dataField: 'Formula', caption: 'Nguồn tạo' },
-  { dataField: 'Status', caption: 'Trạng thái' },
+const actionButtons = [
+  {
+    hint: 'Nhân bản',
+    icon: 'repeat',
+    onClick: (e: any) => {
+      alert('Clone ' + e.row.data.name)
+    },
+  },
+  {
+    hint: 'Sửa',
+    icon: 'edit',
+    onClick: (e: any) => {
+      alert('Edit ' + e.row.data.name)
+    },
+  },
+  {
+    hint: 'Xóa',
+    icon: 'trash',
+    onClick: (e: any) => {
+      alert('Delete ' + e.row.data.name)
+    },
+  },
 ]
 
 const usedColumns = computed(() => {
-  return props.columns && props.columns.length ? props.columns : gridColumns
+  return props.columns && props.columns.length ? props.columns : []
 })
 
 const tableDataSource = computed(() => {
   return props.data && props.data.length ? props.data : (salaryData as any)
 })
 </script>
-
-<style scoped>
-.mstable .dx-datagrid {
-  background: white;
-  border: 1px solid #e5e7eb;
-}
-
-.mstable .dx-datagrid .dx-scrollable,
-.mstable .dx-datagrid .dx-scrollable-wrapper,
-.mstable .dx-datagrid .dx-scrollable-container,
-.mstable .dx-datagrid .dx-datagrid-rowsview {
-  overflow: auto !important;
-}
-
-.mstable .dx-datagrid .dx-datagrid-headers .dx-datagrid-table,
-.mstable .dx-datagrid .dx-datagrid-rowsview .dx-datagrid-table {
-  min-width: 1200px;
-  table-layout: fixed;
-}
-
-.mstable .dx-datagrid .dx-datagrid-headers .dx-row,
-.mstable .dx-datagrid .dx-datagrid-rowsview .dx-row {
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.mstable .dx-datagrid .dx-datagrid-table th,
-.mstable .dx-datagrid .dx-datagrid-table td {
-  border-right: 1px solid #e5e7eb;
-  padding: 8px 12px;
-  vertical-align: middle;
-  white-space: normal;
-}
-
-.mstable .dx-scrollable::-webkit-scrollbar {
-  height: 12px;
-  background: transparent;
-}
-
-.mstable .dx-scrollable::-webkit-scrollbar-thumb {
-  background-color: rgba(0, 0, 0, 0.25);
-  border-radius: 6px;
-}
-</style>
