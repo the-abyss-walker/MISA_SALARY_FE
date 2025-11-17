@@ -2,17 +2,13 @@
   <div ref="root" :style="containerStyle" class="relative inline-block">
     <button
       type="button"
-      class="w-full flex items-center justify-between px-3 py-2 rounded bg-white text-left cursor-pointer"
-      :class="{ 'opacity-60 pointer-events-none': disabled }"
+      class="w-full flex items-center justify-between px-3 py-2 rounded bg-white text-left cursor-pointer ms-dropdown-btn"
+      :class="[{ 'opacity-60 pointer-events-none': disabled }, buttonClasses]"
       @click="toggle"
       :aria-expanded="open"
       :aria-disabled="disabled"
     >
-      <span
-        class="truncate flex-1 pr-1"
-        :class="props && props.labelAlign === 'right' ? 'text-right' : 'text-left'"
-        :title="selectedLabel || placeholder"
-      >
+      <span :class="labelClasses" :title="selectedLabel || placeholder">
         {{ selectedLabel || placeholder }}
       </span>
       <span class="ml-1 flex items-center">
@@ -81,6 +77,9 @@ const props = withDefaults(
     searchPlaceholder?: string
     width?: number
     maxHeight?: number
+    labelPosition?: 'left' | 'near-icon'
+    bordered?: boolean
+    hoverable?: boolean
   }>(),
   {
     options: () => [],
@@ -93,6 +92,9 @@ const props = withDefaults(
     searchPlaceholder: 'Tìm kiếm...',
     width: 240,
     maxHeight: 240,
+    labelPosition: 'left',
+    bordered: false,
+    hoverable: true,
   },
 )
 
@@ -101,6 +103,20 @@ const emit = defineEmits(['update:modelValue', 'select', 'open', 'close'])
 const root = ref<HTMLElement | null>(null)
 const open = ref(false)
 const search = ref('')
+
+const labelClasses = computed(() => {
+  const alignClass = props && props.labelAlign === 'right' ? 'text-right' : 'text-left'
+  if (props && props.labelPosition === 'near-icon') {
+    return `truncate mr-1 ml-auto ${alignClass}`
+  }
+  return `truncate flex-1 pr-1 ${alignClass}`
+})
+
+const buttonClasses = computed(() => ({
+  'ms-dropdown-btn': true,
+  bordered: !!props.bordered,
+  hoverable: !!props.hoverable,
+}))
 
 const containerStyle = computed(() => ({ width: `${props.width}px` }))
 const panelStyle = computed(() => {
@@ -168,14 +184,6 @@ function onEnter() {
 
 onMounted(() => document.addEventListener('click', onDocumentClick))
 onBeforeUnmount(() => document.removeEventListener('click', onDocumentClick))
-
-watch(
-  () => props.modelValue,
-  () => {
-    // clear search when selection changes
-    search.value = ''
-  },
-)
 </script>
 
 <style scoped>
@@ -203,5 +211,13 @@ watch(
   display: inline-flex;
   align-items: center;
   justify-content: center;
+}
+
+/* Button border and hover control */
+.ms-dropdown-btn.bordered {
+  border: 1px solid #e5e7eb;
+}
+.ms-dropdown-btn.bordered.hoverable:hover {
+  border-color: #34b057;
 }
 </style>
