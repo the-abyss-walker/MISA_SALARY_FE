@@ -8,7 +8,11 @@
       :aria-expanded="open"
       :aria-disabled="disabled"
     >
-      <span class="truncate flex-1 text-right pr-1" :title="selectedLabel || placeholder">
+      <span
+        class="truncate flex-1 pr-1"
+        :class="props && props.labelAlign === 'right' ? 'text-right' : 'text-left'"
+        :title="selectedLabel || placeholder"
+      >
         {{ selectedLabel || placeholder }}
       </span>
       <span class="ml-1 flex items-center">
@@ -71,6 +75,7 @@ const props = withDefaults(
     modelValue?: any
     placeholder?: string
     disabled?: boolean
+    labelAlign?: 'left' | 'right'
     searchable?: boolean
     searchPlaceholder?: string
     width?: number
@@ -81,6 +86,7 @@ const props = withDefaults(
     modelValue: undefined,
     placeholder: 'Chọn',
     disabled: false,
+    labelAlign: 'right',
     searchable: false,
     searchPlaceholder: 'Tìm kiếm...',
     width: 240,

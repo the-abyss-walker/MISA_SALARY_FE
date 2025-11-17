@@ -1,50 +1,37 @@
 <template>
   <div class="mstable w-full bg-white">
-    <div class="mstable__grid">
-      <DxDataGrid
-        :data-source="tableDataSource"
-        show-borders
-        :column-auto-width="false"
-        :allow-column-resizing="true"
-        :height="gridHeight"
-        :remote-operations="props.remoteOperations"
-        @row-click="(e) => emit('row-click', e)"
-      >
-        <DxScrolling mode="standard" :scroll-by-content="true" show-scrollbar="always" />
+    <MSTableHeader
+      v-model:left="leftDropdown"
+      v-model:right="rightDropdown"
+      v-model:search="searchQuery"
+      v-bind="headerBindings"
+      @left-select="onLeftSelect"
+      @right-select="onRightSelect"
+      @add="onAdd"
+      @export="onExport"
+      @search="onSearchInput"
+    />
 
-        <DxColumn
-          v-for="col in usedColumns"
-          :key="col.dataField"
-          :data-field="col.dataField"
-          :caption="col.caption"
-        />
-      </DxDataGrid>
+    <div class="mstable__grid">
+      <MSTable :data="pagedData" :columns="gridColumns" :grid-height="gridHeight" />
     </div>
+
+    <MSPagination
+      :totalRecords="tableData.length"
+      v-model:currentPage="page"
+      v-model:pageSize="pageSize"
+      @page-change="onPageChange"
+      @size-change="onSizeChange"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { DxDataGrid, DxColumn, DxScrolling } from 'devextreme-vue/data-grid'
-import salaryData from '../../data/salarycomposition.json'
-
-const props = withDefaults(
-  defineProps<{
-    data?: any[]
-    columns?: Array<Record<string, any>>
-    gridHeight?: number | string
-    remoteOperations?: boolean
-    pageSize?: number
-  }>(),
-  {
-    data: () => [],
-    columns: () => [],
-    gridHeight: '500px',
-    remoteOperations: false,
-  },
-)
-
-const emit = defineEmits(['row-click', 'page-change'])
+import { ref, computed } from 'vue'
+import MSTableHeader from '@/components/table/table-header/MSTableHeader.vue'
+import MSTable from '@/components/table/MSTable.vue'
+import MSPagination from '@/components/pagination/MSPagination.vue'
+import salaryData from '@/data/salarycomposition.json'
 
 const gridColumns = [
   { dataField: 'SalaryCompositionCode', caption: 'Mã thành phần' },
@@ -63,13 +50,56 @@ const gridColumns = [
   { dataField: 'Status', caption: 'Trạng thái' },
 ]
 
-const usedColumns = computed(() => {
-  return props.columns && props.columns.length ? props.columns : gridColumns
+const tableData = ref(salaryData as any)
+
+const searchQuery = ref('')
+const leftDropdown = ref(null as any)
+const rightDropdown = ref(null as any)
+const gridHeight = ref('500px')
+
+const pageSize = ref(15)
+const page = ref(1)
+
+const headerBindings = computed(() => ({
+  // forward any header related settings (no options by default)
+}))
+
+const pagedData = computed(() => {
+  const s = pageSize.value
+  const p = page.value
+  if (!s) return tableData.value
+  const start = (p - 1) * s
+  return tableData.value.slice(start, start + s)
 })
 
-const tableDataSource = computed(() => {
-  return props.data && props.data.length ? props.data : (salaryData as any)
-})
+function onSearchInput(val: string) {
+  searchQuery.value = val
+}
+
+function onLeftSelect(opt: any) {
+  leftDropdown.value = opt
+}
+
+function onRightSelect(opt: any) {
+  rightDropdown.value = opt
+}
+
+function onPageChange(p: number) {
+  page.value = p
+}
+
+function onSizeChange(s: number) {
+  pageSize.value = s
+  page.value = 1
+}
+
+function onAdd() {
+  // bubble up or handle add
+}
+
+function onExport() {
+  // handle export
+}
 </script>
 
 <style scoped>

@@ -25,7 +25,7 @@
 
     <!-- Body: render list or add form via children -->
     <div v-if="!isAdd">
-      <MSTable />
+      <SalayryCompositionTable />
     </div>
 
     <div v-else>
@@ -37,9 +37,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import MSButton from '@/components/button/MSButton.vue'
-import MSTable from '@/components/table/MSTable.vue'
 import MSIcon from '@/components/icons/MSIcon.vue'
 import SalaryCompositionAdd from './SalaryCompositionAdd.vue'
+import SalayryCompositionTable from './SalayryCompositionTable.vue'
 
 const isAdd = ref(false)
 const title = ref('Thành phần lương')

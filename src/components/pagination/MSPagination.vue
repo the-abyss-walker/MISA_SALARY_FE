@@ -10,23 +10,12 @@
       <div class="page-size">
         <label for="ps-select">Số bản ghi / trang</label>
 
-        <div ref="psRoot" class="ps-dropdown" @click.stop>
-          <button class="ps-button" type="button" @click.stop="toggleDropdown">
-            <span class="ps-value">{{ localPageSize }}</span>
-            <MSIcon name="dropdown" color="#6E737A" />
-          </button>
-
-          <ul v-if="open" class="ps-options">
-            <li
-              v-for="opt in pageSizeOptions"
-              :key="opt"
-              class="ps-option"
-              @click.stop="selectSize(opt)"
-            >
-              {{ opt }}
-            </li>
-          </ul>
-        </div>
+        <MSDropdown
+          :options="pageSizeOptions.map((o) => ({ label: String(o), value: o }))"
+          v-model="localPageSize"
+          :width="80"
+          labelAlign="left"
+        />
       </div>
 
       <div class="range">
@@ -46,8 +35,9 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch, onMounted, onBeforeUnmount } from 'vue'
+import { computed, ref, watch } from 'vue'
 import MSIcon from '@/components/icons/MSIcon.vue'
+import MSDropdown from '@/components/dropdown/MSDropdown.vue'
 
 interface Props {
   totalRecords?: number
@@ -72,28 +62,6 @@ const emit = defineEmits<{
 
 const localPageSize = ref(props.pageSize)
 const localPage = ref(props.currentPage)
-
-const open = ref(false)
-const psRoot = ref<HTMLElement | null>(null)
-
-function toggleDropdown() {
-  open.value = !open.value
-}
-
-function selectSize(opt: number) {
-  localPageSize.value = opt
-  open.value = false
-}
-
-function onDocClick(e: MouseEvent) {
-  const root = psRoot.value
-  if (!root) return
-  const target = e.target as Node
-  if (!root.contains(target)) open.value = false
-}
-
-onMounted(() => document.addEventListener('click', onDocClick))
-onBeforeUnmount(() => document.removeEventListener('click', onDocClick))
 
 watch(
   () => props.pageSize,
@@ -175,45 +143,7 @@ function goNext() {
   margin-right: 6px;
   font-size: 14px;
 }
-.ps-dropdown {
-  position: relative;
-  display: inline-block;
-}
-.ps-button {
-  display: inline-flex;
-  align-items: center;
-  gap: 16px;
-  padding: 6px 8px;
-  border-radius: 4px;
-  border: 1px solid #d1d5db;
-  background: #fff;
-  cursor: pointer;
-}
-.ps-value {
-  font-size: 13px;
-}
-.ps-options {
-  position: absolute;
-  right: 0;
-  top: calc(100% + 6px);
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.06);
-  border-radius: 6px;
-  list-style: none;
-  margin: 0;
-  padding: 6px 0;
-  min-width: 90px;
-  z-index: 20;
-}
-.ps-option {
-  padding: 8px 12px;
-  cursor: pointer;
-  font-size: 13px;
-}
-.ps-option:hover {
-  background: #f3f4f6;
-}
+/* dropdown uses shared `MSDropdown` component styles */
 .range {
   font-size: 14px;
   /* font-weight: bold; */
@@ -228,7 +158,6 @@ function goNext() {
   justify-content: center;
   width: 34px;
   height: 34px;
-  background: #fff;
   cursor: pointer;
 }
 .btn:disabled {
