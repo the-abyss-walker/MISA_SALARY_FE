@@ -135,7 +135,7 @@ defineExpose({ validate })
   width: 100%;
   box-sizing: border-box;
   height: var(--ms-input-height);
-  padding: 6px 10px;
+  padding: 8px 12px;
   border: 1px solid var(--ms-input-border);
   border-radius: var(--ms-input-radius);
   font-size: var(--ms-input-font-size);

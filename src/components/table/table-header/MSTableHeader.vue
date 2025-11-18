@@ -15,6 +15,7 @@
         :options="leftOptions"
         :placeholder="leftPlaceholder"
         @select="onLeftSelect"
+        :label-position="'right'"
       />
 
       <MSDropdown

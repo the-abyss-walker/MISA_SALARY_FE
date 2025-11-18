@@ -15,7 +15,8 @@
       <template v-if="props.inlineSearch">
         <input
           v-model="search"
-          class="w-full px-0 py-0 bg-transparent text-left text-sm outline-none"
+          class="w-full px-0 py-0 bg-transparent text-left outline-none"
+          style="font-size: 14px"
           type="text"
           :placeholder="props.searchPlaceholder"
           @click.stop
@@ -87,7 +88,7 @@ const props = withDefaults(
     searchPlaceholder?: string
     width?: number
     maxHeight?: number
-    labelPosition?: 'left' | 'near-icon'
+    labelPosition?: 'left' | 'right'
     bordered?: boolean
     hoverable?: boolean
     inlineSearch?: boolean
@@ -119,10 +120,11 @@ const root = ref<HTMLElement | null>(null)
 const open = ref(false)
 const search = ref('')
 const error = ref('')
+const suppressOpen = ref(false)
 
 const labelClasses = computed(() => {
   const alignClass = props && props.labelAlign === 'right' ? 'text-right' : 'text-left'
-  if (props && props.labelPosition === 'near-icon') {
+  if (props && props.labelPosition === 'right') {
     return `truncate mr-1 ml-auto ${alignClass}`
   }
   return `truncate flex-1 pr-1 ${alignClass}`
@@ -154,15 +156,19 @@ const panelStyle = computed(() => {
 
 const options = computed(() => props.options || [])
 
-const filteredOptions = computed(() => {
-  if (!search.value) return options.value
-  const q = search.value.toLowerCase()
-  return options.value.filter((o) => o.label.toLowerCase().includes(q))
-})
-
 const selectedLabel = computed(() => {
   const found = options.value.find((o) => o.value === props.modelValue)
   return found ? found.label : ''
+})
+
+const filteredOptions = computed(() => {
+  if (props.inlineSearch && open.value && search.value && search.value === selectedLabel.value) {
+    return options.value
+  }
+
+  if (!search.value) return options.value
+  const q = search.value.toLowerCase()
+  return options.value.filter((o) => o.label.toLowerCase().includes(q))
 })
 
 function toggle() {
@@ -180,8 +186,16 @@ function select(opt: Opt) {
   if (opt.disabled) return
   emit('update:modelValue', opt.value)
   emit('select', opt)
-  // clear any inline search text and close panel
-  clearSearch()
+  if (props.inlineSearch) {
+    // Prevent the search watcher from reopening the panel when we set
+    // the input to the selected label.
+    suppressOpen.value = true
+    search.value = opt.label
+    // Restore suppression shortly after to allow normal behavior.
+    setTimeout(() => (suppressOpen.value = false), 0)
+  } else {
+    clearSearch()
+  }
   close()
 }
 
@@ -192,7 +206,7 @@ function clearSearch() {
 // when searching inline, open the panel to show results
 watch(search, (v) => {
   if (props.inlineSearch) {
-    if (v && v.length > 0) open.value = true
+    if (v && v.length > 0 && !suppressOpen.value) open.value = true
   }
 })
 
@@ -215,7 +229,14 @@ function isSelected(opt: Opt) {
 function onDocumentClick(e: MouseEvent) {
   if (!root.value) return
   if (!(e.target instanceof Node)) return
-  if (!root.value.contains(e.target)) close()
+  if (!root.value.contains(e.target)) {
+    if (props.inlineSearch) {
+      if (search.value && search.value !== selectedLabel.value) {
+        clearSearch()
+      }
+    }
+    close()
+  }
 }
 
 function onEnter() {
