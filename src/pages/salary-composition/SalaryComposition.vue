@@ -7,7 +7,8 @@
           <MSIcon name="arrow_left" />
         </button>
 
-        <h2 class="text-[20px] font-semibold">Thành phần lương</h2>
+        <h2 v-if="isAdd" class="text-[20px] font-semibold">Thêm thành phần</h2>
+        <h2 v-else class="text-[20px] font-semibold">Thành phần lương</h2>
       </div>
 
       <div class="flex items-center gap-3">
@@ -41,7 +42,7 @@ import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import MSButton from '@/components/button/MSButton.vue'
 import MSIcon from '@/components/icons/MSIcon.vue'
-import SalaryCompositionAdd from './SalaryCompositionAdd.vue'
+import SalaryCompositionAdd from './SalaryCompositionForm.vue'
 import SalayryCompositionTable from './SalayryCompositionTable.vue'
 
 const isAdd = ref(false)
