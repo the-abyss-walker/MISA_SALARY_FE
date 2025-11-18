@@ -307,12 +307,9 @@ defineExpose({ submit })
 <style scoped>
 .add-form {
   padding: 40px;
-  max-height: calc(100vh - 120px);
-  display: flex;
-  flex: 1;
+  max-height: calc(100vh - 130px);
   overflow-y: auto;
   box-sizing: border-box;
-  -webkit-overflow-scrolling: touch;
 }
 
 .ms-row {

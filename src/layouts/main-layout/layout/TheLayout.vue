@@ -7,7 +7,7 @@
     <div class="flex flex-1">
       <TheSideBar :collapsed="isCollapsed" @toggle="toggleSidebar" />
 
-      <div class="content flex-1">
+      <div class="content flex-1 overflow-x-hidden">
         <router-view />
       </div>
     </div>
@@ -33,6 +33,7 @@ function toggleSidebar() {
 
 #header {
   height: 48px;
+  min-height: 48px;
 }
 
 .content {

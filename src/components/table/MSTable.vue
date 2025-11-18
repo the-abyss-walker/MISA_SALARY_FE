@@ -50,9 +50,8 @@ const props = withDefaults(
   {
     data: () => [],
     columns: () => [],
-    gridHeight: 500,
+    gridHeight: 'calc(100vh - 250px)',
     columnWidth: 200,
-    columnHeight: 36,
     remoteOperations: false,
   },
 )
@@ -93,12 +92,6 @@ const tableDataSource = computed(() => {
 </script>
 
 <style>
-/* @import './table-icon/table-icon.css'; */
-.mstable__grid {
-  width: 100%;
-  max-width: 1250px;
-}
-
 .dx-command-edit {
   border-left: none !important;
 }
