@@ -5,7 +5,7 @@ export enum FormulaCompositionType {
 }
 
 export const FormulaCompositionTypeLabel: Record<FormulaCompositionType, string> = {
-  [FormulaCompositionType.DefaultFormula]: 'Công thức mặc định',
-  [FormulaCompositionType.AutoSumFormula]: 'Công thức tự động cộng',
-  [FormulaCompositionType.CustomFormula]: 'Công thức tùy chỉnh',
+  [FormulaCompositionType.DefaultFormula]: 'Theo công thức mặc định của chương trình',
+  [FormulaCompositionType.AutoSumFormula]: 'Tự động cộng các giá trị của nhân viên',
+  [FormulaCompositionType.CustomFormula]: 'Tính theo công thức tự đặt',
 }

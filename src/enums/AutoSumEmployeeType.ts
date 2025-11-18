@@ -5,7 +5,7 @@ export enum AutoSumEmployeeType {
 }
 
 export const AutoSumEmployeeTypeLabel: Record<AutoSumEmployeeType, string> = {
-  [AutoSumEmployeeType.SameWorkingUnit]: 'Nhân viên cùng đơn vị công tác',
-  [AutoSumEmployeeType.UnderAuthority]: 'Nhân viên thuộc quyền quản lý',
-  [AutoSumEmployeeType.BelongToOrganization]: 'Nhân viên thuộc tổ chức',
+  [AutoSumEmployeeType.SameWorkingUnit]: 'Trong cùng đơn vị công tác',
+  [AutoSumEmployeeType.UnderAuthority]: 'Dưới quyền',
+  [AutoSumEmployeeType.BelongToOrganization]: 'Thuộc cơ cấu tổ chức',
 }

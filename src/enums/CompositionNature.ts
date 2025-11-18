@@ -5,7 +5,7 @@ export enum CompositionNature {
 }
 
 export const CompositionNatureLabel: Record<CompositionNature, string> = {
-  [CompositionNature.Income]: 'Khoản thu',
-  [CompositionNature.Deduction]: 'Khoản giảm trừ',
+  [CompositionNature.Income]: 'Thu nhập',
+  [CompositionNature.Deduction]: 'Khấu trừ',
   [CompositionNature.Other]: 'Khác',
 }

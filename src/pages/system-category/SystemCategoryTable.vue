@@ -30,6 +30,11 @@ import MSTableHeader from '@/components/table/table-header/MSTableHeader.vue'
 import MSTable from '@/components/table/MSTable.vue'
 import MSPagination from '@/components/pagination/MSPagination.vue'
 import systemData from '@/data/systemcomposition.json'
+import { CompositionTypeLabel } from '@/enums/CompositionType'
+import { CompositionNatureLabel } from '@/enums/CompositionNature'
+import { OptionShowPaycheckLabel } from '@/enums/OptionShowPaycheck'
+import { StatusLabel } from '@/enums/Status'
+import { ValueTypeLabel } from '@/enums/ValueType'
 
 const gridColumns = [
   { dataField: 'SalaryCompositionCode', caption: 'Mã thành phần' },
@@ -38,14 +43,36 @@ const gridColumns = [
   { dataField: 'CompositionNature', caption: 'Tính chất' },
   { dataField: 'Taxable', caption: 'Chịu thuế' },
   { dataField: 'TaxDeduction', caption: 'Giảm trừ khi tính thuế' },
-  { dataField: 'Quota', caption: 'Định mức' },
+  { dataField: 'QuotaFormula', caption: 'Định mức' },
   { dataField: 'ValueType', caption: 'Kiểu giá trị' },
   { dataField: 'Formula', caption: 'Giá trị' },
   { dataField: 'Description', caption: 'Mô tả' },
   { dataField: 'OptionShowPaycheck', caption: 'Hiển thị trên phiếu lương' },
 ]
 
-const tableData = ref(systemData as any)
+const tableData = ref(
+  (systemData as any).map((item: any) => {
+    const newItem: { [key: string]: any } = {
+      ...item,
+      CompositionType:
+        CompositionTypeLabel[item.CompositionType as keyof typeof CompositionTypeLabel],
+      CompositionNature:
+        CompositionNatureLabel[item.CompositionNature as keyof typeof CompositionNatureLabel],
+      OptionShowPaycheck:
+        OptionShowPaycheckLabel[item.OptionShowPaycheck as keyof typeof OptionShowPaycheckLabel],
+      Status: StatusLabel[item.Status as keyof typeof StatusLabel],
+      ValueType: ValueTypeLabel[item.ValueType as keyof typeof ValueTypeLabel],
+      Taxable: item.Taxable ? 'Có' : 'Không',
+      TaxDeduction: item.TaxDeduction ? 'Có' : 'Không',
+    }
+    for (const key in newItem) {
+      if (newItem[key] === null || newItem[key] === undefined || newItem[key] === '') {
+        newItem[key] = '-'
+      }
+    }
+    return newItem
+  }),
+)
 
 const searchQuery = ref('')
 const leftDropdown = ref(null as any)

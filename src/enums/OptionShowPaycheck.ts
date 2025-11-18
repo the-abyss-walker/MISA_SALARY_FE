@@ -5,7 +5,7 @@ export enum OptionShowPaycheck {
 }
 
 export const OptionShowPaycheckLabel: Record<OptionShowPaycheck, string> = {
-  [OptionShowPaycheck.Yes]: 'Hiển thị',
-  [OptionShowPaycheck.No]: 'Không hiển thị',
-  [OptionShowPaycheck.ShowWhenNonZero]: 'Hiển thị khi khác 0',
+  [OptionShowPaycheck.Yes]: 'Có',
+  [OptionShowPaycheck.No]: 'Không',
+  [OptionShowPaycheck.ShowWhenNonZero]: 'Chỉ hiển thị nếu giá trị khác không',
 }

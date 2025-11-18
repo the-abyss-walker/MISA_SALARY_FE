@@ -30,6 +30,11 @@ import MSTableHeader from '@/components/table/table-header/MSTableHeader.vue'
 import MSTable from '@/components/table/MSTable.vue'
 import MSPagination from '@/components/pagination/MSPagination.vue'
 import salaryData from '@/data/salarycomposition.json'
+import { CompositionTypeLabel } from '@/enums/CompositionType'
+import { CompositionNatureLabel } from '@/enums/CompositionNature'
+import { OptionShowPaycheckLabel } from '@/enums/OptionShowPaycheck'
+import { StatusLabel } from '@/enums/Status'
+import { ValueTypeLabel } from '@/enums/ValueType'
 
 const gridColumns = [
   { dataField: 'SalaryCompositionCode', caption: 'Mã thành phần' },
@@ -48,7 +53,29 @@ const gridColumns = [
   { dataField: 'Status', caption: 'Trạng thái' },
 ]
 
-const tableData = ref(salaryData as any)
+const tableData = ref(
+  (salaryData as any).map((item: any) => {
+    const newItem: { [key: string]: any } = {
+      ...item,
+      CompositionType:
+        CompositionTypeLabel[item.CompositionType as keyof typeof CompositionTypeLabel],
+      CompositionNature:
+        CompositionNatureLabel[item.CompositionNature as keyof typeof CompositionNatureLabel],
+      OptionShowPaycheck:
+        OptionShowPaycheckLabel[item.OptionShowPaycheck as keyof typeof OptionShowPaycheckLabel],
+      Status: StatusLabel[item.Status as keyof typeof StatusLabel],
+      ValueType: ValueTypeLabel[item.ValueType as keyof typeof ValueTypeLabel],
+      Taxable: item.Taxable ? 'Có' : 'Không',
+      TaxDeduction: item.TaxDeduction ? 'Có' : 'Không',
+    }
+    for (const key in newItem) {
+      if (newItem[key] === null || newItem[key] === undefined || newItem[key] === '') {
+        newItem[key] = '-'
+      }
+    }
+    return newItem
+  }),
+)
 
 const searchQuery = ref('')
 const leftDropdown = ref(null as any)

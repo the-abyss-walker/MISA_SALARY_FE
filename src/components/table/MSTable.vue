@@ -4,14 +4,18 @@
       :data-source="tableDataSource"
       show-borders
       :allow-column-resizing="true"
+      :column-resizing-mode="'widget'"
       :height="gridHeight"
       :remote-operations="props.remoteOperations"
       @row-click="(e) => emit('row-click', e)"
       :hover-state-enabled="true"
       :column-width="props.columnWidth"
+      :column-min-width="120"
     >
       <DxPaging :enabled="false" />
       <DxScrolling column-rendering-mode="virtual" />
+
+      <DxSelection select-all-mode="page" mode="multiple" />
 
       <DxColumn
         v-for="col in usedColumns"
@@ -22,7 +26,6 @@
         :allow-resizing="col.allowResizing !== true"
       />
       <DxColumn
-        class="custom-column custom-button"
         width="120"
         type="buttons"
         :fixed="true"
@@ -34,8 +37,15 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { DxDataGrid, DxColumn, DxScrolling, DxPaging } from 'devextreme-vue/data-grid'
+import { computed, ref } from 'vue'
+import {
+  DxDataGrid,
+  DxColumn,
+  DxScrolling,
+  DxPaging,
+  DxSelection,
+  type DxDataGridTypes,
+} from 'devextreme-vue/data-grid'
 import salaryData from '../../data/salarycomposition.json'
 
 const props = withDefaults(
