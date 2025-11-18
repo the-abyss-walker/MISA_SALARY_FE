@@ -56,7 +56,7 @@ const props = withDefaults(
     leftOptions: () => [
       { label: 'Tất cả trạng thái', value: null },
       { label: 'Đang hoạt động', value: 'active' },
-      { label: 'Ngừng hoạt động', value: 'inactive' },
+      { label: 'Ngừng theo dõi', value: 'inactive' },
     ],
     rightOptions: () => [
       { label: 'Phòng nhân sự', value: 'hr' },

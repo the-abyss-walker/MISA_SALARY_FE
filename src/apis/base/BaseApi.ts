@@ -67,6 +67,6 @@ export default class BaseApi {
    * @param pageSize Số bản ghi trên trang
    */
   paging(pageIndex: number, pageSize: number) {
-    return api.get(`${this.controller}/paging?pageIndex=${pageIndex}&pageSize=${pageSize}`)
+    return api.get(`${this.controller}/all?pageIndex=${pageIndex}&pageSize=${pageSize}`)
   }
 }

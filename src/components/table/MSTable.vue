@@ -38,14 +38,7 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import {
-  DxDataGrid,
-  DxColumn,
-  DxScrolling,
-  DxPaging,
-  DxSelection,
-  type DxDataGridTypes,
-} from 'devextreme-vue/data-grid'
+import { DxDataGrid, DxColumn, DxScrolling, DxPaging, DxSelection } from 'devextreme-vue/data-grid'
 import salaryData from '../../data/salarycomposition.json'
 
 const props = withDefaults(

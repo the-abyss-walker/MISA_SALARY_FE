@@ -7,7 +7,7 @@
           <MSIcon name="arrow_left" />
         </button>
 
-        <h2 class="text-[20px] font-semibold">Danh mục thành phần lương hệ thống</h2>
+        <h2 class="text-[20px] font-semibold">Danh mục thành phần lương của hệ thống</h2>
       </div>
     </div>
 

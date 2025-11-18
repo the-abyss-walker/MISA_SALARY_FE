@@ -1,11 +1,12 @@
 import axios from 'axios'
 
-const baseURL = import.meta.env.BASE_URL
+const baseURL = import.meta.env.VITE_API_URL || 'https://localhost:7139/api/v1/'
 
 let api = axios.create({
   baseURL: baseURL,
   headers: {
     'Content-Type': 'application/json',
+    Accept: 'application/json',
   },
 })
 

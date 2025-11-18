@@ -15,7 +15,7 @@
     <MSTable :data="pagedData" :columns="gridColumns" />
 
     <MSPagination
-      :totalRecords="tableData.length"
+      :totalRecords="totalCount"
       v-model:currentPage="page"
       v-model:pageSize="pageSize"
       @page-change="onPageChange"
@@ -25,11 +25,11 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import MSTableHeader from '@/components/table/table-header/MSTableHeader.vue'
 import MSTable from '@/components/table/MSTable.vue'
 import MSPagination from '@/components/pagination/MSPagination.vue'
-import salaryData from '@/data/salarycomposition.json'
+import SalaryCompositionApi from '@/apis/components/SalaryCompositionApi'
 import { CompositionTypeLabel } from '@/enums/CompositionType'
 import { CompositionNatureLabel } from '@/enums/CompositionNature'
 import { OptionShowPaycheckLabel } from '@/enums/OptionShowPaycheck'
@@ -53,29 +53,8 @@ const gridColumns = [
   { dataField: 'Status', caption: 'Trạng thái' },
 ]
 
-const tableData = ref(
-  (salaryData as any).map((item: any) => {
-    const newItem: { [key: string]: any } = {
-      ...item,
-      CompositionType:
-        CompositionTypeLabel[item.CompositionType as keyof typeof CompositionTypeLabel],
-      CompositionNature:
-        CompositionNatureLabel[item.CompositionNature as keyof typeof CompositionNatureLabel],
-      OptionShowPaycheck:
-        OptionShowPaycheckLabel[item.OptionShowPaycheck as keyof typeof OptionShowPaycheckLabel],
-      Status: StatusLabel[item.Status as keyof typeof StatusLabel],
-      ValueType: ValueTypeLabel[item.ValueType as keyof typeof ValueTypeLabel],
-      Taxable: item.Taxable ? 'Có' : 'Không',
-      TaxDeduction: item.TaxDeduction ? 'Có' : 'Không',
-    }
-    for (const key in newItem) {
-      if (newItem[key] === null || newItem[key] === undefined || newItem[key] === '') {
-        newItem[key] = '-'
-      }
-    }
-    return newItem
-  }),
-)
+const tableData = ref<Array<Record<string, any>>>([])
+const totalCount = ref(0)
 
 const searchQuery = ref('')
 const leftDropdown = ref(null as any)
@@ -88,12 +67,56 @@ const headerBindings = computed(() => ({
   // forward any header related settings (no options by default)
 }))
 
-const pagedData = computed(() => {
-  const s = pageSize.value
-  const p = page.value
-  if (!s) return tableData.value
-  const start = (p - 1) * s
-  return tableData.value.slice(start, start + s)
+const pagedData = computed(() => tableData.value)
+
+async function loadData() {
+  try {
+    const res = await SalaryCompositionApi.paging(page.value, pageSize.value)
+    console.log('status', res.status, 'content-type', res.headers['content-type'])
+    console.log('raw data', res.data)
+    const payload = res?.data?.data ?? res?.data
+    const items = payload?.items ?? []
+    totalCount.value = payload?.totalCount ?? items.length
+
+    tableData.value = items.map((item: any) => {
+      const newItem: { [key: string]: any } = {
+        ...item,
+        SalaryCompositionCode: item.salaryCompositionCode,
+        SalaryCompositionName: item.salaryCompositionName,
+        OrganizationUnitNames: (item.organizationUnitNames || []).join(', '),
+        CompositionType:
+          CompositionTypeLabel[item.compositionType as keyof typeof CompositionTypeLabel],
+        CompositionNature:
+          CompositionNatureLabel[item.compositionNature as keyof typeof CompositionNatureLabel],
+        OptionShowPaycheck:
+          OptionShowPaycheckLabel[item.optionShowPaycheck as keyof typeof OptionShowPaycheckLabel],
+        Status: StatusLabel[item.status as keyof typeof StatusLabel],
+        ValueType: ValueTypeLabel[item.valueType as keyof typeof ValueTypeLabel],
+        Taxable: item.taxable === true ? 'Có' : 'Không',
+        TaxDeduction: item.taxDeduction === true ? 'Có' : 'Không',
+        Quota: item.quota,
+        Value: item.value,
+        Description: item.description,
+        Formula: item.formula,
+      }
+
+      for (const key in newItem) {
+        if (newItem[key] === null || newItem[key] === undefined || newItem[key] === '') {
+          newItem[key] = '-'
+        }
+      }
+
+      return newItem
+    })
+  } catch (error) {
+    // fallback to empty
+    tableData.value = []
+    totalCount.value = 0
+  }
+}
+
+onMounted(() => {
+  loadData()
 })
 
 function onSearchInput(val: string) {
@@ -112,11 +135,13 @@ function onRightSelect(opt: any) {
 
 function onPageChange(p: number) {
   page.value = p
+  loadData()
 }
 
 function onSizeChange(s: number) {
   pageSize.value = s
   page.value = 1
+  loadData()
 }
 
 function onFilter() {
