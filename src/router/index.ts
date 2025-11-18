@@ -4,17 +4,12 @@ const routes = [
   {
     path: '/salarycomposition',
     name: 'SalaryComposition',
-    component: () => import('@/pages/salary-composition/SalaryComposition.vue'),
+    component: () => import('@/pages/salary-composition/SalaryCompositionPage.vue'),
   },
   {
     path: '/salarycomposition/systemcategory',
     name: 'SystemCategory',
     component: () => import('@/pages/system-category/SystemCategory.vue'),
-  },
-  {
-    path: '/dashboard',
-    name: 'Dashboard',
-    component: () => import('@/pages/dashboard/Dashboard.vue'),
   },
 ]
 

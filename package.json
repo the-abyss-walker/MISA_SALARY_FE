@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.17",
+    "axios": "^1.13.2",
     "devextreme": "24.2.11",
     "devextreme-vue": "24.2.11",
     "tailwindcss": "^4.1.17",
