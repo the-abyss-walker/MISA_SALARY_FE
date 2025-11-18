@@ -12,7 +12,7 @@
       :aria-expanded="open"
       :aria-disabled="disabled"
     >
-      <template v-if="props.searchable && props.inlineSearch">
+      <template v-if="props.inlineSearch">
         <input
           v-model="search"
           class="w-full px-0 py-0 bg-transparent text-left text-sm outline-none"
@@ -40,15 +40,7 @@
       :style="panelStyle"
       role="listbox"
     >
-      <div v-if="props.searchable && !props.inlineSearch" class="p-2">
-        <input
-          v-model="search"
-          class="w-full px-2 py-1 border rounded text-sm"
-          type="search"
-          :placeholder="props.searchPlaceholder"
-          @keydown.enter.prevent="onEnter"
-        />
-      </div>
+      <!-- Panel-level search removed: inline search is used instead -->
 
       <ul class="max-h-60 overflow-auto p-2">
         <li
@@ -163,7 +155,7 @@ const panelStyle = computed(() => {
 const options = computed(() => props.options || [])
 
 const filteredOptions = computed(() => {
-  if (!props.searchable || !search.value) return options.value
+  if (!search.value) return options.value
   const q = search.value.toLowerCase()
   return options.value.filter((o) => o.label.toLowerCase().includes(q))
 })
