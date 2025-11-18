@@ -1,16 +1,20 @@
 <template>
   <div class="content">
     <div class="bg-white rounded shadow add-form">
-      <form @submit.prevent="onSubmit" class="flex flex-col gap-4">
+      <form @submit.prevent="onSubmit" class="flex flex-col">
         <!-- Row 1: Tên thành phần (required) -->
-        <div class="flex items-center gap-4">
-          <label class="w-40 text-sm font-medium"
-            >Tên thành phần <span class="text-red-600">*</span></label
-          >
+        <div class="ms-row flex items-center">
+          <div class="width-186px">
+            <label class="pd-r-8">
+              <b>Tên thành phần</b>
+              <span class="text-red-600">*</span>
+            </label>
+          </div>
+
           <MSInputItem
             ref="nameRef"
             v-model="form.name"
-            :width="'100%'"
+            :width="675"
             :maxLength="100"
             required
             placeholder="Nhập tên thành phần"
@@ -18,14 +22,17 @@
         </div>
 
         <!-- Row 2: Mã thành phần (required) -->
-        <div class="flex items-center gap-4">
-          <label class="w-40 text-sm font-medium"
-            >Mã thành phần <span class="text-red-600">*</span></label
-          >
+        <div class="ms-row flex items-center">
+          <div class="width-186px">
+            <label class="pd-r-8">
+              <b>Mã thành phần</b>
+              <span class="text-red-600">*</span>
+            </label>
+          </div>
           <MSInputItem
             ref="codeRef"
             v-model="form.code"
-            :width="'100%'"
+            :width="675"
             :maxLength="20"
             required
             placeholder="Nhập mã thành phần"
@@ -33,10 +40,13 @@
         </div>
 
         <!-- Row 3: Đơn vị áp dụng (required) -->
-        <div class="flex items-center gap-4">
-          <label class="w-40 text-sm font-medium"
-            >Đơn vị áp dụng <span class="text-red-600">*</span></label
-          >
+        <div class="ms-row flex items-center">
+          <div class="width-186px">
+            <label class="pd-r-8">
+              <b>Đơn vị áp dụng</b>
+              <span class="text-red-600">*</span>
+            </label>
+          </div>
           <MSCombobox
             ref="unitRef"
             v-model="form.unit"
@@ -46,16 +56,18 @@
         </div>
 
         <!-- Row 4: Loại thành phần (required) -->
-        <div class="flex items-center gap-4">
-          <label class="w-40 text-sm font-medium"
-            >Loại thành phần <span class="text-red-600">*</span></label
-          >
+        <div class="ms-row flex items-center">
+          <div class="width-186px">
+            <label class="pd-r-8">
+              <b>Loại thành phần</b>
+              <span class="text-red-600">*</span>
+            </label>
+          </div>
           <MSDropdown
             ref="typeRef"
             v-model="form.type"
             :options="typeOptions"
-            placeholder="Chọn loại"
-            :width="320"
+            :width="237"
             :bordered="true"
             :hoverable="true"
             labelPosition="left"
@@ -64,16 +76,19 @@
         </div>
 
         <!-- Row 5: Tính chất (required) -->
-        <div class="flex items-center gap-4">
-          <label class="w-40 text-sm font-medium"
-            >Tính chất <span class="text-red-600">*</span></label
-          >
+        <div class="ms-row flex items-center">
+          <div class="width-186px">
+            <label class="pd-r-8">
+              <b>Tính chất</b>
+              <span class="text-red-600">*</span>
+            </label>
+          </div>
           <MSDropdown
             ref="natureRef"
             v-model="form.nature"
             :options="natureOptions"
-            placeholder="Chọn tính chất"
-            :width="320"
+            placeholder="Thu nhập"
+            :width="237"
             :bordered="true"
             :hoverable="true"
             labelPosition="left"
@@ -82,26 +97,32 @@
         </div>
 
         <!-- Row 6: Định mức -->
-        <div class="flex items-center gap-4">
-          <label class="w-40 text-sm font-medium">Định mức</label>
+        <div class="ms-row flex items-center">
+          <div class="width-186px">
+            <label class="pd-r-8"><b>Định mức</b></label>
+          </div>
           <MSInputItem
             ref="normRef"
             v-model="form.norm"
-            :width="'100%'"
+            :width="675"
+            :height="86"
             :maxLength="50"
-            placeholder="Nhập định mức"
+            :placeholderTop="20"
+            placeholder="Tự động gợi ý công thức và tham số khi gõ"
           />
         </div>
 
         <!-- Row 7: Kiểu giá trị -->
-        <div class="flex items-center gap-4">
-          <label class="w-40 text-sm font-medium">Kiểu giá trị</label>
+        <div class="ms-row flex items-center">
+          <div class="width-186px">
+            <label class="pd-r-8"><b>Kiểu giá trị</b></label>
+          </div>
           <MSDropdown
             ref="valueTypeRef"
             v-model="form.valueType"
             :options="valueTypeOptions"
-            placeholder="Chọn kiểu giá trị"
-            :width="320"
+            placeholder="Tiền tệ"
+            :width="237"
             :bordered="true"
             :hoverable="true"
             labelPosition="left"
@@ -110,32 +131,40 @@
         </div>
 
         <!-- Row 8: Giá trị -->
-        <div class="flex items-center gap-4">
-          <label class="w-40 text-sm font-medium">Giá trị</label>
+        <div class="ms-row flex items-center">
+          <div class="width-186px">
+            <label class="pd-r-8"><b>Giá trị</b></label>
+          </div>
           <MSInputItem
             ref="valueRef"
             v-model="form.value"
-            :width="'100%'"
+            :width="675"
+            :height="86"
             :maxLength="100"
-            placeholder="Nhập giá trị"
+            :placeholderTop="20"
+            placeholder="Tự động nhập gợi ý công thức và tham số khi gõ"
           />
         </div>
 
         <!-- Row 9: Mô tả -->
-        <div class="flex items-start gap-4">
-          <label class="w-40 text-sm font-medium">Mô tả</label>
+        <div class="ms-row flex items-start">
+          <div class="width-186px">
+            <label class="pd-r-8"><b>Mô tả</b></label>
+          </div>
           <MSInputItem
             ref="descriptionRef"
             v-model="form.description"
-            :width="'100%'"
+            :width="676"
+            :height="72.6"
             :maxLength="500"
-            placeholder="Nhập mô tả"
           />
         </div>
 
         <!-- Row 10: Hiển thị trên phiếu lương (radio) -->
-        <div class="flex items-center gap-4">
-          <label class="w-40 text-sm font-medium">Hiển thị trên phiếu lương</label>
+        <div class="ms-row flex items-center">
+          <div class="width-186px">
+            <label class="pd-r-8"><b>Hiển thị trên phiếu lương</b></label>
+          </div>
           <div class="flex items-center gap-4">
             <label class="inline-flex items-center">
               <input type="radio" value="yes" v-model="form.showOnPayslip" class="mr-2" /> Có
@@ -147,8 +176,8 @@
         </div>
 
         <!-- Row 11: Nguồn tạo (fixed label) -->
-        <div class="flex items-center gap-4">
-          <label class="w-40 text-sm font-medium">Nguồn tạo</label>
+        <div class="ms-row flex items-center gap-4">
+          <b>Nguồn tạo</b>
           <div class="px-3 py-2 border rounded bg-gray-50">Tự thêm</div>
         </div>
       </form>
@@ -161,6 +190,7 @@ import { reactive, ref } from 'vue'
 import MSInputItem from '@/components/inputs/MSInputItem.vue'
 import MSCombobox from '@/components/combobox/MSCombobox.vue'
 import MSDropdown from '@/components/dropdown/MSDropdown.vue'
+import MSPopup from '@/components/popup/MSPopup.vue'
 
 const emit = defineEmits<{
   (e: 'saved', payload: any): void
@@ -277,5 +307,25 @@ defineExpose({ submit })
 <style scoped>
 .add-form {
   padding: 40px;
+  max-height: calc(100vh - 120px);
+  display: flex;
+  flex: 1;
+  overflow-y: auto;
+  box-sizing: border-box;
+  -webkit-overflow-scrolling: touch;
+}
+
+.ms-row {
+  width: 100%;
+  margin-bottom: 16px;
+}
+
+.pd-r-8 {
+  padding-right: 8px;
+}
+
+.width-186px {
+  width: 186px;
+  line-height: 35px;
 }
 </style>

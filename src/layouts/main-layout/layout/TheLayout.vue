@@ -1,6 +1,6 @@
 <template>
-  <div id="layout" class="flex flex-col h-full min-h-[300px]">
-    <div id="header" class="w-full bg-white flex items-center">
+  <div id="layout" class="flex flex-col">
+    <div id="header" class="bg-white flex items-center">
       <TheHeader />
     </div>
 

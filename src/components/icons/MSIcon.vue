@@ -54,6 +54,7 @@ const positionMap: Record<string, string> = {
   copy: '-80px 0',
   pencil: '-60px 0',
   trash: '-120px -20px',
+  close: '-280px 0',
 }
 
 const sizeMap: Record<string, { width: number; height: number }> = {
@@ -80,6 +81,7 @@ const sizeMap: Record<string, { width: number; height: number }> = {
   copy: { width: 20, height: 20 },
   pencil: { width: 20, height: 20 },
   trash: { width: 20, height: 20 },
+  close: { width: 20, height: 20 },
 }
 
 const iconSize = computed(() => sizeMap[props.name] || { width: 20, height: 20 })
@@ -109,6 +111,7 @@ const colorMap: Record<string, string> = {
   copy: '#6E737A',
   pencil: '#6E737A',
   trash: '#FF6161',
+  close: '#6E737A',
 }
 
 const defaultColor = computed(() => props.color ?? colorMap[props.name] ?? 'currentColor')
