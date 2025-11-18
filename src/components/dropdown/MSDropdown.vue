@@ -3,18 +3,36 @@
     <button
       type="button"
       class="w-full flex items-center justify-between px-3 py-2 rounded bg-white text-left cursor-pointer ms-dropdown-btn"
-      :class="[{ 'opacity-60 pointer-events-none': disabled }, buttonClasses]"
+      :class="[
+        { 'opacity-60 pointer-events-none': disabled },
+        buttonClasses,
+        { 'border-red-500': error },
+      ]"
       @click="toggle"
       :aria-expanded="open"
       :aria-disabled="disabled"
     >
-      <span :class="labelClasses" :title="selectedLabel || placeholder">
-        {{ selectedLabel || placeholder }}
-      </span>
+      <template v-if="props.searchable && props.inlineSearch">
+        <input
+          v-model="search"
+          class="w-full px-0 py-0 bg-transparent text-left text-sm outline-none"
+          type="text"
+          :placeholder="props.searchPlaceholder"
+          @click.stop
+          @keydown.enter.prevent="onEnter"
+        />
+      </template>
+      <template v-else>
+        <span :class="labelClasses" :title="selectedLabel || placeholder">
+          {{ selectedLabel || placeholder }}
+        </span>
+      </template>
       <span class="ml-1 flex items-center">
         <MSIcon name="dropdown" color="#6e737a" />
       </span>
     </button>
+
+    <div v-if="error" class="mt-1 text-sm text-red-600">{{ error }}</div>
 
     <div
       v-if="open"
@@ -22,12 +40,12 @@
       :style="panelStyle"
       role="listbox"
     >
-      <div v-if="searchable" class="p-2">
+      <div v-if="props.searchable && !props.inlineSearch" class="p-2">
         <input
           v-model="search"
           class="w-full px-2 py-1 border rounded text-sm"
           type="search"
-          :placeholder="searchPlaceholder"
+          :placeholder="props.searchPlaceholder"
           @keydown.enter.prevent="onEnter"
         />
       </div>
@@ -80,21 +98,26 @@ const props = withDefaults(
     labelPosition?: 'left' | 'near-icon'
     bordered?: boolean
     hoverable?: boolean
+    inlineSearch?: boolean
+    required?: boolean
+    requiredMessage?: string
   }>(),
   {
     options: () => [],
     modelValue: undefined,
-    placeholder: 'Chọn',
+    placeholder: '',
     disabled: false,
     placement: 'bottom',
-    labelAlign: 'right',
+    labelAlign: 'left',
     searchable: false,
-    searchPlaceholder: 'Tìm kiếm...',
+    inlineSearch: false,
     width: 240,
     maxHeight: 240,
     labelPosition: 'left',
     bordered: false,
     hoverable: true,
+    required: false,
+    requiredMessage: 'Không được để trống',
   },
 )
 
@@ -103,6 +126,7 @@ const emit = defineEmits(['update:modelValue', 'select', 'open', 'close'])
 const root = ref<HTMLElement | null>(null)
 const open = ref(false)
 const search = ref('')
+const error = ref('')
 
 const labelClasses = computed(() => {
   const alignClass = props && props.labelAlign === 'right' ? 'text-right' : 'text-left'
@@ -164,7 +188,32 @@ function select(opt: Opt) {
   if (opt.disabled) return
   emit('update:modelValue', opt.value)
   emit('select', opt)
+  // clear any inline search text and close panel
+  clearSearch()
   close()
+}
+
+function clearSearch() {
+  search.value = ''
+}
+
+// when searching inline, open the panel to show results
+watch(search, (v) => {
+  if (props.inlineSearch) {
+    if (v && v.length > 0) open.value = true
+  }
+})
+
+function validate() {
+  if (props.required) {
+    const val = props.modelValue
+    if (val === undefined || val === null || val === '') {
+      error.value = props.requiredMessage || 'Không được để trống'
+      return false
+    }
+  }
+  error.value = ''
+  return true
 }
 
 function isSelected(opt: Opt) {
@@ -184,6 +233,15 @@ function onEnter() {
 
 onMounted(() => document.addEventListener('click', onDocumentClick))
 onBeforeUnmount(() => document.removeEventListener('click', onDocumentClick))
+
+watch(
+  () => props.modelValue,
+  () => {
+    if (error.value) error.value = ''
+  },
+)
+
+defineExpose({ validate })
 </script>
 
 <style scoped>

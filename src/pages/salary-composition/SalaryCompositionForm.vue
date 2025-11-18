@@ -67,6 +67,10 @@
             ref="typeRef"
             v-model="form.type"
             :options="typeOptions"
+            :searchable="true"
+            :inlineSearch="true"
+            :searchPlaceholder="''"
+            :required="true"
             :width="237"
             :bordered="true"
             :hoverable="true"
@@ -87,6 +91,10 @@
             ref="natureRef"
             v-model="form.nature"
             :options="natureOptions"
+            :searchable="true"
+            :inlineSearch="true"
+            :searchPlaceholder="''"
+            :required="true"
             placeholder="Thu nhập"
             :width="237"
             :bordered="true"
@@ -121,6 +129,9 @@
             ref="valueTypeRef"
             v-model="form.valueType"
             :options="valueTypeOptions"
+            :searchable="true"
+            :inlineSearch="true"
+            :searchPlaceholder="''"
             placeholder="Tiền tệ"
             :width="237"
             :bordered="true"
@@ -264,8 +275,12 @@ const submit = () => {
   const validName = nameRef.value ? nameRef.value.validate() : true
   const validFormula = formulaRef.value ? formulaRef.value.validate() : true
   const validUnit = unitRef.value ? (unitRef.value.validate?.() ?? true) : true
-  const validType = form.type !== ''
-  const validNature = form.nature !== ''
+  const validType = typeRef.value
+    ? (typeRef.value.validate?.() ?? form.type !== '')
+    : form.type !== ''
+  const validNature = natureRef.value
+    ? (natureRef.value.validate?.() ?? form.nature !== '')
+    : form.nature !== ''
 
   if (!validCode) {
     return

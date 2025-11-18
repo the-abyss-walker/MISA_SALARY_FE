@@ -19,7 +19,7 @@
         :data-field="col.dataField"
         :caption="col.caption"
         :width="col.width"
-        :allow-resizing="col.allowResizing !== false"
+        :allow-resizing="col.allowResizing !== true"
       />
       <DxColumn
         class="custom-column custom-button"
@@ -137,5 +137,11 @@ const tableDataSource = computed(() => {
 .dx-datagrid .dx-datagrid-table .dx-header-row > td {
   padding-top: 0 !important;
   padding-bottom: 0 !important;
+}
+
+.dx-datagrid td {
+  padding-top: 0 !important;
+  padding-bottom: 0 !important;
+  height: 36px !important;
 }
 </style>
