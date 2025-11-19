@@ -1,5 +1,11 @@
 <template>
   <div class="bg-white">
+    <MSToast
+      v-if="toastVisible"
+      :type="toastType"
+      :message="toastMessage"
+      @close="toastVisible = false"
+    />
     <MSTableHeader
       v-model:left="leftDropdown"
       v-model:right="rightDropdown"
@@ -12,7 +18,12 @@
       @search="onSearchInput"
     />
 
-    <MSTable :data="pagedData" :columns="gridColumns" :show-selection="true" />
+    <MSTable
+      v-if="tableData.length > 0"
+      :data="pagedData"
+      :columns="gridColumns"
+      :show-selection="true"
+    />
 
     <MSPagination
       :totalRecords="totalCount"
@@ -29,6 +40,7 @@ import { ref, computed, onMounted } from 'vue'
 import MSTableHeader from '@/components/table/table-header/MSTableHeader.vue'
 import MSTable from '@/components/table/MSTable.vue'
 import MSPagination from '@/components/pagination/MSPagination.vue'
+import MSToast from '@/components/toast/MSToast.vue'
 import SalaryCompositionApi from '@/apis/components/SalaryCompositionApi'
 import { CompositionTypeLabel } from '@/enums/CompositionType'
 import { CompositionNatureLabel } from '@/enums/CompositionNature'
@@ -42,8 +54,8 @@ const gridColumns = [
   { dataField: 'OrganizationUnitNames', caption: 'Đơn vị áp dụng' },
   { dataField: 'CompositionType', caption: 'Loại thành phần' },
   { dataField: 'CompositionNature', caption: 'Tính chất' },
-  { dataField: 'Taxable', caption: 'Chịu thuế' },
-  { dataField: 'TaxDeduction', caption: 'Giảm trừ khi tính thuế' },
+  { dataField: 'Taxable', caption: 'Chịu thuế', datatype: 'string' },
+  { dataField: 'TaxDeduction', caption: 'Giảm trừ khi tính thuế', datatype: 'string' },
   { dataField: 'Quota', caption: 'Định mức' },
   { dataField: 'ValueType', caption: 'Kiểu giá trị' },
   { dataField: 'Value', caption: 'Giá trị' },
@@ -56,6 +68,11 @@ const gridColumns = [
 const tableData = ref<Array<Record<string, any>>>([])
 const totalCount = ref(0)
 
+// toast state
+const toastVisible = ref(false)
+const toastMessage = ref('')
+const toastType = ref<'information' | 'warning' | 'success' | 'failed'>('failed')
+
 const searchQuery = ref('')
 const leftDropdown = ref(null as any)
 const rightDropdown = ref(null as any)
@@ -67,7 +84,7 @@ const headerBindings = computed(() => ({
   // forward any header related settings (no options by default)
 }))
 
-const pagedData = computed(() => tableData.value)
+const pagedData = computed(() => [...tableData.value])
 
 async function loadData() {
   try {
@@ -106,10 +123,14 @@ async function loadData() {
 
       return newItem
     })
+    // Hide any previous error toast if data loads successfully
+    toastVisible.value = false
   } catch (error) {
-    // fallback to empty
-    tableData.value = []
-    totalCount.value = 0
+    // show toast with error message
+    const errMsg = 'Đã xảy ra lỗi khi tải dữ liệu.'
+    toastMessage.value = String(errMsg)
+    toastType.value = 'failed'
+    toastVisible.value = true
   }
 }
 

@@ -48,14 +48,20 @@ const iconName = computed(() => {
 
 <style scoped>
 .ms-toast {
+  position: fixed;
+  top: 10%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   max-width: fit-content;
   display: flex;
   align-items: center;
   padding-right: 8px;
   height: 40px;
-  border-radius: 2px;
+  border-radius: 4px;
   border: 1px solid transparent;
   background: #fff;
+  z-index: 9999;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
 }
 
 /* Color variables per type */

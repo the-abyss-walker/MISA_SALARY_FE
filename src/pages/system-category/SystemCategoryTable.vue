@@ -12,7 +12,7 @@
       @search="onSearchInput"
     />
 
-    <MSTable :data="pagedData" :columns="gridColumns" />
+    <MSTable :data="pagedData" :columns="gridColumns" :show-selection="true" />
 
     <MSPagination
       :totalRecords="tableData.length"

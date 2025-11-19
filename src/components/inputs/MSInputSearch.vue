@@ -7,16 +7,14 @@
     @mouseleave="isHover = false"
     @click="focusInput"
   >
-    <!-- Icon wrapper 24x24 + padding-left 8px -->
-    <div class="flex items-center justify-center w-6 h-6 pl-2 box-content">
+    <span class="icon-span flex items-center justify-center box-content">
       <MSIcon v-if="icon" :name="icon" :color="'#6E737A'" />
-    </div>
+    </span>
 
-    <!-- Input field -->
     <input
       ref="inputRef"
       :placeholder="placeholder"
-      class="flex-1 bg-transparent outline-none text-[13px] font-medium px-3"
+      class="flex-1 bg-transparent outline-none text-[14px] font-normal px-3"
       :class="placeholderClass"
       v-model="modelValueLocal"
       @input="$emit('update:modelValue', modelValueLocal)"
@@ -67,3 +65,11 @@ const focusInput = () => {
   inputRef.value?.focus()
 }
 </script>
+
+<style scoped>
+.icon-span {
+  width: 24px;
+  height: 24px;
+  padding-left: 4px;
+}
+</style>

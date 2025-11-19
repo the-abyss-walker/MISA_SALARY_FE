@@ -19,6 +19,8 @@
       />
 
       <MSDropdownTree
+        width="350px"
+        height="36px"
         v-model="rightModel"
         :options="rightOptions"
         :placeholder="rightPlaceholder"
