@@ -127,6 +127,7 @@ const iconWrapperStyle = computed(() => {
 <style scoped>
 .msbtn {
   box-sizing: border-box;
+  font-weight: 500;
   font-size: 14px;
   line-height: 1;
   border-width: 1px;

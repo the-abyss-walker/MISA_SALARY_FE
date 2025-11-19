@@ -47,11 +47,19 @@
               <span class="text-red-600">*</span>
             </label>
           </div>
-          <MSCombobox
+          <MSDropdownTree
             ref="unitRef"
             v-model="form.unit"
             :options="unitOptions"
-            placeholder="Chọn đơn vị"
+            :searchable="true"
+            :inlineSearch="true"
+            :searchPlaceholder="''"
+            :required="true"
+            :width="675"
+            :bordered="true"
+            :hoverable="true"
+            labelPosition="left"
+            labelAlign="left"
           />
         </div>
 
@@ -202,6 +210,7 @@ import MSInputItem from '@/components/inputs/MSInputItem.vue'
 import MSCombobox from '@/components/combobox/MSCombobox.vue'
 import MSDropdown from '@/components/dropdown/MSDropdown.vue'
 import MSPopup from '@/components/popup/MSPopup.vue'
+import MSDropdownTree from '@/components/dropdown/MSDropdownTree.vue'
 
 const emit = defineEmits<{
   (e: 'saved', payload: any): void

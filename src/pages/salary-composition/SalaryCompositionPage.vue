@@ -7,13 +7,13 @@
           <MSIcon name="arrow_left" />
         </button>
 
-        <h2 v-if="isAdd" class="text-[20px] font-semibold">Thêm thành phần</h2>
-        <h2 v-else class="text-[20px] font-semibold">Thành phần lương</h2>
+        <h2 v-if="isAdd">Thêm thành phần</h2>
+        <h2 v-else>Thành phần lương</h2>
       </div>
 
       <div class="flex items-center gap-3">
         <MSButton v-if="!isAdd" variant="secondary" icon="rule" @click="goToSystemCategory"
-          >Danh mục hệ thống</MSButton
+          >Danh mục của hệ thống</MSButton
         >
 
         <MSButton v-if="!isAdd" variant="combo" icon="plus" @click="openAdd"> Thêm mới </MSButton>
@@ -77,5 +77,10 @@ const onSaveFromHeader = () => {
 <style scoped>
 .text {
   font-size: 18px;
+}
+
+h2 {
+  font-weight: 700;
+  font-size: 20px;
 }
 </style>

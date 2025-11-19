@@ -12,7 +12,7 @@
       @search="onSearchInput"
     />
 
-    <MSTable :data="pagedData" :columns="gridColumns" />
+    <MSTable :data="pagedData" :columns="gridColumns" :show-selection="true" />
 
     <MSPagination
       :totalRecords="totalCount"
@@ -72,9 +72,7 @@ const pagedData = computed(() => tableData.value)
 async function loadData() {
   try {
     const res = await SalaryCompositionApi.paging(page.value, pageSize.value)
-    console.log('status', res.status, 'content-type', res.headers['content-type'])
-    console.log('raw data', res.data)
-    const payload = res?.data?.data ?? res?.data
+    const payload = res?.data?.data
     const items = payload?.items ?? []
     totalCount.value = payload?.totalCount ?? items.length
 
@@ -92,8 +90,8 @@ async function loadData() {
           OptionShowPaycheckLabel[item.optionShowPaycheck as keyof typeof OptionShowPaycheckLabel],
         Status: StatusLabel[item.status as keyof typeof StatusLabel],
         ValueType: ValueTypeLabel[item.valueType as keyof typeof ValueTypeLabel],
-        Taxable: item.taxable === true ? 'Có' : 'Không',
-        TaxDeduction: item.taxDeduction === true ? 'Có' : 'Không',
+        Taxable: item.taxable ? 'Có' : 'Không',
+        TaxDeduction: item.taxDeduction ? 'Có' : 'Không',
         Quota: item.quota,
         Value: item.value,
         Description: item.description,

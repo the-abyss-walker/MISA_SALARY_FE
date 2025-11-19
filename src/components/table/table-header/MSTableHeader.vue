@@ -18,13 +18,12 @@
         :label-position="'right'"
       />
 
-      <MSDropdown
+      <MSDropdownTree
         v-model="rightModel"
         :options="rightOptions"
         :placeholder="rightPlaceholder"
         @select="onRightSelect"
       />
-
       <MSButton variant="icon" icon="filter" @click="$emit('filter')" />
       <MSButton variant="icon" icon="setting" @click="$emit('config')" />
     </div>
@@ -37,6 +36,7 @@ import type { DropdownOption } from '@/types/dropdown'
 import MSInputSearch from '@/components/inputs/MSInputSearch.vue'
 import MSButton from '@/components/button/MSButton.vue'
 import MSDropdown from '@/components/dropdown/MSDropdown.vue'
+import MSDropdownTree from '@/components/dropdown/MSDropdownTree.vue'
 
 const props = withDefaults(
   defineProps<{
@@ -109,6 +109,7 @@ function onRightSelect(opt: any) {
 
 <style scoped>
 .theader {
+  height: 61px;
   padding: 12px 20px;
 }
 </style>

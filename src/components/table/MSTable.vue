@@ -2,7 +2,6 @@
   <div class="mstable__grid">
     <DxDataGrid
       :data-source="tableDataSource"
-      show-borders
       :allow-column-resizing="true"
       :column-resizing-mode="'widget'"
       :height="gridHeight"
@@ -15,7 +14,12 @@
       <DxPaging :enabled="false" />
       <DxScrolling column-rendering-mode="virtual" />
 
-      <DxSelection select-all-mode="page" mode="multiple" />
+      <DxSelection
+        v-if="props.showSelection"
+        select-all-mode="page"
+        mode="multiple"
+        show-check-boxes-mode="always"
+      />
 
       <DxColumn
         v-for="col in usedColumns"
@@ -24,14 +28,43 @@
         :caption="col.caption"
         :width="col.width"
         :allow-resizing="col.allowResizing !== true"
+        :cell-template="col.cellTemplate"
+        :header-cell-template="col.headerTemplate"
       />
+      <template
+        v-for="col in columnsWithTemplates"
+        :key="col.dataField"
+        #[col.cellTemplate]="cellInfo"
+      >
+        <slot :name="col.cellTemplate" :data="cellInfo"></slot>
+      </template>
+      <template
+        v-for="col in columnsWithHeaderTemplates"
+        :key="col.dataField"
+        #[col.headerTemplate]="headerInfo"
+      >
+        <slot :name="col.headerTemplate" :data="headerInfo"></slot>
+      </template>
       <DxColumn
         width="120"
-        type="buttons"
         :fixed="true"
         fixed-position="right"
-        :buttons="actionButtons"
+        cell-template="actionTemplate"
+        alignment="center"
       />
+      <template #actionTemplate="{ data }">
+        <div class="action-buttons">
+          <div class="action-button" title="Nhân bản" @click.stop="handleClone(data)">
+            <MSIcon name="copy" />
+          </div>
+          <div class="action-button" title="Sửa" @click.stop="handleEdit(data)">
+            <MSIcon name="pencil" />
+          </div>
+          <div class="action-button" title="Xóa" @click.stop="handleDelete(data)">
+            <MSIcon name="trash" />
+          </div>
+        </div>
+      </template>
     </DxDataGrid>
   </div>
 </template>
@@ -40,6 +73,7 @@
 import { computed, ref } from 'vue'
 import { DxDataGrid, DxColumn, DxScrolling, DxPaging, DxSelection } from 'devextreme-vue/data-grid'
 import salaryData from '../../data/salarycomposition.json'
+import MSIcon from '../icons/MSIcon.vue'
 
 const props = withDefaults(
   defineProps<{
@@ -49,44 +83,42 @@ const props = withDefaults(
     columnWidth?: number
     remoteOperations?: boolean
     pageSize?: number
+    showSelection?: boolean
   }>(),
   {
     data: () => [],
     columns: () => [],
-    gridHeight: 'calc(100vh - 250px)',
+    gridHeight: 'calc(100vh - 258px)',
     columnWidth: 200,
     remoteOperations: false,
+    showSelection: false,
   },
 )
 
 const emit = defineEmits(['row-click', 'page-change'])
 
-const actionButtons = [
-  {
-    hint: 'Nhân bản',
-    icon: 'repeat',
-    onClick: (e: any) => {
-      alert('Clone ' + e.row.data.name)
-    },
-  },
-  {
-    hint: 'Sửa',
-    icon: 'edit',
-    onClick: (e: any) => {
-      alert('Edit ' + e.row.data.name)
-    },
-  },
-  {
-    hint: 'Xóa',
-    icon: 'trash',
-    onClick: (e: any) => {
-      alert('Delete ' + e.row.data.name)
-    },
-  },
-]
+const handleClone = (e: any) => {
+  alert('Clone ' + e.data.name)
+}
+
+const handleEdit = (e: any) => {
+  alert('Edit ' + e.data.name)
+}
+
+const handleDelete = (e: any) => {
+  alert('Delete ' + e.data.name)
+}
 
 const usedColumns = computed(() => {
   return props.columns && props.columns.length ? props.columns : []
+})
+
+const columnsWithTemplates = computed(() => {
+  return usedColumns.value.filter((col) => col.cellTemplate)
+})
+
+const columnsWithHeaderTemplates = computed(() => {
+  return usedColumns.value.filter((col) => col.headerTemplate)
 })
 
 const tableDataSource = computed(() => {
@@ -106,6 +138,7 @@ const tableDataSource = computed(() => {
 }
 .dx-datagrid .dx-datagrid-sticky-column-right {
   background: transparent !important;
+  border-left: none !important;
 }
 .dx-datagrid-headers .dx-datagrid-table .dx-row > td {
   border-bottom: none !important;
@@ -117,10 +150,7 @@ const tableDataSource = computed(() => {
 
 .dx-datagrid > .dx-datagrid-headers {
   background-color: #f6f6f6 !important;
-  height: 36px !important;
-  display: flex !important;
-  align-items: center !important;
-  /* padding-inline: 16px !important; */
+  height: 38px !important;
   color: #212121 !important;
 }
 .dx-datagrid-headers .dx-datagrid-table .dx-row > td {
@@ -146,5 +176,77 @@ const tableDataSource = computed(() => {
   padding-top: 0 !important;
   padding-bottom: 0 !important;
   height: 36px !important;
+  vertical-align: middle !important;
+}
+
+.dx-datagrid td:not(.dx-command-select) {
+  padding-inline: 16px !important;
+}
+
+.dx-datagrid-rowsview .dx-data-row > td {
+  background-color: #ffffff !important;
+}
+
+.dx-datagrid-rowsview .dx-data-row.dx-state-hover > td {
+  background-color: #eafbf2 !important;
+  cursor: pointer;
+}
+
+.dx-datagrid .dx-row > .dx-command-select {
+  border-right: none !important;
+}
+
+.mstable__grid .dx-checkbox-icon {
+  border-radius: 4px !important;
+  width: 16px !important;
+  height: 16px !important;
+}
+
+.mstable__grid .dx-checkbox-checked .dx-checkbox-icon {
+  background-color: #34b057 !important;
+  border-color: #34b057 !important;
+  color: #ffffff !important;
+}
+
+.mstable__grid .dx-datagrid-headers .dx-checkbox-icon {
+  background-color: #ffffff !important;
+}
+
+.dx-datagrid .dx-header-row > .dx-command-select {
+  background-color: #f6f6f6 !important;
+}
+
+.mstable__grid .dx-datagrid-headers .dx-checkbox-checked .dx-checkbox-icon {
+  background-color: #34b057 !important;
+}
+
+.mstable__grid .dx-datagrid-rowsview .dx-selection.dx-row > td,
+.mstable__grid .dx-datagrid-rowsview .dx-selection.dx-row:hover > td {
+  background-color: #eafbf2 !important;
+}
+
+.action-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  visibility: hidden;
+}
+
+.dx-data-row.dx-state-hover .action-buttons {
+  visibility: visible;
+}
+
+.action-button {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+}
+
+.action-button:hover {
+  background-color: #eff1f6;
 }
 </style>
