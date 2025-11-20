@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col gap-4">
+  <div class="flex flex-col gap-4 relative">
     <!-- Header: changes depending on child route -->
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-4">
@@ -20,7 +20,7 @@
 
         <template v-if="isAdd">
           <MSButton variant="secondary" @click="goBack">Hủy bỏ</MSButton>
-          <MSButton variant="secondary">Lưu và thêm</MSButton>
+          <MSButton variant="secondary" @click="onSaveAndAddFromHeader">Lưu và thêm</MSButton>
           <MSButton variant="primary" @click="onSaveFromHeader">Lưu</MSButton>
         </template>
       </div>
@@ -32,22 +32,69 @@
     </div>
 
     <div v-else>
-      <SalaryCompositionAdd @saved="onSaved" @cancel="goBack" ref="addComp" />
+      <SalaryCompositionAdd
+        @saved="onSaved"
+        @savedAndAdd="onSavedAndAdd"
+        @cancel="goBack"
+        ref="addComp"
+      />
     </div>
+
+    <!-- Toast Notification -->
+    <div v-if="toast.show" class="fixed top-4 right-4 z-50">
+      <MSToast :type="toast.type" :message="toast.message" @close="closeToast" />
+    </div>
+
+    <!-- Confirmation Popup -->
+    <MSPopup
+      v-model:visible="showConfirmPopup"
+      title="Thông báo"
+      content="Thông tin đã được thay đổi, bạn có muốn lưu lại?"
+      :buttons="confirmButtons"
+      @action="onConfirmAction"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import MSButton from '@/components/button/MSButton.vue'
 import MSIcon from '@/components/icons/MSIcon.vue'
+import MSToast from '@/components/toast/MSToast.vue'
+import MSPopup from '@/components/popup/MSPopup.vue'
 import SalaryCompositionAdd from './SalaryCompositionForm.vue'
 import SalayryCompositionTable from './SalayryCompositionTable.vue'
 
 const isAdd = ref(false)
 const addComp = ref<any>(null)
 const router = useRouter()
+const showConfirmPopup = ref(false)
+
+const toast = reactive({
+  show: false,
+  type: 'success' as 'success' | 'information' | 'warning' | 'failed',
+  message: '',
+})
+
+const confirmButtons = [
+  { label: 'Hủy', variant: 'secondary' as const, id: 'cancel' },
+  { label: 'Không lưu', variant: 'secondary' as const, id: 'no-save' },
+  { label: 'Lưu', variant: 'primary' as const, id: 'save' },
+]
+
+const showToast = (type: 'success' | 'information' | 'warning' | 'failed', message: string) => {
+  toast.type = type
+  toast.message = message
+  toast.show = true
+  setTimeout(() => {
+    toast.show = false
+  }, 3000)
+}
+
+const closeToast = () => {
+  toast.show = false
+}
 
 const goToSystemCategory = () => {
   router.push({ name: 'SystemCategory' })
@@ -58,18 +105,46 @@ const openAdd = () => {
 }
 
 const goBack = () => {
-  isAdd.value = false
+  if (addComp.value && addComp.value.isDirty) {
+    showConfirmPopup.value = true
+  } else {
+    isAdd.value = false
+  }
+}
+
+const onConfirmAction = ({ button }: { button?: any }) => {
+  if (!button) return
+  if (button.id === 'cancel') {
+    showConfirmPopup.value = false
+  } else if (button.id === 'no-save') {
+    showConfirmPopup.value = false
+    isAdd.value = false
+  } else if (button.id === 'save') {
+    showConfirmPopup.value = false
+    onSaveFromHeader()
+  }
 }
 
 const onSaved = (payload?: any) => {
   // payload can contain saved item; for now return to list
   isAdd.value = false
+  showToast('success', 'Thêm thành công')
+}
+
+const onSavedAndAdd = (payload?: any) => {
+  showToast('success', 'Thêm thành công')
 }
 
 const onSaveFromHeader = () => {
   // call save on the child component if available
   if (addComp.value && typeof addComp.value.submit === 'function') {
-    addComp.value.submit()
+    addComp.value.submit('save')
+  }
+}
+
+const onSaveAndAddFromHeader = () => {
+  if (addComp.value && typeof addComp.value.submit === 'function') {
+    addComp.value.submit('saveAndAdd')
   }
 }
 </script>

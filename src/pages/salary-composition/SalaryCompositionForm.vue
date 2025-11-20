@@ -224,8 +224,13 @@
             <label class="pd-r-8"><b>Hiển thị trên phiếu lương</b></label>
           </div>
           <div class="flex items-center gap-4">
-            <MSRadio v-model="form.showOnPayslip" value="true" label="Có" />
-            <MSRadio v-model="form.showOnPayslip" value="false" label="Không" />
+            <MSRadio v-model="form.showOnPayslip" value="1" label="Có" />
+            <MSRadio v-model="form.showOnPayslip" value="2" label="Không" />
+            <MSRadio
+              v-model="form.showOnPayslip"
+              value="3"
+              label="Chỉ hiển thị nếu giá trị khác 0"
+            />
           </div>
         </div>
 
@@ -251,6 +256,7 @@ import MSCheckBox from '@/components/checkbox/MSCheckBox.vue'
 
 const emit = defineEmits<{
   (e: 'saved', payload: any): void
+  (e: 'savedAndAdd', payload: any): void
   (e: 'cancel'): void
 }>()
 
@@ -271,6 +277,16 @@ const form = reactive({
   valueCalculationMethod: 'auto_sum',
   allowExceedNorm: false,
 })
+
+const isDirty = ref(false)
+
+watch(
+  form,
+  () => {
+    isDirty.value = true
+  },
+  { deep: true },
+)
 
 const codeRef = ref<any>(null)
 const nameRef = ref<any>(null)
@@ -349,7 +365,7 @@ watch(
   },
 )
 
-const submit = () => {
+const submit = (mode: 'save' | 'saveAndAdd' = 'save') => {
   // validate fields before emitting
   const validCode = codeRef.value ? codeRef.value.validate() : true
   const validName = nameRef.value ? nameRef.value.validate() : true
@@ -378,11 +394,16 @@ const submit = () => {
 
   // TODO: replace with actual save call (API)
   console.log('Saving', { ...form })
-  emit('saved', { ...form })
+  if (mode === 'save') {
+    emit('saved', { ...form })
+  } else {
+    emit('savedAndAdd', { ...form })
+    onReset()
+  }
 }
 
 const onSubmit = () => {
-  submit()
+  submit('save')
 }
 
 const onCancel = () => {
@@ -393,10 +414,26 @@ const onReset = () => {
   form.code = ''
   form.name = ''
   form.type = ''
+  form.unit = ''
+  form.nature = 'income'
+  form.norm = ''
+  form.valueType = 'currency'
+  form.value = ''
+  form.description = ''
+  form.showOnPayslip = 'yes'
   form.formula = ''
+  form.taxType = 'taxable'
+  form.isTaxDeduction = false
+  form.valueCalculationMethod = 'auto_sum'
+  form.allowExceedNorm = false
+
+  // Reset dirty state after reset
+  setTimeout(() => {
+    isDirty.value = false
+  }, 0)
 }
 
-defineExpose({ submit })
+defineExpose({ submit, isDirty })
 </script>
 
 <style scoped>
