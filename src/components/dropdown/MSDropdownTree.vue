@@ -16,16 +16,18 @@
     >
       <template #field>
         <DxTagBox
-          :value="treeBoxValue"
+          v-model:value="treeBoxValue"
           :data-source="treeDataSource"
           value-expr="ID"
           display-expr="name"
           :placeholder="placeholder"
           :show-selection-controls="false"
+          :max-displayed-tags="2"
+          :show-multi-tag-only="false"
           :open-on-field-click="false"
           :accept-custom-value="false"
-          :read-only="true"
           class="w-full"
+          @value-changed="syncTreeViewSelection()"
         />
       </template>
 
@@ -36,6 +38,7 @@
               <MSInputSearch
                 v-model="searchValue"
                 :height="36"
+                :width="310"
                 :base-class="'bg-white border-gray-300'"
                 :placeholder="'Tìm kiếm'"
                 class="input"
@@ -44,7 +47,7 @@
             <DxTreeView
               :data-source="treeDataSource"
               :select-by-click="true"
-              :select-nodes-recursive="false"
+              :select-nodes-recursive="true"
               data-structure="plain"
               key-expr="ID"
               parent-id-expr="categoryId"
@@ -89,13 +92,13 @@ interface Props {
   placeholder?: string
 }
 
-const props = withDefaults(defineProps<Props>(), {
+withDefaults(defineProps<Props>(), {
   width: '100%',
   height: 'auto',
-  placeholder: 'Select a value...',
+  placeholder: 'Tất cả đơn vị',
 })
 
-const treeBoxValue = ref(['1_1'])
+const treeBoxValue = ref()
 const searchValue = ref('')
 let treeView: DxTreeView['instance']
 
@@ -117,21 +120,42 @@ function treeViewContentReady({ component }: DxTreeViewTypes.ContentReadyEvent) 
 }
 
 function syncTreeViewSelection() {
-  const value = treeBoxValue.value
+  if (!treeView) return
+  const component = treeView
 
-  if (treeView) {
-    if (value === null) {
-      treeView.unselectAll()
-    } else {
-      value?.forEach((val: string) => {
-        treeView?.selectItem(val)
-      })
+  const values = treeBoxValue.value || []
+  const selectedNodes = component.getSelectedNodes()
+
+  selectedNodes.forEach((node: any) => {
+    if (values.includes(node.key)) return
+
+    let parent = node.parent
+    let isImplied = false
+    while (parent) {
+      if (values.includes(parent.key)) {
+        isImplied = true
+        break
+      }
+      parent = parent.parent
     }
-  }
+
+    if (!isImplied) {
+      component.unselectItem(node.key)
+    }
+  })
+
+  const currentSelectedKeys = component.getSelectedNodeKeys()
+  values.forEach((val: string) => {
+    if (!currentSelectedKeys.includes(val)) {
+      component.selectItem(val)
+    }
+  })
 }
 
 function treeViewItemSelectionChanged(e: DxTreeViewTypes.ItemSelectionChangedEvent) {
-  treeBoxValue.value = e.component.getSelectedNodeKeys()
+  const nodes = e.component.getSelectedNodes()
+  const roots = nodes.filter((node: any) => !node.parent || !node.parent.selected)
+  treeBoxValue.value = roots.map((node: any) => node.key)
 }
 </script>
 
@@ -148,6 +172,7 @@ function treeViewItemSelectionChanged(e: DxTreeViewTypes.ItemSelectionChangedEve
 
 .custom-dropdown-box.dx-dropdownbox.dx-state-hover {
   border-color: #34b057 !important;
+  background-color: white !important;
 }
 
 .custom-dropdown-box.dx-dropdownbox.dx-state-focused {
@@ -245,5 +270,69 @@ function treeViewItemSelectionChanged(e: DxTreeViewTypes.ItemSelectionChangedEve
   background-color: white;
   border: solid 1px gray;
   border-radius: 4px;
+}
+
+.dx-texteditor.dx-editor-filled {
+  background-color: transparent;
+}
+
+.dx-overlay-content.dx-popup-normal.dx-resizable.dx-popup-flex-height {
+  transform: translate(0px, 40px) !important;
+}
+
+.dx-treeview-item {
+  padding: 8px 0px !important;
+  gap: 8px !important;
+}
+
+.dx-checkbox-icon::after {
+  content: unset !important;
+}
+
+.dx-checkbox-icon {
+  width: 16px;
+  height: 16px;
+  font-size: 18px;
+  border: 2px solid #666;
+  border-radius: 4px;
+}
+
+.dx-checkbox-checked .dx-checkbox-icon {
+  background-color: #34b057 !important;
+  color: #ffffff !important;
+}
+
+.dx-treeview-toggle-item-visibility {
+  mask-image: url('@/assets/icons/ICON.svg') !important;
+  mask-repeat: no-repeat;
+  mask-position: -120px -40px;
+  width: 20px;
+  height: 20px;
+  margin-right: 0px;
+  background-color: #666 !important;
+}
+
+.dx-treeview-toggle-item-visibility.dx-treeview-toggle-item-visibility-opened {
+  mask-image: url('@/assets/icons/ICON.svg') !important;
+  mask-repeat: no-repeat;
+  mask-position: -100px -40px;
+  width: 20px;
+  height: 20px;
+  margin-right: 0px;
+  background-color: #616161 !important;
+}
+
+.dx-treeview-toggle-item-visibility::before {
+  content: unset !important;
+}
+
+.dx-checkbox-indeterminate .dx-checkbox-icon {
+  width: 16px;
+  height: 16px;
+  font-size: 18px;
+  border: 2px solid #616161;
+  border-radius: 4px;
+  background-color: white;
+  color: white;
 }
 </style>

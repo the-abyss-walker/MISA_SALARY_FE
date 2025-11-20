@@ -7,7 +7,7 @@
           <div class="width-186px">
             <label class="pd-r-8">
               <b>Tên thành phần</b>
-              <span class="text-red-600">*</span>
+              <span class="text-red-600 star">*</span>
             </label>
           </div>
 
@@ -26,7 +26,7 @@
           <div class="width-186px">
             <label class="pd-r-8">
               <b>Mã thành phần</b>
-              <span class="text-red-600">*</span>
+              <span class="text-red-600 star">*</span>
             </label>
           </div>
           <MSInputItem
@@ -44,7 +44,7 @@
           <div class="width-186px">
             <label class="pd-r-8">
               <b>Đơn vị áp dụng</b>
-              <span class="text-red-600">*</span>
+              <span class="text-red-600 star">*</span>
             </label>
           </div>
           <MSDropdownTree
@@ -56,10 +56,12 @@
             :searchPlaceholder="''"
             :required="true"
             :width="675"
+            :height="36"
             :bordered="true"
             :hoverable="true"
             labelPosition="left"
             labelAlign="left"
+            :max-displayed-tags="4"
           />
         </div>
 
@@ -68,7 +70,7 @@
           <div class="width-186px">
             <label class="pd-r-8">
               <b>Loại thành phần</b>
-              <span class="text-red-600">*</span>
+              <span class="text-red-600 star">*</span>
             </label>
           </div>
           <MSDropdown
@@ -92,7 +94,7 @@
           <div class="width-186px">
             <label class="pd-r-8">
               <b>Tính chất</b>
-              <span class="text-red-600">*</span>
+              <span class="text-red-600 star">*</span>
             </label>
           </div>
           <MSDropdown
@@ -348,5 +350,9 @@ defineExpose({ submit })
 .width-186px {
   width: 186px;
   line-height: 35px;
+}
+
+.star {
+  padding-inline-start: 2px;
 }
 </style>

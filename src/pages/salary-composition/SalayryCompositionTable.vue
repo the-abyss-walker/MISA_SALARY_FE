@@ -127,7 +127,7 @@ async function loadData() {
     toastVisible.value = false
   } catch (error) {
     // show toast with error message
-    const errMsg = 'Đã xảy ra lỗi khi tải dữ liệu.'
+    const errMsg = 'Lỗi'
     toastMessage.value = String(errMsg)
     toastType.value = 'failed'
     toastVisible.value = true
