@@ -112,23 +112,39 @@
             labelPosition="left"
             labelAlign="left"
           />
+          <div v-if="form.nature === 'income'" class="flex items-center ml-4 gap-4">
+            <MSRadio v-model="form.taxType" value="taxable" label="Chịu thuế" />
+            <MSRadio v-model="form.taxType" value="fully_exempt" label="Miễn thuế toàn phần" />
+            <MSRadio v-model="form.taxType" value="partially_exempt" label="Miễn thuế một phần" />
+          </div>
+          <div v-if="form.nature === 'deduction'" class="flex items-center ml-4">
+            <MSCheckBox v-model="form.isTaxDeduction" label="Giảm trừ khi tính thuế" />
+          </div>
         </div>
 
         <!-- Row 6: Định mức -->
-        <div class="ms-row flex items-center">
+        <div class="ms-row flex items-start" v-if="form.nature !== 'other'">
           <div class="width-186px">
             <label class="pd-r-8"><b>Định mức</b></label>
           </div>
-          <MSInputItem
-            ref="normRef"
-            v-model="form.norm"
-            :width="675"
-            :height="86"
-            :maxLength="50"
-            :placeholderTop="20"
-            placeholder="Tự động gợi ý công thức và tham số khi gõ"
-            isTextarea
-          />
+          <div class="flex flex-col">
+            <MSInputItem
+              ref="normRef"
+              v-model="form.norm"
+              :width="675"
+              :height="86"
+              :maxLength="50"
+              :placeholderTop="20"
+              placeholder="Tự động gợi ý công thức và tham số khi gõ"
+              isTextarea
+            />
+            <div class="mt-2">
+              <MSCheckBox
+                v-model="form.allowExceedNorm"
+                label="Cho phép giá trị vượt quá định mức"
+              />
+            </div>
+          </div>
         </div>
 
         <!-- Row 7: Kiểu giá trị -->
@@ -139,6 +155,7 @@
           <MSDropdown
             ref="valueTypeRef"
             v-model="form.valueType"
+            :disabled="form.nature === 'income' || form.nature === 'deduction'"
             :options="valueTypeOptions"
             :searchable="true"
             :inlineSearch="true"
@@ -153,20 +170,37 @@
         </div>
 
         <!-- Row 8: Giá trị -->
-        <div class="ms-row flex items-center">
+        <div class="ms-row flex items-start">
           <div class="width-186px">
             <label class="pd-r-8"><b>Giá trị</b></label>
           </div>
-          <MSInputItem
-            ref="valueRef"
-            v-model="form.value"
-            :width="675"
-            :height="86"
-            :maxLength="100"
-            :placeholderTop="20"
-            placeholder="Tự động nhập gợi ý công thức và tham số khi gõ"
-            isTextarea
-          />
+          <div class="flex flex-col">
+            <div
+              v-if="['number', 'currency'].includes(form.valueType)"
+              class="flex flex-col mb-2 gap-2"
+            >
+              <MSRadio
+                v-model="form.valueCalculationMethod"
+                value="auto_sum"
+                label="Tự động cộng giá trị của các nhân viên"
+              />
+              <MSRadio
+                v-model="form.valueCalculationMethod"
+                value="formula"
+                label="Tính theo công thức tự đặt"
+              />
+            </div>
+            <MSInputItem
+              ref="valueRef"
+              v-model="form.value"
+              :width="675"
+              :height="86"
+              :maxLength="100"
+              :placeholderTop="20"
+              placeholder="Tự động nhập gợi ý công thức và tham số khi gõ"
+              isTextarea
+            />
+          </div>
         </div>
 
         <!-- Row 9: Mô tả -->
@@ -206,13 +240,14 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref } from 'vue'
+import { reactive, ref, watch } from 'vue'
 import MSInputItem from '@/components/inputs/MSInputItem.vue'
 import MSCombobox from '@/components/combobox/MSCombobox.vue'
 import MSDropdown from '@/components/dropdown/MSDropdown.vue'
 import MSPopup from '@/components/popup/MSPopup.vue'
 import MSDropdownTree from '@/components/dropdown/MSDropdownTree.vue'
 import MSRadio from '@/components/radio/MSRadio.vue'
+import MSCheckBox from '@/components/checkbox/MSCheckBox.vue'
 
 const emit = defineEmits<{
   (e: 'saved', payload: any): void
@@ -224,13 +259,17 @@ const form = reactive({
   name: '',
   type: '',
   unit: '',
-  nature: '',
+  nature: 'income',
   norm: '',
-  valueType: '',
+  valueType: 'currency',
   value: '',
   description: '',
   showOnPayslip: 'yes',
   formula: '',
+  taxType: 'taxable',
+  isTaxDeduction: false,
+  valueCalculationMethod: 'auto_sum',
+  allowExceedNorm: false,
 })
 
 const codeRef = ref<any>(null)
@@ -279,6 +318,36 @@ const valueTypeOptions = [
   { label: 'Chữ', value: 'string' },
   { label: 'Ngày', value: 'date' },
 ]
+
+watch(
+  () => form.type,
+  (newType) => {
+    const incomeTypes = [
+      'employee_info',
+      'revenue',
+      'salary',
+      'personal_tax',
+      'insurance_union',
+      'other',
+    ]
+    const otherTypes = ['attendance', 'kpi', 'product']
+
+    if (incomeTypes.includes(newType)) {
+      form.nature = 'income'
+    } else if (otherTypes.includes(newType)) {
+      form.nature = 'other'
+    }
+  },
+)
+
+watch(
+  () => form.nature,
+  (newNature) => {
+    if (newNature === 'income' || newNature === 'deduction') {
+      form.valueType = 'currency'
+    }
+  },
+)
 
 const submit = () => {
   // validate fields before emitting
@@ -354,5 +423,9 @@ defineExpose({ submit })
 
 .star {
   padding-inline-start: 2px;
+}
+
+:deep(.ms-dropdown-btn.pointer-events-none) {
+  background-color: #e0e0e0 !important;
 }
 </style>

@@ -254,6 +254,16 @@ watch(
   },
 )
 
+watch(
+  selectedLabel,
+  (val) => {
+    if (props.inlineSearch) {
+      search.value = val
+    }
+  },
+  { immediate: true },
+)
+
 defineExpose({ validate })
 </script>
 
