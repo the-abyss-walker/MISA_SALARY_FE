@@ -1,6 +1,6 @@
 export enum Status {
-  Following = 1,
-  Stopped = 2,
+  Following = 0,
+  Stopped = 1,
 }
 
 export const StatusLabel: Record<Status, string> = {

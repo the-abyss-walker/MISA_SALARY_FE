@@ -23,7 +23,19 @@
       :data="pagedData"
       :columns="gridColumns"
       :show-selection="true"
-    />
+    >
+      <template #statusTemplate="{ data }">
+        <div class="status-cell">
+          <div
+            class="status-dot"
+            :style="{ backgroundColor: data.value === 'Đang theo dõi' ? '#34B057' : '#FF9900' }"
+          ></div>
+          <span :style="{ color: data.value === 'Đang theo dõi' ? '#34B057' : '#FF9900' }">
+            {{ data.value }}
+          </span>
+        </div>
+      </template>
+    </MSTable>
 
     <MSPagination
       :totalRecords="totalCount"
@@ -45,7 +57,7 @@ import SalaryCompositionApi from '@/apis/components/SalaryCompositionApi'
 import { CompositionTypeLabel } from '@/enums/CompositionType'
 import { CompositionNatureLabel } from '@/enums/CompositionNature'
 import { OptionShowPaycheckLabel } from '@/enums/OptionShowPaycheck'
-import { StatusLabel } from '@/enums/Status'
+import { StatusLabel, Status } from '@/enums/Status'
 import { ValueTypeLabel } from '@/enums/ValueType'
 
 const gridColumns = [
@@ -62,7 +74,7 @@ const gridColumns = [
   { dataField: 'Description', caption: 'Mô tả' },
   { dataField: 'OptionShowPaycheck', caption: 'Hiển thị trên phiếu lương' },
   { dataField: 'Formula', caption: 'Nguồn tạo' },
-  { dataField: 'Status', caption: 'Trạng thái' },
+  { dataField: 'Status', caption: 'Trạng thái', cellTemplate: 'statusTemplate' },
 ]
 
 const tableData = ref<Array<Record<string, any>>>([])
@@ -80,18 +92,30 @@ const rightDropdown = ref(null as any)
 const pageSize = ref(15)
 const page = ref(1)
 
+const statusOptions = [
+  { label: 'Tất cả trạng thái', value: null },
+  { label: 'Đang theo dõi', value: Status.Following },
+  { label: 'Ngừng theo dõi', value: Status.Stopped },
+]
+
 const headerBindings = computed(() => ({
-  // forward any header related settings (no options by default)
+  leftOptions: statusOptions,
 }))
 
 const pagedData = computed(() => [...tableData.value])
 
 async function loadData() {
   try {
-    const res = await SalaryCompositionApi.paging(page.value, pageSize.value)
-    const payload = res?.data?.data
-    const items = payload?.items ?? []
-    totalCount.value = payload?.totalCount ?? items.length
+    const payload = {
+      query: searchQuery.value,
+      status: leftDropdown.value,
+      pageSize: pageSize.value,
+      pageIndex: page.value,
+    }
+    const res = await SalaryCompositionApi.paging(payload)
+    const resData = res?.data?.data
+    const items = resData?.items ?? []
+    totalCount.value = resData?.totalCount ?? items.length
 
     tableData.value = items.map((item: any) => {
       const newItem: { [key: string]: any } = {
@@ -140,11 +164,15 @@ onMounted(() => {
 
 function onSearchInput(val: string) {
   searchQuery.value = val
+  page.value = 1
+  loadData()
 }
 
 function onLeftSelect(opt: any) {
   // store the option value so v-model bindings match MSDropdown's modelValue
   leftDropdown.value = opt && opt.value !== undefined ? opt.value : opt
+  page.value = 1
+  loadData()
 }
 
 function onRightSelect(opt: any) {
@@ -171,3 +199,17 @@ function onConfig() {
   // handle export
 }
 </script>
+
+<style>
+.status-cell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+</style>

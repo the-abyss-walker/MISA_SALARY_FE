@@ -63,10 +63,9 @@ export default class BaseApi {
   /**
    * Hàm lấy dữ liệu phân trang
    * createdby: VanViet (18/11/2025)
-   * @param pageIndex Số trang hiện tại
-   * @param pageSize Số bản ghi trên trang
+   * @param payload Dữ liệu phân trang
    */
-  paging(pageIndex: number, pageSize: number) {
-    return api.get(`${this.controller}/all?pageIndex=${pageIndex}&pageSize=${pageSize}`)
+  paging(payload: any) {
+    return api.get(`${this.controller}/page`, { params: payload })
   }
 }

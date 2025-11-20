@@ -152,7 +152,7 @@ const tableDataSource = computed(() => {
   border-bottom: none !important;
 }
 .dx-datagrid-rowsview .dx-data-row.dx-row-lines > td {
-  background-color: transparent !important;
+  /* background-color: transparent !important; */
 }
 .dx-datagrid .dx-datagrid-sticky-column-right {
   background-color: transparent !important;
@@ -262,5 +262,20 @@ const tableDataSource = computed(() => {
 
 .action-button:hover {
   background-color: #eff1f6;
+}
+
+.dx-datagrid
+  .dx-datagrid-sticky-columns
+  .dx-datagrid-table
+  .dx-row
+  td.dx-datagrid-sticky-column-border-left {
+  background-color: transparent !important;
+}
+
+.dx-data-row.dx-state-hover:not(.dx-selection):not(.dx-row-inserted):not(.dx-row-removed):not(
+    .dx-edit-row
+  ):not(.dx-row-focused)
+  > td:not(.dx-focused) {
+  background-color: #eafbf2 !important;
 }
 </style>
