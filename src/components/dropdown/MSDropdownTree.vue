@@ -2,12 +2,12 @@
   <div class="dx-field-value">
     <DxDropDownBox
       v-model:value="treeBoxValue"
-      :show-clear-button="true"
+      :show-clear-button="false"
       :input-attr="{ 'aria-label': 'Owner' }"
       :data-source="treeDataSource"
       value-expr="ID"
       display-expr="name"
-      :placeholder="placeholder"
+      :placeholder="'Hello'"
       :width="width"
       :height="height"
       class="custom-dropdown-box"
@@ -22,7 +22,7 @@
           display-expr="name"
           :placeholder="placeholder"
           :show-selection-controls="false"
-          :max-displayed-tags="2"
+          :max-displayed-tags="actualMaxDisplayedTags"
           :show-multi-tag-only="false"
           :open-on-field-click="false"
           :accept-custom-value="false"
@@ -33,17 +33,17 @@
 
       <template #content="{ data }">
         <div class="flex flex-col h-full">
-          <div class="flex-1 overflow-auto">
-            <div class="pb-2">
-              <MSInputSearch
-                v-model="searchValue"
-                :height="36"
-                :width="310"
-                :base-class="'bg-white border-gray-300'"
-                :placeholder="'Tìm kiếm'"
-                class="input"
-              ></MSInputSearch>
-            </div>
+          <div class="pb-2">
+            <MSInputSearch
+              v-model="searchValue"
+              :height="36"
+              width="100%"
+              :base-class="'bg-white border-gray-300'"
+              :placeholder="'Tìm kiếm'"
+              class="input"
+            ></MSInputSearch>
+          </div>
+          <div class="overflow-y-auto max-h-80">
             <DxTreeView
               :data-source="treeDataSource"
               :select-by-click="true"
@@ -56,16 +56,20 @@
               display-expr="name"
               :search-enabled="true"
               :search-value="searchValue"
+              :no-data-text="'Không có dữ liệu'"
               @content-ready="treeViewContentReady($event)"
               @item-selection-changed="treeViewItemSelectionChanged($event)"
             />
           </div>
 
-          <div class="h-10 bg-[#EAFBF2] flex items-center px-3 cursor-pointer">
+          <div
+            v-if="showInactiveOption"
+            class="h-10 bg-[#EAFBF2] flex items-center px-3 cursor-pointer"
+          >
             <input
               type="checkbox"
               id="show-inactive"
-              class="w-4 h-4 mr-2 accent-[#34B057] cursor-pointer"
+              class="w-5 h-5 mr-2 accent-[#34B057] cursor-pointer border-2px"
             />
             <label
               for="show-inactive"
@@ -80,7 +84,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { DxDropDownBox } from 'devextreme-vue/drop-down-box'
 import { DxTagBox } from 'devextreme-vue/tag-box'
 import DxTreeView, { type DxTreeViewTypes } from 'devextreme-vue/tree-view'
@@ -90,12 +94,20 @@ interface Props {
   width?: string | number
   height?: string | number
   placeholder?: string
+  maxDisplayedTags?: number | null
+  showInactiveOption?: boolean
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   width: '100%',
-  height: 'auto',
+  height: '36',
   placeholder: 'Tất cả đơn vị',
+  maxDisplayedTags: 2,
+  showInactiveOption: true,
+})
+
+const actualMaxDisplayedTags = computed(() => {
+  return props.maxDisplayedTags === null ? undefined : props.maxDisplayedTags
 })
 
 const treeBoxValue = ref()
@@ -103,11 +115,16 @@ const searchValue = ref('')
 let treeView: DxTreeView['instance']
 
 const treeDataSource = [
-  { ID: '1', name: 'Furniture' },
-  { ID: '1_1', categoryId: '1', name: 'Tables & Chairs' },
-  { ID: '1_2', categoryId: '1', name: 'Sofas' },
-  { ID: '1_3', categoryId: '1', name: 'Occasional Furniture' },
-  { ID: '1_3_1', categoryId: '1_3', name: 'Dark soul' },
+  { ID: '1', name: 'Công ty ABC' },
+  { ID: '1_1', categoryId: '1', name: 'Chi nhánh miền Bắc' },
+  { ID: '1_2', categoryId: '1', name: 'Chi nhánh miền Nam' },
+  { ID: '1_1_1', categoryId: '1_1', name: 'Khối sản xuất' },
+  { ID: 'a', categoryId: '1_1_1', name: 'Dự án Core' },
+  { ID: 'b', categoryId: '1_1_1', name: 'Dự án C&B' },
+  { ID: 'c', categoryId: '1_1_1', name: 'Dự án C&B' },
+  { ID: 'd', categoryId: '1_1', name: 'Khối kinh doanh' },
+  { ID: 'e', categoryId: '1_2', name: 'Khối sản xuất' },
+  { ID: 'f', categoryId: '1_2', name: 'Khối kinh doanh' },
   { ID: '2', name: 'Decor' },
   { ID: '2_1', categoryId: '2', name: 'Bed Linen' },
   { ID: '2_2', categoryId: '2', name: 'Curtains & Blinds' },
@@ -160,10 +177,6 @@ function treeViewItemSelectionChanged(e: DxTreeViewTypes.ItemSelectionChangedEve
 </script>
 
 <style>
-.input {
-  border: solid 1px #34b057;
-}
-
 .custom-dropdown-box.dx-dropdownbox {
   border: 1px solid #ddd !important;
   border-radius: 4px;
@@ -238,10 +251,6 @@ function treeViewItemSelectionChanged(e: DxTreeViewTypes.ItemSelectionChangedEve
   background: #6e737a !important;
 }
 
-.dx-show-clear-button .dx-icon-clear {
-  display: none !important;
-}
-
 .dx-tagbox.dx-editor-filled .dx-tag-container {
   padding-inline-start: 8px;
 }
@@ -274,10 +283,6 @@ function treeViewItemSelectionChanged(e: DxTreeViewTypes.ItemSelectionChangedEve
 
 .dx-texteditor.dx-editor-filled {
   background-color: transparent;
-}
-
-.dx-overlay-content.dx-popup-normal.dx-resizable.dx-popup-flex-height {
-  transform: translate(0px, 40px) !important;
 }
 
 .dx-treeview-item {

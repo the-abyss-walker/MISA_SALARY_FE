@@ -56,12 +56,12 @@
             :searchPlaceholder="''"
             :required="true"
             :width="675"
-            :height="36"
             :bordered="true"
+            :max-displayed-tags="4"
+            :show-inactive-option="false"
             :hoverable="true"
             labelPosition="left"
             labelAlign="left"
-            :max-displayed-tags="4"
           />
         </div>
 
@@ -127,6 +127,7 @@
             :maxLength="50"
             :placeholderTop="20"
             placeholder="Tự động gợi ý công thức và tham số khi gõ"
+            isTextarea
           />
         </div>
 
@@ -164,6 +165,7 @@
             :maxLength="100"
             :placeholderTop="20"
             placeholder="Tự động nhập gợi ý công thức và tham số khi gõ"
+            isTextarea
           />
         </div>
 
@@ -178,6 +180,7 @@
             :width="676"
             :height="72.6"
             :maxLength="500"
+            isTextarea
           />
         </div>
 
@@ -187,12 +190,8 @@
             <label class="pd-r-8"><b>Hiển thị trên phiếu lương</b></label>
           </div>
           <div class="flex items-center gap-4">
-            <label class="inline-flex items-center">
-              <input type="radio" value="yes" v-model="form.showOnPayslip" class="mr-2" /> Có
-            </label>
-            <label class="inline-flex items-center">
-              <input type="radio" value="no" v-model="form.showOnPayslip" class="mr-2" /> Không
-            </label>
+            <MSRadio v-model="form.showOnPayslip" value="true" label="Có" />
+            <MSRadio v-model="form.showOnPayslip" value="false" label="Không" />
           </div>
         </div>
 
@@ -213,6 +212,7 @@ import MSCombobox from '@/components/combobox/MSCombobox.vue'
 import MSDropdown from '@/components/dropdown/MSDropdown.vue'
 import MSPopup from '@/components/popup/MSPopup.vue'
 import MSDropdownTree from '@/components/dropdown/MSDropdownTree.vue'
+import MSRadio from '@/components/radio/MSRadio.vue'
 
 const emit = defineEmits<{
   (e: 'saved', payload: any): void

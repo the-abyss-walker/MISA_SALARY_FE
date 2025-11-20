@@ -1,6 +1,18 @@
 <template>
   <div class="ms-input-item" :style="cssVars">
+    <textarea
+      v-if="isTextarea"
+      ref="inputRef"
+      class="ms-input__field ms-textarea__field"
+      :placeholder="placeholder"
+      :value="modelValue"
+      @input="onInput"
+      :disabled="disabled"
+      @focus="onFocus"
+      @blur="onBlur"
+    ></textarea>
     <input
+      v-else
       ref="inputRef"
       class="ms-input__field"
       :placeholder="placeholder"
@@ -32,6 +44,7 @@ const props = withDefaults(
     maxLength?: number | undefined
     pattern?: string | RegExp | undefined
     errorMessage?: string | undefined
+    isTextarea?: boolean
   }>(),
   {
     modelValue: '',
@@ -47,6 +60,7 @@ const props = withDefaults(
     maxLength: undefined,
     pattern: undefined,
     errorMessage: undefined,
+    isTextarea: false,
   },
 )
 
@@ -57,7 +71,7 @@ const emit = defineEmits<{
   (e: 'validation', valid: boolean): void
 }>()
 
-const inputRef = ref<HTMLInputElement | null>(null)
+const inputRef = ref<HTMLInputElement | HTMLTextAreaElement | null>(null)
 
 const error = ref<string | null>(null)
 
@@ -106,7 +120,7 @@ const cssVars = computed(() => {
 })
 
 const onInput = (e: Event) => {
-  const t = e.target as HTMLInputElement
+  const t = e.target as HTMLInputElement | HTMLTextAreaElement
   emit('update:modelValue', t.value)
   // validate new value
   validate(t.value)
@@ -118,7 +132,7 @@ const onFocus = (e: FocusEvent) => {
 
 const onBlur = (e: FocusEvent) => {
   // validate on blur as well
-  const val = (e.target as HTMLInputElement)?.value ?? ''
+  const val = (e.target as HTMLInputElement | HTMLTextAreaElement)?.value ?? ''
   validate(val)
   emit('blur')
 }
@@ -165,5 +179,11 @@ defineExpose({ validate })
   color: #dc2626;
   margin-top: 6px;
   font-size: 12px;
+}
+
+.ms-textarea__field {
+  resize: vertical;
+  min-height: var(--ms-input-height);
+  height: auto;
 }
 </style>

@@ -46,7 +46,7 @@
         <slot :name="col.headerTemplate" :data="headerInfo"></slot>
       </template>
       <DxColumn
-        width="120"
+        width="180"
         :fixed="true"
         fixed-position="right"
         cell-template="actionTemplate"
@@ -54,6 +54,9 @@
       />
       <template #actionTemplate="{ data }">
         <div class="action-buttons">
+          <div class="action-button" title="Ngừng theo dõi" @click.stop="handleStopFlowing(data)">
+            <MSIcon name="minus_circle" />
+          </div>
           <div class="action-button" title="Nhân bản" @click.stop="handleClone(data)">
             <MSIcon name="copy" />
           </div>
@@ -97,6 +100,10 @@ const props = withDefaults(
 
 const emit = defineEmits(['row-click', 'page-change'])
 
+const handleStopFlowing = (e: any) => {
+  alert('Stop Flowing ' + e.data.name)
+}
+
 const handleClone = (e: any) => {
   alert('Clone ' + e.data.name)
 }
@@ -129,6 +136,7 @@ const tableDataSource = computed(() => {
 <style>
 .dx-command-edit {
   border-left: none !important;
+  background: transparent !important;
 }
 .dx-command-edit a {
   display: none !important;
@@ -142,6 +150,12 @@ const tableDataSource = computed(() => {
 }
 .dx-datagrid-headers .dx-datagrid-table .dx-row > td {
   border-bottom: none !important;
+}
+.dx-datagrid-rowsview .dx-data-row.dx-row-lines > td {
+  background-color: transparent !important;
+}
+.dx-datagrid .dx-datagrid-sticky-column-right {
+  background-color: transparent !important;
 }
 
 .dx-widget {
@@ -228,7 +242,7 @@ const tableDataSource = computed(() => {
 .action-buttons {
   display: flex;
   justify-content: center;
-  gap: 8px;
+  gap: 14px;
   visibility: hidden;
 }
 

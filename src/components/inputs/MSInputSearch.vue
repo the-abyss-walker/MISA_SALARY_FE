@@ -30,8 +30,8 @@ interface Props {
   modelValue?: string
   icon?: string
   placeholder?: string
-  width?: number
-  height?: number
+  width?: number | string
+  height?: number | string
   baseClass?: string
   hoverClass?: string
   placeholderClass?: string
@@ -56,8 +56,8 @@ const modelValueLocal = ref(props.modelValue)
 
 const sizeStyle = computed(() => {
   return {
-    width: `${props.width}px`,
-    height: `${props.height}px`,
+    width: typeof props.width === 'number' ? `${props.width}px` : props.width,
+    height: typeof props.height === 'number' ? `${props.height}px` : props.height,
   }
 })
 
