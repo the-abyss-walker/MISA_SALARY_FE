@@ -5,9 +5,9 @@
       :show-clear-button="false"
       :input-attr="{ 'aria-label': 'Owner' }"
       :data-source="treeDataSource"
-      value-expr="ID"
-      display-expr="name"
-      :placeholder="'Hello'"
+      value-expr="id"
+      display-expr="organizationName"
+      :placeholder="placeholder"
       :width="width"
       :height="height"
       class="custom-dropdown-box"
@@ -18,8 +18,8 @@
         <DxTagBox
           v-model:value="treeBoxValue"
           :data-source="treeDataSource"
-          value-expr="ID"
-          display-expr="name"
+          value-expr="id"
+          display-expr="organizationName"
           :placeholder="placeholder"
           :show-selection-controls="false"
           :max-displayed-tags="actualMaxDisplayedTags"
@@ -49,11 +49,11 @@
               :select-by-click="true"
               :select-nodes-recursive="true"
               data-structure="plain"
-              key-expr="ID"
-              parent-id-expr="categoryId"
+              key-expr="id"
+              parent-id-expr="parentId"
               selection-mode="multiple"
               show-check-boxes-mode="normal"
-              display-expr="name"
+              display-expr="organizationName"
               :search-enabled="true"
               :search-value="searchValue"
               :no-data-text="'Không có dữ liệu'"
@@ -84,11 +84,12 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import { DxDropDownBox } from 'devextreme-vue/drop-down-box'
 import { DxTagBox } from 'devextreme-vue/tag-box'
 import DxTreeView, { type DxTreeViewTypes } from 'devextreme-vue/tree-view'
 import MSInputSearch from '@/components/inputs/MSInputSearch.vue'
+import OrganizationApi from '@/apis/components/OrganizationApi'
 
 interface Props {
   width?: string | number
@@ -96,6 +97,7 @@ interface Props {
   placeholder?: string
   maxDisplayedTags?: number | null
   showInactiveOption?: boolean
+  modelValue?: any
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -104,32 +106,43 @@ const props = withDefaults(defineProps<Props>(), {
   placeholder: 'Tất cả đơn vị',
   maxDisplayedTags: 2,
   showInactiveOption: true,
+  modelValue: () => [],
 })
+
+const emit = defineEmits(['update:modelValue'])
 
 const actualMaxDisplayedTags = computed(() => {
   return props.maxDisplayedTags === null ? undefined : props.maxDisplayedTags
 })
 
-const treeBoxValue = ref()
 const searchValue = ref('')
 let treeView: DxTreeView['instance']
 
-const treeDataSource = [
-  { ID: '1', name: 'Công ty ABC' },
-  { ID: '1_1', categoryId: '1', name: 'Chi nhánh miền Bắc' },
-  { ID: '1_2', categoryId: '1', name: 'Chi nhánh miền Nam' },
-  { ID: '1_1_1', categoryId: '1_1', name: 'Khối sản xuất' },
-  { ID: 'a', categoryId: '1_1_1', name: 'Dự án Core' },
-  { ID: 'b', categoryId: '1_1_1', name: 'Dự án C&B' },
-  { ID: 'c', categoryId: '1_1_1', name: 'Dự án C&B' },
-  { ID: 'd', categoryId: '1_1', name: 'Khối kinh doanh' },
-  { ID: 'e', categoryId: '1_2', name: 'Khối sản xuất' },
-  { ID: 'f', categoryId: '1_2', name: 'Khối kinh doanh' },
-  { ID: '2', name: 'Decor' },
-  { ID: '2_1', categoryId: '2', name: 'Bed Linen' },
-  { ID: '2_2', categoryId: '2', name: 'Curtains & Blinds' },
-  { ID: '2_3', categoryId: '2', name: 'Carpets' },
-]
+const treeBoxValue = computed({
+  get: () => props.modelValue,
+  set: (val: any) => {
+    let newVal = val
+    if (val && typeof val === 'object' && !Array.isArray(val)) {
+      newVal = Object.values(val)
+    }
+    emit('update:modelValue', newVal)
+  },
+})
+
+const treeDataSource = ref([])
+
+const getOrganizationUnit = async () => {
+  try {
+    const res = await OrganizationApi.getAll()
+    treeDataSource.value = res.data.data
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+onMounted(() => {
+  getOrganizationUnit()
+})
 
 function treeViewContentReady({ component }: DxTreeViewTypes.ContentReadyEvent) {
   treeView = component

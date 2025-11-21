@@ -49,7 +49,6 @@
           <MSDropdownTree
             ref="unitRef"
             v-model="form.unit"
-            :options="unitOptions"
             :searchable="true"
             :inlineSearch="true"
             :searchPlaceholder="''"
@@ -293,7 +292,7 @@ const form = reactive({
   code: '',
   name: '',
   compositionType: null as CompositionType | null,
-  unit: '',
+  unit: [] as string[],
   nature: CompositionNature.Income,
   quota: '',
   valueType: ValueType.Money,
@@ -334,13 +333,6 @@ const normRef = ref<any>(null)
 const valueTypeRef = ref<any>(null)
 const valueRef = ref<any>(null)
 const descriptionRef = ref<any>(null)
-
-// Simple options for comboboxes. Adjust labels/values as needed.
-const unitOptions = [
-  { label: 'Toàn công ty', value: 'company' },
-  { label: 'Phòng ban', value: 'department' },
-  { label: 'Cá nhân', value: 'individual' },
-]
 
 // Loại thành phần
 const typeOptions = Object.values(CompositionType)
@@ -428,7 +420,6 @@ const submit = (mode: 'save' | 'saveAndAdd' = 'save') => {
   if (!validType) return
   if (!validNature) return
 
-  // TODO: replace with actual save call (API)
   const payload = {
     SalaryCompositionName: form.name,
     SalaryCompositionCode: form.code,
@@ -452,8 +443,7 @@ const submit = (mode: 'save' | 'saveAndAdd' = 'save') => {
     Status: Status.Following,
     OptionShowPaycheck: form.optionShowPaycheck,
     IsNotAllowDelete: false,
-    OrganizationUnitIds: form.unit ? [form.unit] : [],
-    OrganizationUnitNames: [], // Assuming this is handled by backend or not needed for now
+    OrganizationUnitIds: form.unit?.map(String) || [],
     IsDefault: false,
     AutoSumCompositionCode: null,
     IsAutoSumEmployee: form.valueCalculationMethod === FormulaCompositionType.AutoSumFormula,
@@ -463,7 +453,6 @@ const submit = (mode: 'save' | 'saveAndAdd' = 'save') => {
         : null,
     FormulaCompositionType: form.valueCalculationMethod,
   }
-
   SalaryCompositionApi.create(payload)
     .then((res) => {
       if (mode === 'save') {
@@ -491,7 +480,7 @@ const onReset = () => {
   form.code = ''
   form.name = ''
   form.compositionType = null
-  form.unit = ''
+  form.unit = []
   form.nature = CompositionNature.Income
   form.quota = ''
   form.valueType = ValueType.Money

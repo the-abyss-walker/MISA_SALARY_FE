@@ -11,7 +11,7 @@ export default class BaseApi {
    * createdby: VanViet (18/11/2025)
    */
   getAll() {
-    return api.get(`${this.controller}`)
+    return api.get(`${this.controller}/all`)
   }
 
   /**
