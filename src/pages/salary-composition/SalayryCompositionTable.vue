@@ -19,7 +19,7 @@
     />
 
     <MSTable
-      v-if="tableData.length > 0"
+      v-if="tableData.length >= 0"
       :data="pagedData"
       :columns="gridColumns"
       :show-selection="true"

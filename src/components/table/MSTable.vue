@@ -75,7 +75,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { DxDataGrid, DxColumn, DxScrolling, DxPaging, DxSelection } from 'devextreme-vue/data-grid'
-import salaryData from '../../data/salarycomposition.json'
 import MSIcon from '../icons/MSIcon.vue'
 
 const props = withDefaults(
@@ -129,7 +128,7 @@ const columnsWithHeaderTemplates = computed(() => {
 })
 
 const tableDataSource = computed(() => {
-  return props.data && props.data.length ? props.data : (salaryData as any)
+  return props.data && props.data.length ? props.data : []
 })
 </script>
 
