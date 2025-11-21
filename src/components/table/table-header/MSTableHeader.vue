@@ -19,6 +19,7 @@
       />
 
       <MSDropdownTree
+        v-if="showRight"
         width="350px"
         height="36px"
         v-model="rightModel"
@@ -50,6 +51,7 @@ const props = withDefaults(
     leftPlaceholder?: string
     rightPlaceholder?: string
     searchPlaceholder?: string
+    showRight?: boolean
   }>(),
   {
     left: undefined,
@@ -68,6 +70,7 @@ const props = withDefaults(
     leftPlaceholder: 'Tất cả trạng thái',
     rightPlaceholder: 'Tất cả đơn vị',
     searchPlaceholder: 'Tìm kiếm',
+    showRight: true,
   },
 )
 

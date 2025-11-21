@@ -150,9 +150,7 @@ const tableDataSource = computed(() => {
 .dx-datagrid-headers .dx-datagrid-table .dx-row > td {
   border-bottom: none !important;
 }
-.dx-datagrid-rowsview .dx-data-row.dx-row-lines > td {
-  /* background-color: transparent !important; */
-}
+
 .dx-datagrid .dx-datagrid-sticky-column-right {
   background-color: transparent !important;
 }
