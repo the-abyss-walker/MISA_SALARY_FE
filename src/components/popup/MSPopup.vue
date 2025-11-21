@@ -1,6 +1,11 @@
 <template>
   <div v-if="visible" class="ms-popup__overlay" @click.self="onClose">
-    <div class="ms-popup__panel" role="dialog" aria-modal="true">
+    <div
+      class="ms-popup__panel"
+      role="dialog"
+      aria-modal="true"
+      :style="{ width: width ? width : '500px' }"
+    >
       <header class="ms-popup__header">
         <div class="ms-popup__title">
           <h2>
@@ -57,6 +62,7 @@ const props = withDefaults(
     visible?: boolean
     content?: string | null
     buttons?: ButtonDef[]
+    width?: string
   }>(),
   {
     title: '',
@@ -66,13 +72,13 @@ const props = withDefaults(
   },
 )
 
-const emit = defineEmits<{
-  (e: 'update:visible', v: boolean): void
-  (e: 'close'): void
-  (e: 'action', payload: { button?: ButtonDef; index: number }): void
-}>()
+const { visible, title, content, buttons, width } = toRefs(props)
 
-const { visible, title, content, buttons } = toRefs(props)
+const emit = defineEmits<{
+  (e: 'update:visible', value: boolean): void
+  (e: 'action', payload: { button: ButtonDef; index: number }): void
+  (e: 'close'): void
+}>()
 
 function onClose() {
   emit('update:visible', false)
@@ -99,7 +105,8 @@ function onButtonClick(btn: ButtonDef, idx: number) {
   background: #ffffff;
   border-radius: 8px;
   width: 500px;
-  max-width: calc(100% - 32px);
+  max-width: calc(100vw - 340px);
+  max-height: calc(100vh - 100px);
   box-shadow: 0 10px 30px rgba(2, 6, 23, 0.18);
   overflow: hidden;
   display: flex;
@@ -130,7 +137,8 @@ function onButtonClick(btn: ButtonDef, idx: number) {
 .ms-popup__body {
   padding: 24px;
   min-height: 48px;
-  height: 69px;
+  flex: 1;
+  overflow-y: auto;
 }
 .ms-popup__body-text {
   display: inline-block;

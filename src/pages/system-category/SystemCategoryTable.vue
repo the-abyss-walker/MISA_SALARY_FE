@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-white">
+  <div class="bg-white h-full flex flex-col">
     <MSTableHeader
       v-model:left="leftDropdown"
       v-model:search="searchQuery"
@@ -20,6 +20,7 @@
       :data="pagedData"
       :columns="gridColumns"
       :show-selection="true"
+      gridHeight="calc(100vh - 250px)"
       @selection-change="onSelectionChange"
     >
       <template #action-panel="{ data }">
@@ -45,7 +46,7 @@ import MSTableHeader from '@/components/table/table-header/MSTableHeader.vue'
 import MSTable from '@/components/table/MSTable.vue'
 import MSPagination from '@/components/pagination/MSPagination.vue'
 import MSIcon from '@/components/icons/MSIcon.vue'
-import { CompositionTypeLabel } from '@/enums/CompositionType'
+import { CompositionType, CompositionTypeLabel } from '@/enums/CompositionType'
 import { CompositionNatureLabel } from '@/enums/CompositionNature'
 import { OptionShowPaycheckLabel } from '@/enums/OptionShowPaycheck'
 import { StatusLabel, Status } from '@/enums/Status'
@@ -73,17 +74,24 @@ const selectedCount = ref(0)
 const selectedItems = ref<any[]>([])
 const tableRef = ref<any>(null)
 
-const statusOptions = [
-  { label: 'Tất cả trạng thái', value: null },
-  { label: 'Đang theo dõi', value: Status.Following },
-  { label: 'Ngừng theo dõi', value: Status.Stopped },
+const compositionTypeOptions = [
+  { label: 'Tất cả thành phần', value: null },
+  { label: 'Thông tin nhân viên', value: CompositionType.EmployeeInfomation },
+  { label: 'Chấm công', value: CompositionType.Timekeeping },
+  { label: 'Doanh số', value: CompositionType.Sales },
+  { label: 'KPI', value: CompositionType.KPI },
+  { label: 'Sản phẩm', value: CompositionType.Product },
+  { label: 'Lương', value: CompositionType.Salary },
+  { label: 'Thuế TNCN', value: CompositionType.PersonalIncomeTax },
+  { label: 'Bảo hiểm - Công đoàn', value: CompositionType.Insurance },
+  { label: 'Khác', value: CompositionType.Other },
 ]
 
 const loadData = async () => {
   try {
     const payload = {
       query: searchQuery.value,
-      status: leftDropdown.value,
+      compositionType: leftDropdown.value,
       pageSize: pageSize.value,
       pageIndex: page.value,
     }
@@ -103,7 +111,6 @@ const loadData = async () => {
           CompositionNatureLabel[item.compositionNature as keyof typeof CompositionNatureLabel],
         OptionShowPaycheck:
           OptionShowPaycheckLabel[item.optionShowPaycheck as keyof typeof OptionShowPaycheckLabel],
-        Status: StatusLabel[item.status as keyof typeof StatusLabel],
         ValueType: ValueTypeLabel[item.valueType as keyof typeof ValueTypeLabel],
         Taxable: item.taxable ? 'Có' : 'Không',
         TaxDeduction: item.taxDeduction ? 'Có' : 'Không',
@@ -134,7 +141,7 @@ const pageSize = ref(15)
 const page = ref(1)
 
 const headerBindings = computed(() => ({
-  leftOptions: statusOptions,
+  leftOptions: compositionTypeOptions,
 }))
 
 const pagedData = computed(() => tableData.value)
@@ -189,4 +196,8 @@ function onAddToList() {
 function handleAdd(data: any) {
   console.log('Add', data)
 }
+
+defineExpose({
+  selectedItems,
+})
 </script>

@@ -17,7 +17,7 @@
       type="button"
       :class="['msbtn', `msbtn--${comboVariant}`, 'msbtn--dropdown']"
       :style="dropdownStyle"
-      @click="$emit('dropdown-click')"
+      @click.stop="$emit('dropdown-click')"
       :disabled="disabled"
     >
       <span class="msbtn__icon"><MSIcon :name="dropdownIcon" /></span>

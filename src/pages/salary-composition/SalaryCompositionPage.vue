@@ -16,7 +16,27 @@
           >Danh mục của hệ thống</MSButton
         >
 
-        <MSButton v-if="!isAdd" variant="combo" icon="plus" @click="openAdd"> Thêm mới </MSButton>
+        <div class="relative" v-if="!isAdd">
+          <MSButton variant="combo" icon="plus" @click="openAdd" @dropdown="toggleAddDropdown">
+            Thêm mới
+          </MSButton>
+          <div
+            v-if="showAddDropdown"
+            class="fixed inset-0 z-10"
+            @click="showAddDropdown = false"
+          ></div>
+          <div
+            v-if="showAddDropdown"
+            class="absolute right-0 top-full mt-1 px-[6px] py-[8px] bg-white border border-gray-200 shadow-lg rounded z-20 w-max"
+          >
+            <div
+              class="px-[8px] py-[8px] hover:bg-[#EAFBF2] cursor-pointer text-normal"
+              @click="handleSelectFromSystem"
+            >
+              Chọn từ danh mục của hệ thống
+            </div>
+          </div>
+        </div>
 
         <template v-if="isAdd">
           <MSButton variant="secondary" @click="goBack">Hủy bỏ</MSButton>
@@ -53,6 +73,12 @@
       :buttons="confirmButtons"
       @action="onConfirmAction"
     />
+
+    <!-- System Category Popup -->
+    <SalaryCompositionPopup
+      v-model:visible="showSystemCategoryPopup"
+      @save="onSystemCategorySave"
+    />
   </div>
 </template>
 
@@ -65,11 +91,14 @@ import MSToast from '@/components/toast/MSToast.vue'
 import MSPopup from '@/components/popup/MSPopup.vue'
 import SalaryCompositionAdd from './SalaryCompositionForm.vue'
 import SalayryCompositionTable from './SalayryCompositionTable.vue'
+import SalaryCompositionPopup from './SalaryCompositionPopup.vue'
 
 const isAdd = ref(false)
 const addComp = ref<any>(null)
 const router = useRouter()
 const showConfirmPopup = ref(false)
+const showAddDropdown = ref(false)
+const showSystemCategoryPopup = ref(false)
 
 const toast = reactive({
   show: false,
@@ -98,6 +127,19 @@ const closeToast = () => {
 
 const goToSystemCategory = () => {
   router.push({ name: 'SystemCategory' })
+}
+
+const toggleAddDropdown = () => {
+  showAddDropdown.value = !showAddDropdown.value
+}
+
+const handleSelectFromSystem = () => {
+  showAddDropdown.value = false
+  showSystemCategoryPopup.value = true
+}
+
+const onSystemCategorySave = (items: any[]) => {
+  console.log('Selected from system:', items)
 }
 
 const openAdd = () => {
