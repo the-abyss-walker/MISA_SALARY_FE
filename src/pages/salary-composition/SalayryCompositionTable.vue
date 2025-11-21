@@ -32,6 +32,7 @@
           ></div>
           <span :style="{ color: data.value === 'Đang theo dõi' ? '#34B057' : '#FF9900' }">
             {{ data.value }}
+            {{ console.log(data) }}
           </span>
         </div>
       </template>

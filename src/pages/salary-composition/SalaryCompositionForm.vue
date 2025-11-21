@@ -44,7 +44,6 @@
           <div class="width-186px">
             <label class="pd-r-8">
               <b>Đơn vị áp dụng</b>
-              <span class="text-red-600 star">*</span>
             </label>
           </div>
           <MSDropdownTree
@@ -75,7 +74,7 @@
           </div>
           <MSDropdown
             ref="typeRef"
-            v-model="form.type"
+            v-model="form.compositionType"
             :options="typeOptions"
             :searchable="true"
             :inlineSearch="true"
@@ -112,25 +111,25 @@
             labelPosition="left"
             labelAlign="left"
           />
-          <div v-if="form.nature === 'income'" class="flex items-center ml-4 gap-4">
+          <div v-if="form.nature === CompositionNature.Income" class="flex items-center ml-4 gap-4">
             <MSRadio v-model="form.taxType" value="taxable" label="Chịu thuế" />
             <MSRadio v-model="form.taxType" value="fully_exempt" label="Miễn thuế toàn phần" />
             <MSRadio v-model="form.taxType" value="partially_exempt" label="Miễn thuế một phần" />
           </div>
-          <div v-if="form.nature === 'deduction'" class="flex items-center ml-4">
+          <div v-if="form.nature === CompositionNature.Deduction" class="flex items-center ml-4">
             <MSCheckBox v-model="form.isTaxDeduction" label="Giảm trừ khi tính thuế" />
           </div>
         </div>
 
         <!-- Row 6: Định mức -->
-        <div class="ms-row flex items-start" v-if="form.nature !== 'other'">
+        <div class="ms-row flex items-start" v-if="form.nature !== CompositionNature.Other">
           <div class="width-186px">
             <label class="pd-r-8"><b>Định mức</b></label>
           </div>
           <div class="flex flex-col">
             <MSInputItem
               ref="normRef"
-              v-model="form.norm"
+              v-model="form.quota"
               :width="675"
               :height="86"
               :maxLength="50"
@@ -155,7 +154,10 @@
           <MSDropdown
             ref="valueTypeRef"
             v-model="form.valueType"
-            :disabled="form.nature === 'income' || form.nature === 'deduction'"
+            :disabled="
+              form.nature === CompositionNature.Income ||
+              form.nature === CompositionNature.Deduction
+            "
             :options="valueTypeOptions"
             :searchable="true"
             :inlineSearch="true"
@@ -176,17 +178,29 @@
           </div>
           <div class="flex flex-col">
             <div
-              v-if="['number', 'currency'].includes(form.valueType)"
+              v-if="[ValueType.Number, ValueType.Money].includes(form.valueType)"
               class="flex flex-col mb-2 gap-2"
             >
+              <div class="flex items-center gap-2">
+                <MSRadio
+                  v-model="form.valueCalculationMethod"
+                  :value="FormulaCompositionType.AutoSumFormula"
+                  label="Tự động cộng giá trị của nhân viên"
+                />
+                <MSDropdown
+                  v-model="form.autoSumScope"
+                  :options="autoSumScopeOptions"
+                  :disabled="form.valueCalculationMethod !== FormulaCompositionType.AutoSumFormula"
+                  :width="250"
+                  :bordered="true"
+                  :hoverable="true"
+                  labelPosition="left"
+                  labelAlign="left"
+                />
+              </div>
               <MSRadio
                 v-model="form.valueCalculationMethod"
-                value="auto_sum"
-                label="Tự động cộng giá trị của các nhân viên"
-              />
-              <MSRadio
-                v-model="form.valueCalculationMethod"
-                value="formula"
+                :value="FormulaCompositionType.CustomFormula"
                 label="Tính theo công thức tự đặt"
               />
             </div>
@@ -224,11 +238,15 @@
             <label class="pd-r-8"><b>Hiển thị trên phiếu lương</b></label>
           </div>
           <div class="flex items-center gap-4">
-            <MSRadio v-model="form.showOnPayslip" value="1" label="Có" />
-            <MSRadio v-model="form.showOnPayslip" value="2" label="Không" />
+            <MSRadio v-model="form.optionShowPaycheck" :value="OptionShowPaycheck.Yes" label="Có" />
             <MSRadio
-              v-model="form.showOnPayslip"
-              value="3"
+              v-model="form.optionShowPaycheck"
+              :value="OptionShowPaycheck.No"
+              label="Không"
+            />
+            <MSRadio
+              v-model="form.optionShowPaycheck"
+              :value="OptionShowPaycheck.ShowWhenNonZero"
               label="Chỉ hiển thị nếu giá trị khác 0"
             />
           </div>
@@ -241,6 +259,9 @@
         </div>
       </form>
     </div>
+    <div v-if="toast.show" class="fixed top-4 right-4 z-50">
+      <MSToast :type="toast.type" :message="toast.message" @close="closeToast" />
+    </div>
   </div>
 </template>
 
@@ -249,10 +270,18 @@ import { reactive, ref, watch } from 'vue'
 import MSInputItem from '@/components/inputs/MSInputItem.vue'
 import MSCombobox from '@/components/combobox/MSCombobox.vue'
 import MSDropdown from '@/components/dropdown/MSDropdown.vue'
-import MSPopup from '@/components/popup/MSPopup.vue'
 import MSDropdownTree from '@/components/dropdown/MSDropdownTree.vue'
 import MSRadio from '@/components/radio/MSRadio.vue'
 import MSCheckBox from '@/components/checkbox/MSCheckBox.vue'
+import MSToast from '@/components/toast/MSToast.vue'
+import SalaryCompositionApi from '@/apis/components/SalaryCompositionApi'
+import { CompositionType, CompositionTypeLabel } from '@/enums/CompositionType'
+import { CompositionNature, CompositionNatureLabel } from '@/enums/CompositionNature'
+import { ValueType, ValueTypeLabel } from '@/enums/ValueType'
+import { AutoSumEmployeeType, AutoSumEmployeeTypeLabel } from '@/enums/AutoSumEmployeeType'
+import { OptionShowPaycheck } from '@/enums/OptionShowPaycheck'
+import { Status } from '@/enums/Status'
+import { FormulaCompositionType } from '@/enums/FormulaCompositionType'
 
 const emit = defineEmits<{
   (e: 'saved', payload: any): void
@@ -263,19 +292,26 @@ const emit = defineEmits<{
 const form = reactive({
   code: '',
   name: '',
-  type: '',
+  compositionType: null as CompositionType | null,
   unit: '',
-  nature: 'income',
-  norm: '',
-  valueType: 'currency',
+  nature: CompositionNature.Income,
+  quota: '',
+  valueType: ValueType.Money,
   value: '',
   description: '',
-  showOnPayslip: 'yes',
+  optionShowPaycheck: OptionShowPaycheck.Yes,
   formula: '',
   taxType: 'taxable',
   isTaxDeduction: false,
-  valueCalculationMethod: 'auto_sum',
+  valueCalculationMethod: FormulaCompositionType.CustomFormula,
   allowExceedNorm: false,
+  autoSumScope: AutoSumEmployeeType.SameWorkingUnit,
+})
+
+const toast = reactive({
+  show: false,
+  type: 'success' as 'success' | 'information' | 'warning' | 'failed',
+  message: '',
 })
 
 const isDirty = ref(false)
@@ -307,51 +343,53 @@ const unitOptions = [
 ]
 
 // Loại thành phần
-const typeOptions = [
-  { label: 'Thông tin nhân viên', value: 'employee_info' },
-  { label: 'Chấm công', value: 'attendance' },
-  { label: 'Doanh số', value: 'revenue' },
-  { label: 'KPI', value: 'kpi' },
-  { label: 'Sản phẩm', value: 'product' },
-  { label: 'Lương', value: 'salary' },
-  { label: 'Thuế TNCN', value: 'personal_tax' },
-  { label: 'Bảo hiểm - công đoàn', value: 'insurance_union' },
-  { label: 'Khác', value: 'other' },
-]
+const typeOptions = Object.values(CompositionType)
+  .filter((v) => typeof v === 'number')
+  .map((v) => ({
+    label: CompositionTypeLabel[v as CompositionType],
+    value: v,
+  }))
 
 // Tính chất
-const natureOptions = [
-  { label: 'Thu nhập', value: 'income' },
-  { label: 'Khấu trừ', value: 'deduction' },
-  { label: 'Khác', value: 'other' },
-]
+const natureOptions = Object.values(CompositionNature)
+  .filter((v) => typeof v === 'number')
+  .map((v) => ({
+    label: CompositionNatureLabel[v as CompositionNature],
+    value: v,
+  }))
 
 // Kiểu giá trị
-const valueTypeOptions = [
-  { label: 'Số', value: 'number' },
-  { label: 'Tiền tệ', value: 'currency' },
-  { label: 'Phần trăm', value: 'percent' },
-  { label: 'Chữ', value: 'string' },
-  { label: 'Ngày', value: 'date' },
-]
+const valueTypeOptions = Object.values(ValueType)
+  .filter((v) => typeof v === 'number')
+  .map((v) => ({
+    label: ValueTypeLabel[v as ValueType],
+    value: v,
+  }))
+
+const autoSumScopeOptions = Object.values(AutoSumEmployeeType)
+  .filter((v) => typeof v === 'number')
+  .map((v) => ({
+    label: AutoSumEmployeeTypeLabel[v as AutoSumEmployeeType],
+    value: v,
+  }))
 
 watch(
-  () => form.type,
+  () => form.compositionType,
   (newType) => {
     const incomeTypes = [
-      'employee_info',
-      'revenue',
-      'salary',
-      'personal_tax',
-      'insurance_union',
-      'other',
+      CompositionType.EmployeeInfomation,
+      CompositionType.Sales,
+      CompositionType.Salary,
+      CompositionType.PersonalIncomeTax,
+      CompositionType.Insurance,
+      CompositionType.Other,
     ]
-    const otherTypes = ['attendance', 'kpi', 'product']
+    const otherTypes = [CompositionType.Timekeeping, CompositionType.KPI, CompositionType.Product]
 
-    if (incomeTypes.includes(newType)) {
-      form.nature = 'income'
-    } else if (otherTypes.includes(newType)) {
-      form.nature = 'other'
+    if (newType && incomeTypes.includes(newType)) {
+      form.nature = CompositionNature.Income
+    } else if (newType && otherTypes.includes(newType)) {
+      form.nature = CompositionNature.Other
     }
   },
 )
@@ -359,8 +397,8 @@ watch(
 watch(
   () => form.nature,
   (newNature) => {
-    if (newNature === 'income' || newNature === 'deduction') {
-      form.valueType = 'currency'
+    if (newNature === CompositionNature.Income || newNature === CompositionNature.Deduction) {
+      form.valueType = ValueType.Money
     }
   },
 )
@@ -372,11 +410,9 @@ const submit = (mode: 'save' | 'saveAndAdd' = 'save') => {
   const validFormula = formulaRef.value ? formulaRef.value.validate() : true
   const validUnit = unitRef.value ? (unitRef.value.validate?.() ?? true) : true
   const validType = typeRef.value
-    ? (typeRef.value.validate?.() ?? form.type !== '')
-    : form.type !== ''
-  const validNature = natureRef.value
-    ? (natureRef.value.validate?.() ?? form.nature !== '')
-    : form.nature !== ''
+    ? (typeRef.value.validate?.() ?? form.compositionType !== null)
+    : form.compositionType !== null
+  const validNature = natureRef.value ? (natureRef.value.validate?.() ?? true) : true
 
   if (!validCode) {
     return
@@ -393,13 +429,54 @@ const submit = (mode: 'save' | 'saveAndAdd' = 'save') => {
   if (!validNature) return
 
   // TODO: replace with actual save call (API)
-  console.log('Saving', { ...form })
-  if (mode === 'save') {
-    emit('saved', { ...form })
-  } else {
-    emit('savedAndAdd', { ...form })
-    onReset()
+  const payload = {
+    SalaryCompositionName: form.name,
+    SalaryCompositionCode: form.code,
+    CompositionType: form.compositionType,
+    CompositionNature: form.nature,
+    Taxable:
+      form.nature === CompositionNature.Income
+        ? ['taxable', 'partially_exempt'].includes(form.taxType)
+        : null,
+    TaxDeduction:
+      form.nature === CompositionNature.Income
+        ? form.taxType === 'fully_exempt'
+        : form.nature === CompositionNature.Deduction
+          ? form.isTaxDeduction
+          : null,
+    Quota: form.quota,
+    Formula:
+      form.valueCalculationMethod === FormulaCompositionType.CustomFormula ? form.value : null,
+    ValueType: form.valueType,
+    Description: form.description,
+    Status: Status.Following,
+    OptionShowPaycheck: form.optionShowPaycheck,
+    IsNotAllowDelete: false,
+    OrganizationUnitIds: form.unit ? [form.unit] : [],
+    OrganizationUnitNames: [], // Assuming this is handled by backend or not needed for now
+    IsDefault: false,
+    AutoSumCompositionCode: null,
+    IsAutoSumEmployee: form.valueCalculationMethod === FormulaCompositionType.AutoSumFormula,
+    AutoSumEmployeeType:
+      form.valueCalculationMethod === FormulaCompositionType.AutoSumFormula
+        ? form.autoSumScope
+        : null,
+    FormulaCompositionType: form.valueCalculationMethod,
   }
+
+  SalaryCompositionApi.create(payload)
+    .then((res) => {
+      if (mode === 'save') {
+        emit('saved', res)
+      } else {
+        emit('savedAndAdd', res)
+        onReset()
+      }
+    })
+    .catch((err) => {
+      console.error(err)
+      showToast('failed', err.response.data.errors[0].message || 'Có lỗi xảy ra vui lòng thử lại.')
+    })
 }
 
 const onSubmit = () => {
@@ -413,24 +490,38 @@ const onCancel = () => {
 const onReset = () => {
   form.code = ''
   form.name = ''
-  form.type = ''
+  form.compositionType = null
   form.unit = ''
-  form.nature = 'income'
-  form.norm = ''
-  form.valueType = 'currency'
+  form.nature = CompositionNature.Income
+  form.quota = ''
+  form.valueType = ValueType.Money
   form.value = ''
   form.description = ''
-  form.showOnPayslip = 'yes'
+  form.optionShowPaycheck = OptionShowPaycheck.Yes
   form.formula = ''
   form.taxType = 'taxable'
   form.isTaxDeduction = false
-  form.valueCalculationMethod = 'auto_sum'
+  form.valueCalculationMethod = FormulaCompositionType.CustomFormula
   form.allowExceedNorm = false
+  form.autoSumScope = AutoSumEmployeeType.SameWorkingUnit
 
   // Reset dirty state after reset
   setTimeout(() => {
     isDirty.value = false
   }, 0)
+}
+
+const showToast = (type: 'success' | 'information' | 'warning' | 'failed', message: string) => {
+  toast.type = type
+  toast.message = message
+  toast.show = true
+  setTimeout(() => {
+    toast.show = false
+  }, 3000)
+}
+
+const closeToast = () => {
+  toast.show = false
 }
 
 defineExpose({ submit, isDirty })

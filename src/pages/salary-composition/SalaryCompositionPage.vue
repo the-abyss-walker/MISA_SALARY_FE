@@ -49,7 +49,7 @@
     <MSPopup
       v-model:visible="showConfirmPopup"
       title="Thông báo"
-      content="Thông tin đã được thay đổi, bạn có muốn lưu lại?"
+      content="Thông tin đã được thay đổi. Bạn có muốn lưu lại không?"
       :buttons="confirmButtons"
       @action="onConfirmAction"
     />

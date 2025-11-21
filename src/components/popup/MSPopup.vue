@@ -92,7 +92,7 @@ function onButtonClick(btn: ButtonDef, idx: number) {
   display: flex;
   align-items: flex-start;
   justify-content: center;
-  padding-top: 70px;
+  padding-top: 75px;
   z-index: 9999;
 }
 .ms-popup__panel {
@@ -111,40 +111,39 @@ function onButtonClick(btn: ButtonDef, idx: number) {
   align-items: center;
   justify-content: space-between;
   padding: 24px 24px 0px 24px;
-  border-bottom: 1px solid #eef2f6;
 }
 .ms-popup__title {
   margin: 0;
-  font-size: 21px;
+  font-size: 24px;
   font-weight: 700;
   color: #212121;
 }
 .ms-popup__close {
   background: transparent;
   border: none;
-  padding: 6px;
+  padding: 6px 0px 6px 8px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
 }
 .ms-popup__body {
-  padding: 20px;
+  padding: 24px;
   min-height: 48px;
   height: 69px;
 }
 .ms-popup__body-text {
   display: inline-block;
-  color: #374151;
+  color: #212121;
 }
 .ms-popup__footer {
-  padding: 12px 20px;
-  border-top: 1px solid #eef2f6;
+  padding: 16px 24px;
   height: 68px;
+  background-color: #f2f2f2;
 }
 .ms-popup__footer-inner {
   display: flex;
-  gap: 8px;
+  gap: 12px;
   justify-content: flex-end;
 }
 </style>

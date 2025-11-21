@@ -82,6 +82,12 @@ const btnStyle = computed(() => {
     gap: '6px',
     minWidth: '36px',
   }
+
+  if (props.variant === 'primary') {
+    s.minWidth = '80px'
+    s.justifyContent = 'center'
+  }
+
   if (props.width) s.width = `${props.width}px`
   // if width is small (icon-only dropdown e.g. 40px) center content and remove paddings
   if (props.width && typeof props.width === 'number' && props.width <= 40) {
