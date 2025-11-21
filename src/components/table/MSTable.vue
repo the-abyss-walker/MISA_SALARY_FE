@@ -11,7 +11,6 @@
       @selection-changed="(e) => emit('selection-change', e.selectedRowsData)"
       :hover-state-enabled="true"
       :column-width="props.columnWidth"
-      :column-min-width="120"
     >
       <DxPaging :enabled="false" />
       <DxScrolling column-rendering-mode="virtual" />
@@ -48,7 +47,7 @@
         <slot :name="col.headerTemplate" :data="headerInfo"></slot>
       </template>
       <DxColumn
-        width="180"
+        width="auto"
         :fixed="true"
         fixed-position="right"
         cell-template="actionTemplate"
@@ -56,18 +55,20 @@
       />
       <template #actionTemplate="{ data }">
         <div class="action-buttons">
-          <div class="action-button" title="Ngừng theo dõi" @click.stop="handleStopFlowing(data)">
-            <MSIcon name="minus_circle" />
-          </div>
-          <div class="action-button" title="Nhân bản" @click.stop="handleClone(data)">
-            <MSIcon name="copy" />
-          </div>
-          <div class="action-button" title="Sửa" @click.stop="handleEdit(data)">
-            <MSIcon name="pencil" />
-          </div>
-          <div class="action-button" title="Xóa" @click.stop="handleDelete(data)">
-            <MSIcon name="trash" />
-          </div>
+          <slot name="action-panel" :data="data">
+            <div class="action-button" title="Ngừng theo dõi" @click.stop="handleStopFlowing(data)">
+              <MSIcon name="minus_circle" />
+            </div>
+            <div class="action-button" title="Nhân bản" @click.stop="handleClone(data)">
+              <MSIcon name="copy" />
+            </div>
+            <div class="action-button" title="Sửa" @click.stop="handleEdit(data)">
+              <MSIcon name="pencil" />
+            </div>
+            <div class="action-button" title="Xóa" @click.stop="handleDelete(data)">
+              <MSIcon name="trash" />
+            </div>
+          </slot>
         </div>
       </template>
     </DxDataGrid>

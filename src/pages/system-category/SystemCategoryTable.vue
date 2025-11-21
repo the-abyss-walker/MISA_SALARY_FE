@@ -21,7 +21,13 @@
       :columns="gridColumns"
       :show-selection="true"
       @selection-change="onSelectionChange"
-    />
+    >
+      <template #action-panel="{ data }">
+        <div class="action-button" title="Đưa vào danh sách sử dụng" @click.stop="handleAdd(data)">
+          <MSIcon name="plus" color="#34B057" />
+        </div>
+      </template>
+    </MSTable>
 
     <MSPagination
       :totalRecords="totalCount"
@@ -38,6 +44,7 @@ import { ref, computed, onMounted } from 'vue'
 import MSTableHeader from '@/components/table/table-header/MSTableHeader.vue'
 import MSTable from '@/components/table/MSTable.vue'
 import MSPagination from '@/components/pagination/MSPagination.vue'
+import MSIcon from '@/components/icons/MSIcon.vue'
 import { CompositionTypeLabel } from '@/enums/CompositionType'
 import { CompositionNatureLabel } from '@/enums/CompositionNature'
 import { OptionShowPaycheckLabel } from '@/enums/OptionShowPaycheck'
@@ -177,5 +184,9 @@ function onDeselect() {
 
 function onAddToList() {
   console.log('Add to list', selectedItems.value)
+}
+
+function handleAdd(data: any) {
+  console.log('Add', data)
 }
 </script>
