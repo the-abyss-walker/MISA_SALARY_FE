@@ -1,11 +1,13 @@
 <template>
   <div class="bg-white">
-    <MSToast
-      v-if="toastVisible"
-      :type="toastType"
-      :message="toastMessage"
-      @close="toastVisible = false"
-    />
+    <Transition name="toast-slide">
+      <MSToast
+        v-if="toastVisible"
+        :type="toastType"
+        :message="toastMessage"
+        @close="toastVisible = false"
+      />
+    </Transition>
     <MSPopup
       v-if="popupVisible"
       :visible="popupVisible"
@@ -275,13 +277,13 @@ function getActionIcon(item: any) {
 }
 
 function getActionTitle(item: any) {
-  return item.status === Status.Following ? 'Ngừng theo dõi' : 'Đang theo dõi'
+  return item.status === Status.Following ? 'Ngừng theo dõi' : 'Theo dõi'
 }
 
 function onActionClick(item: any) {
   currentActionItem.value = item
   popupTitle.value = 'Chuyển trạng thái'
-  const actionText = item.status === Status.Following ? 'ngừng theo dõi' : 'đang theo dõi'
+  const actionText = item.status === Status.Following ? 'ngừng theo dõi' : 'theo dõi'
   popupContent.value = `Bạn có chắc chắn muốn chuyển trạng thái thành phần lương <b>${item.SalaryCompositionName}</b> sang ${actionText} không?`
   popupVisible.value = true
 }
@@ -332,5 +334,20 @@ function onDeleteItem(item: any) {
   width: 8px;
   height: 8px;
   border-radius: 50%;
+}
+
+.toast-slide-enter-active,
+.toast-slide-leave-active {
+  transition: all 0.5s ease;
+}
+
+.toast-slide-enter-from {
+  transform: translate(-100vw, -50%) !important;
+  opacity: 0;
+}
+
+.toast-slide-leave-to {
+  transform: translate(100vw, -50%) !important;
+  opacity: 0;
 }
 </style>

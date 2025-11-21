@@ -13,7 +13,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import MSIcon from '@/components/icons/MSIcon.vue'
 
 const props = defineProps({
@@ -25,6 +25,14 @@ const props = defineProps({
     type: String,
     default: '',
   },
+})
+
+const emit = defineEmits(['close'])
+
+onMounted(() => {
+  setTimeout(() => {
+    emit('close')
+  }, 3000)
 })
 
 const typeClass = computed(() => {
@@ -59,7 +67,7 @@ const iconName = computed(() => {
   height: 40px;
   border-radius: 4px;
   border: 1px solid transparent;
-  background: #fff;
+  background: var(--toast-bg);
   z-index: 9999;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
 }
@@ -67,15 +75,19 @@ const iconName = computed(() => {
 /* Color variables per type */
 .ms-toast.information {
   --toast-color: #34b057;
+  --toast-bg: #deeef9;
 }
 .ms-toast.success {
   --toast-color: #34b057;
+  --toast-bg: #eaf7ee;
 }
 .ms-toast.warning {
   --toast-color: #ffdd00;
+  --toast-bg: #edc201;
 }
 .ms-toast.failed {
   --toast-color: #e83950;
+  --toast-bg: #fc91ad;
 }
 
 .ms-toast {
