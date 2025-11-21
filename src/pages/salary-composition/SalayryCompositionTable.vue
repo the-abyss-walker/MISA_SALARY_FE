@@ -11,18 +11,24 @@
       v-model:right="rightDropdown"
       v-model:search="searchQuery"
       v-bind="headerBindings"
+      :selectedCount="selectedCount"
       @left-select="onLeftSelect"
       @right-select="onRightSelect"
       @filter="onFilter"
       @config="onConfig"
       @search="onSearchInput"
+      @unfollow="onUnfollow"
+      @delete="onDelete"
+      @deselect="onDeselect"
     />
 
     <MSTable
       v-if="tableData.length >= 0"
+      ref="tableRef"
       :data="pagedData"
       :columns="gridColumns"
       :show-selection="true"
+      @selection-change="onSelectionChange"
     >
       <template #statusTemplate="{ data }">
         <div class="status-cell">
@@ -92,6 +98,30 @@ const rightDropdown = ref(null as any)
 
 const pageSize = ref(15)
 const page = ref(1)
+
+const selectedCount = ref(0)
+const selectedItems = ref<any[]>([])
+
+const tableRef = ref<any>(null)
+
+function onSelectionChange(items: any[]) {
+  selectedItems.value = items
+  selectedCount.value = items.length
+}
+
+function onDeselect() {
+  if (tableRef.value) {
+    tableRef.value.clearSelection()
+  }
+}
+
+function onUnfollow() {
+  console.log('Unfollow', selectedItems.value)
+}
+
+function onDelete() {
+  console.log('Delete', selectedItems.value)
+}
 
 const statusOptions = [
   { label: 'Tất cả trạng thái', value: null },

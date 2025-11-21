@@ -1,12 +1,14 @@
 <template>
   <div class="mstable__grid">
     <DxDataGrid
+      ref="gridRef"
       :data-source="tableDataSource"
       :allow-column-resizing="true"
       :column-resizing-mode="'widget'"
       :height="gridHeight"
       :remote-operations="props.remoteOperations"
       @row-click="(e) => emit('row-click', e)"
+      @selection-changed="(e) => emit('selection-change', e.selectedRowsData)"
       :hover-state-enabled="true"
       :column-width="props.columnWidth"
       :column-min-width="120"
@@ -97,7 +99,7 @@ const props = withDefaults(
   },
 )
 
-const emit = defineEmits(['row-click', 'page-change'])
+const emit = defineEmits(['row-click', 'page-change', 'selection-change'])
 
 const handleStopFlowing = (e: any) => {
   alert('Stop Flowing ' + e.data.name)
@@ -129,6 +131,18 @@ const columnsWithHeaderTemplates = computed(() => {
 
 const tableDataSource = computed(() => {
   return props.data && props.data.length ? props.data : []
+})
+
+const gridRef = ref<any>(null)
+
+const clearSelection = () => {
+  if (gridRef.value && gridRef.value.instance) {
+    gridRef.value.instance.clearSelection()
+  }
+}
+
+defineExpose({
+  clearSelection,
 })
 </script>
 

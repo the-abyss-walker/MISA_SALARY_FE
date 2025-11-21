@@ -5,13 +5,23 @@
       v-model:search="searchQuery"
       v-bind="headerBindings"
       :showRight="false"
+      :selectedCount="selectedCount"
+      actionMode="add"
       @left-select="onLeftSelect"
       @filter="onFilter"
       @config="onConfig"
       @search="onSearchInput"
+      @deselect="onDeselect"
+      @add-to-list="onAddToList"
     />
 
-    <MSTable :data="pagedData" :columns="gridColumns" :show-selection="true" />
+    <MSTable
+      ref="tableRef"
+      :data="pagedData"
+      :columns="gridColumns"
+      :show-selection="true"
+      @selection-change="onSelectionChange"
+    />
 
     <MSPagination
       :totalRecords="totalCount"
@@ -51,6 +61,10 @@ const gridColumns = [
 
 const tableData = ref<any[]>([])
 const totalCount = ref(0)
+
+const selectedCount = ref(0)
+const selectedItems = ref<any[]>([])
+const tableRef = ref<any>(null)
 
 const statusOptions = [
   { label: 'Tất cả trạng thái', value: null },
@@ -148,5 +162,20 @@ function onFilter() {
 
 function onConfig() {
   // handle export
+}
+
+function onSelectionChange(items: any[]) {
+  selectedItems.value = items
+  selectedCount.value = items.length
+}
+
+function onDeselect() {
+  if (tableRef.value) {
+    tableRef.value.clearSelection()
+  }
+}
+
+function onAddToList() {
+  console.log('Add to list', selectedItems.value)
 }
 </script>

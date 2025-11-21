@@ -1,5 +1,5 @@
 <template>
-  <div class="theader flex items-center justify-between">
+  <div class="theader flex items-center justify-between" v-if="!selectedCount">
     <div class="flex items-center gap-2 w-1/2">
       <MSInputSearch
         :height="36"
@@ -31,6 +31,36 @@
       <MSButton variant="icon" icon="setting" @click="$emit('config')" />
     </div>
   </div>
+  <div class="theader flex items-center gap-4" v-else>
+    <div class="flex items-center gap-2">
+      <span class="text-base">Đã chọn</span>
+      <span class="font-bold text-base">{{ selectedCount }}</span>
+      <span class="deselect-btn cursor-pointer ml-2" @click="$emit('deselect')">Bỏ chọn</span>
+    </div>
+    <template v-if="actionMode === 'manage'">
+      <MSButton
+        variant="secondary"
+        class="btn-unfollow"
+        icon="minus_circle"
+        @click="$emit('unfollow')"
+      >
+        Ngừng theo dõi
+      </MSButton>
+      <MSButton variant="secondary" class="btn-delete" icon="trash" @click="$emit('delete')">
+        Xóa
+      </MSButton>
+    </template>
+    <template v-else-if="actionMode === 'add'">
+      <MSButton
+        variant="secondary"
+        class="btn-add-to-list"
+        icon="plus"
+        @click="$emit('add-to-list')"
+      >
+        Đưa vào danh sách sử dụng
+      </MSButton>
+    </template>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -52,6 +82,8 @@ const props = withDefaults(
     rightPlaceholder?: string
     searchPlaceholder?: string
     showRight?: boolean
+    selectedCount?: number
+    actionMode?: 'manage' | 'add'
   }>(),
   {
     left: undefined,
@@ -71,6 +103,8 @@ const props = withDefaults(
     rightPlaceholder: 'Tất cả đơn vị',
     searchPlaceholder: 'Tìm kiếm',
     showRight: true,
+    selectedCount: 0,
+    actionMode: 'manage',
   },
 )
 
@@ -83,6 +117,10 @@ const emit = defineEmits([
   'config',
   'filter',
   'search',
+  'unfollow',
+  'delete',
+  'deselect',
+  'add-to-list',
 ])
 
 const searchModel = computed({
@@ -116,5 +154,48 @@ function onRightSelect(opt: any) {
 .theader {
   height: 61px;
   padding: 12px 20px;
+}
+
+.btn-unfollow {
+  background-color: white !important;
+  border: 1px solid #ff9900 !important;
+  color: #ff9900 !important;
+  --ms-icon-color: #ff9900 !important;
+}
+
+.btn-unfollow:hover {
+  color: #ff9900 !important;
+  --ms-icon-color: #ff9900 !important;
+}
+
+.btn-delete {
+  background-color: white !important;
+  border: 1px solid #ef292f !important;
+  color: #ef292f !important;
+  --ms-icon-color: #ef292f !important;
+}
+
+.btn-delete:hover {
+  background-color: #fee8e7 !important;
+  color: #ef292f !important;
+  --ms-icon-color: #ef292f !important;
+}
+
+.deselect-btn {
+  color: #34b057;
+  font-weight: 700;
+}
+
+.btn-add-to-list {
+  background-color: white !important;
+  border: 1px solid #e0e0e0 !important;
+  color: #212121 !important;
+  --ms-icon-color: #6e737a !important;
+}
+
+.btn-add-to-list:hover {
+  border-color: #34b057 !important;
+  color: #34b057 !important;
+  --ms-icon-color: #34b057 !important;
 }
 </style>
