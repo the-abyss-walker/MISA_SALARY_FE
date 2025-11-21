@@ -11,6 +11,7 @@
       @selection-changed="(e) => emit('selection-change', e.selectedRowsData)"
       :hover-state-enabled="true"
       :column-width="props.columnWidth"
+      :column-min-width="60"
     >
       <DxPaging :enabled="false" />
       <DxScrolling column-rendering-mode="virtual" />
@@ -47,6 +48,7 @@
         <slot :name="col.headerTemplate" :data="headerInfo"></slot>
       </template>
       <DxColumn
+        v-if="props.showActionColumn"
         width="auto"
         :fixed="true"
         fixed-position="right"
@@ -89,6 +91,7 @@ const props = withDefaults(
     remoteOperations?: boolean
     pageSize?: number
     showSelection?: boolean
+    showActionColumn?: boolean
   }>(),
   {
     data: () => [],
@@ -97,6 +100,7 @@ const props = withDefaults(
     columnWidth: 200,
     remoteOperations: false,
     showSelection: false,
+    showActionColumn: true,
   },
 )
 

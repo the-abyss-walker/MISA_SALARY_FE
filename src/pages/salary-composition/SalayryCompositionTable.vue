@@ -6,6 +6,16 @@
       :message="toastMessage"
       @close="toastVisible = false"
     />
+    <MSPopup
+      v-if="popupVisible"
+      :visible="popupVisible"
+      :title="popupTitle"
+      :buttons="popupButtons"
+      @action="onPopupAction"
+      @update:visible="(val) => (popupVisible = val)"
+    >
+      <div v-html="popupContent"></div>
+    </MSPopup>
     <MSTableHeader
       v-model:left="leftDropdown"
       v-model:right="rightDropdown"
@@ -42,6 +52,24 @@
           </span>
         </div>
       </template>
+      <template #action-panel="{ data }">
+        <div
+          class="action-button"
+          :title="getActionTitle(data.data)"
+          @click.stop="onActionClick(data.data)"
+        >
+          <MSIcon :name="getActionIcon(data.data)" />
+        </div>
+        <div class="action-button" title="Nhân bản" @click.stop="onCloneItem(data.data)">
+          <MSIcon name="copy" />
+        </div>
+        <div class="action-button" title="Sửa" @click.stop="onEditItem(data.data)">
+          <MSIcon name="pencil" />
+        </div>
+        <div class="action-button" title="Xóa" @click.stop="onDeleteItem(data.data)">
+          <MSIcon name="trash" />
+        </div>
+      </template>
     </MSTable>
 
     <MSPagination
@@ -60,6 +88,8 @@ import MSTableHeader from '@/components/table/table-header/MSTableHeader.vue'
 import MSTable from '@/components/table/MSTable.vue'
 import MSPagination from '@/components/pagination/MSPagination.vue'
 import MSToast from '@/components/toast/MSToast.vue'
+import MSPopup from '@/components/popup/MSPopup.vue'
+import MSIcon from '@/components/icons/MSIcon.vue'
 import SalaryCompositionApi from '@/apis/components/SalaryCompositionApi'
 import { CompositionTypeLabel } from '@/enums/CompositionType'
 import { CompositionNatureLabel } from '@/enums/CompositionNature'
@@ -126,7 +156,7 @@ function onDelete() {
 const statusOptions = [
   { label: 'Tất cả trạng thái', value: null },
   { label: 'Đang theo dõi', value: Status.Following },
-  { label: 'Ngừng theo dõi', value: Status.Stopped },
+  { label: 'Ngừng theo dõi', value: Status.UnFollowing },
 ]
 
 const headerBindings = computed(() => ({
@@ -228,6 +258,66 @@ function onFilter() {
 
 function onConfig() {
   // handle export
+}
+
+// Popup state
+const popupVisible = ref(false)
+const popupTitle = ref('')
+const popupContent = ref('')
+const currentActionItem = ref<any>(null)
+const popupButtons = [
+  { label: 'Không', variant: 'secondary' as const },
+  { label: 'Có', variant: 'primary' as const },
+]
+
+function getActionIcon(item: any) {
+  return item.status === Status.Following ? 'minus_circle' : 'check_circle'
+}
+
+function getActionTitle(item: any) {
+  return item.status === Status.Following ? 'Ngừng theo dõi' : 'Đang theo dõi'
+}
+
+function onActionClick(item: any) {
+  currentActionItem.value = item
+  popupTitle.value = 'Chuyển trạng thái'
+  const actionText = item.status === Status.Following ? 'ngừng theo dõi' : 'đang theo dõi'
+  popupContent.value = `Bạn có chắc chắn muốn chuyển trạng thái thành phần lương <b>${item.SalaryCompositionName}</b> sang ${actionText} không?`
+  popupVisible.value = true
+}
+
+async function onPopupAction({ button }: any) {
+  if (button.label === 'Có') {
+    try {
+      const newStatus =
+        currentActionItem.value.status === Status.Following ? Status.UnFollowing : Status.Following
+      console.log(currentActionItem.value.id, newStatus)
+      await SalaryCompositionApi.updateStatus(currentActionItem.value.id, newStatus)
+
+      await loadData()
+
+      toastMessage.value = 'Cập nhật thành phần lương thành công'
+      toastType.value = 'success'
+      toastVisible.value = true
+    } catch (error) {
+      toastMessage.value = 'Cập nhật thành phần lương thất bại'
+      toastType.value = 'failed'
+      toastVisible.value = true
+    }
+  }
+  popupVisible.value = false
+}
+
+function onCloneItem(item: any) {
+  console.log('Clone item', item)
+}
+
+function onEditItem(item: any) {
+  console.log('Edit item', item)
+}
+
+function onDeleteItem(item: any) {
+  console.log('Delete item', item)
 }
 </script>
 

@@ -7,7 +7,7 @@ class SalaryCompositionApi extends BaseApi {
     this.controller = 'SalaryComposition'
   }
 
-  updateStatus(id: string, status: number) {
+  updateStatus(id: number, status: number) {
     return api.patch(`${this.controller}/status/${id}`, { status })
   }
 

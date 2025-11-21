@@ -33,6 +33,7 @@
         :data="tableData"
         :columns="gridColumns"
         :show-selection="true"
+        :show-action-column="false"
         gridHeight="calc(100vh - 390px)"
         @selection-change="onSelectionChange"
         class="flex-1 min-h-0"
