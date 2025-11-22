@@ -37,21 +37,35 @@
       @page-change="onPageChange"
       @size-change="onSizeChange"
     />
+
+    <MSPopup
+      v-model:visible="popup.visible"
+      :title="popup.title"
+      :content="popup.content"
+      :buttons="popup.buttons"
+      @action="onPopupAction"
+    />
+
+    <div v-if="toast.show" class="fixed top-4 right-4 z-50">
+      <MSToast :type="toast.type" :message="toast.message" @close="closeToast" />
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, reactive } from 'vue'
 import MSTableHeader from '@/components/table/table-header/MSTableHeader.vue'
 import MSTable from '@/components/table/MSTable.vue'
 import MSPagination from '@/components/pagination/MSPagination.vue'
 import MSIcon from '@/components/icons/MSIcon.vue'
+import MSPopup from '@/components/popup/MSPopup.vue'
+import MSToast from '@/components/toast/MSToast.vue'
 import { CompositionType, CompositionTypeLabel } from '@/enums/CompositionType'
 import { CompositionNatureLabel } from '@/enums/CompositionNature'
 import { OptionShowPaycheckLabel } from '@/enums/OptionShowPaycheck'
-import { StatusLabel, Status } from '@/enums/Status'
 import { ValueTypeLabel } from '@/enums/ValueType'
 import SalaryCompositionSystemApi from '@/apis/components/SalaryCompositionSystemApi'
+import SalaryCompositionApi from '@/apis/components/SalaryCompositionApi'
 
 const gridColumns = [
   { dataField: 'SalaryCompositionSystemCode', caption: 'Mã thành phần' },
@@ -190,11 +204,76 @@ function onDeselect() {
 }
 
 function onAddToList() {
-  console.log('Add to list', selectedItems.value)
+  if (selectedItems.value.length === 0) return
+  popup.itemsToAdd = selectedItems.value
+  if (selectedItems.value.length === 1) {
+    popup.content = `Bạn có chắc chắn muốn đưa thành phần lương mặc định ${selectedItems.value[0].salaryCompositionSystemName} vào danh sách sử dụng không?`
+  } else {
+    popup.content =
+      'Bạn có chắc chắn muốn đưa các thành phần lương mặc định đã chọn vào danh sách sử dụng không?'
+  }
+  popup.visible = true
 }
 
 function handleAdd(data: any) {
-  console.log('Add', data)
+  popup.itemsToAdd = [data]
+  popup.content = `Bạn có chắc chắn muốn đưa thành phần lương mặc định ${data.data.salaryCompositionSystemName} vào danh sách sử dụng không?`
+  popup.visible = true
+}
+
+const popup = reactive({
+  visible: false,
+  title: 'Thông báo',
+  content: '',
+  buttons: [
+    { label: 'Hủy bỏ', variant: 'secondary' as const },
+    { label: 'Đồng ý', variant: 'primary' as const },
+  ],
+  itemsToAdd: [] as any[],
+})
+
+const toast = reactive({
+  show: false,
+  type: 'success' as 'success' | 'failed' | 'information' | 'warning',
+  message: '',
+})
+
+const showToast = (type: 'success' | 'failed' | 'information' | 'warning', message: string) => {
+  toast.type = type
+  toast.message = message
+  toast.show = true
+  setTimeout(() => {
+    toast.show = false
+  }, 3000)
+}
+
+const closeToast = () => {
+  toast.show = false
+}
+
+async function onPopupAction({ button, index }: any) {
+  if (index === 1) {
+    try {
+      const ids = popup.itemsToAdd.map((item) => {
+        if (item.data) {
+          return item.data.id
+        } else {
+          return item.id
+        }
+      })
+      await SalaryCompositionApi.createFromSystem(ids)
+      showToast('success', 'Thêm thành công')
+      selectedItems.value = []
+      if (tableRef.value) {
+        tableRef.value.clearSelection()
+      }
+      await loadData()
+    } catch (error) {
+      console.error(error)
+      showToast('failed', 'Có lỗi xảy ra')
+    }
+  }
+  popup.visible = false
 }
 
 defineExpose({

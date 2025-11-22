@@ -1,55 +1,60 @@
 <template>
-  <MSPopup
-    :visible="visible"
-    title="Thêm từ danh mục của hệ thống"
-    :buttons="popupButtons"
-    @action="onPopupAction"
-    @update:visible="updateVisible"
-    width="1146px"
-  >
-    <div class="flex flex-col h-full overflow-hidden gap-4">
-      <div class="flex items-center justify-between">
-        <div class="w-1/3">
-          <MSInputSearch
-            :height="36"
-            :base-class="'bg-white border-gray-300'"
-            v-model="searchQuery"
-            placeholder="Tìm kiếm"
-            @search="onSearch"
-          />
+  <div>
+    <MSPopup
+      :visible="visible"
+      title="Thêm từ danh mục của hệ thống"
+      :buttons="popupButtons"
+      @action="onPopupAction"
+      @update:visible="updateVisible"
+      width="1146px"
+    >
+      <div class="flex flex-col h-full overflow-hidden gap-4">
+        <div class="flex items-center justify-between">
+          <div class="w-1/3">
+            <MSInputSearch
+              :height="36"
+              :base-class="'bg-white border-gray-300'"
+              v-model="searchQuery"
+              placeholder="Tìm kiếm"
+              @search="onSearch"
+            />
+          </div>
+          <div class="w-1/4">
+            <MSDropdown
+              v-model="compositionType"
+              :options="compositionTypeOptions"
+              placeholder="Tất cả thành phần"
+              label-position="right"
+              @select="onCompositionTypeSelect"
+            />
+          </div>
         </div>
-        <div class="w-1/4">
-          <MSDropdown
-            v-model="compositionType"
-            :options="compositionTypeOptions"
-            placeholder="Tất cả thành phần"
-            label-position="right"
-            @select="onCompositionTypeSelect"
-          />
-        </div>
+
+        <MSTable
+          ref="tableRef"
+          :data="tableData"
+          :columns="gridColumns"
+          :show-selection="true"
+          :show-action-column="false"
+          gridHeight="calc(100vh - 390px)"
+          @selection-change="onSelectionChange"
+          class="flex-1 min-h-0"
+        >
+        </MSTable>
+
+        <MSPagination
+          :totalRecords="totalCount"
+          v-model:currentPage="pageIndex"
+          v-model:pageSize="pageSize"
+          @page-change="onPageChange"
+          @size-change="onSizeChange"
+        />
       </div>
-
-      <MSTable
-        ref="tableRef"
-        :data="tableData"
-        :columns="gridColumns"
-        :show-selection="true"
-        :show-action-column="false"
-        gridHeight="calc(100vh - 390px)"
-        @selection-change="onSelectionChange"
-        class="flex-1 min-h-0"
-      >
-      </MSTable>
-
-      <MSPagination
-        :totalRecords="totalCount"
-        v-model:currentPage="pageIndex"
-        v-model:pageSize="pageSize"
-        @page-change="onPageChange"
-        @size-change="onSizeChange"
-      />
+    </MSPopup>
+    <div v-if="toast.show" class="fixed top-4 right-4 z-50">
+      <MSToast :type="toast.type" :message="toast.message" @close="closeToast" />
     </div>
-  </MSPopup>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -59,7 +64,9 @@ import MSTable from '@/components/table/MSTable.vue'
 import MSPagination from '@/components/pagination/MSPagination.vue'
 import MSInputSearch from '@/components/inputs/MSInputSearch.vue'
 import MSDropdown from '@/components/dropdown/MSDropdown.vue'
+import MSToast from '@/components/toast/MSToast.vue'
 import SalaryCompositionSystemApi from '@/apis/components/SalaryCompositionSystemApi'
+import SalaryCompositionApi from '@/apis/components/SalaryCompositionApi'
 import { CompositionType, CompositionTypeLabel } from '@/enums/CompositionType'
 import { CompositionNatureLabel } from '@/enums/CompositionNature'
 import { OptionShowPaycheckLabel } from '@/enums/OptionShowPaycheck'
@@ -81,6 +88,14 @@ const pageSize = ref(15)
 const searchQuery = ref('')
 const compositionType = ref(null)
 const selectedItems = ref<any[]>([])
+const toast = ref<{
+  show: boolean
+  type: 'success' | 'failed' | 'warning' | 'information'
+  message: string
+}>({ show: false, type: 'success', message: '' })
+const closeToast = () => {
+  toast.value.show = false
+}
 
 const compositionTypeOptions = [
   { label: 'Tất cả thành phần', value: null },
@@ -95,10 +110,15 @@ const compositionTypeOptions = [
   { label: 'Khác', value: CompositionType.Other },
 ]
 
-const popupButtons = [
+const popupButtons = computed(() => [
   { label: 'Hủy bỏ', variant: 'secondary' as const, id: 'cancel' },
-  { label: 'Đồng ý', variant: 'primary' as const, id: 'agree' },
-]
+  {
+    label: 'Đồng ý',
+    variant: 'primary' as const,
+    id: 'agree',
+    disabled: selectedItems.value.length === 0,
+  },
+])
 
 const gridColumns = [
   { dataField: 'SalaryCompositionSystemCode', caption: 'Mã thành phần' },
@@ -170,12 +190,21 @@ function updateVisible(val: boolean) {
   emit('update:visible', val)
 }
 
-function onPopupAction({ button }: { button: any }) {
+async function onPopupAction({ button }: { button: any }) {
   if (button.id === 'cancel') {
     updateVisible(false)
   } else if (button.id === 'agree') {
-    emit('save', selectedItems.value)
-    updateVisible(false)
+    try {
+      const ids = selectedItems.value.map((item) => item.id)
+      await SalaryCompositionApi.createFromSystem(ids)
+      emit('save', selectedItems.value)
+      setTimeout(() => {
+        updateVisible(false)
+      }, 0)
+      toast.value = { show: true, type: 'success', message: 'Thêm thành công' }
+    } catch (error) {
+      toast.value = { show: true, type: 'failed', message: 'Thêm thất bại' }
+    }
   }
 }
 

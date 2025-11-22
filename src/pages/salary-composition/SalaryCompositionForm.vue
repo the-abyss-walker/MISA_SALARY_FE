@@ -11,7 +11,14 @@
             </label>
           </div>
 
-          <MSInputItem ref="nameRef" v-model="form.name" :width="675" :maxLength="100" required />
+          <MSInputItem
+            ref="nameRef"
+            v-model="form.name"
+            :width="675"
+            :maxLength="100"
+            required
+            @blur="checkExistCode"
+          />
         </div>
 
         <!-- Row 2: Mã thành phần (required) -->
@@ -32,6 +39,7 @@
             placeholder="Nhập mã thành phần"
             pattern="^[A-Za-z0-9_]*$"
             errorMessage="Mã thành phần chỉ có thể chứa các kí tự chữ (A-Z a-z), số (0-9) và gạch dưới (_)."
+            @blur="checkExistCode"
           />
         </div>
 
@@ -328,6 +336,34 @@
     <div v-if="toast.show" class="fixed top-4 right-4 z-50">
       <MSToast :type="toast.type" :message="toast.message" @close="closeToast" />
     </div>
+
+    <MSPopup
+      v-model:visible="showSystemMatchPopup"
+      title="Thông báo"
+      width="500px"
+      :buttons="popupButtons"
+      @action="onPopupAction"
+    >
+      <div>
+        <div class="mb-4">
+          Đã tìm thấy một thành phần lương mặc định của hệ thống có cùng tên
+          <b>{{ systemMatchData?.salaryCompositionSystemName }}</b
+          >. Chọn thao tác bạn muốn thực hiện với đối tượng này:
+        </div>
+        <div class="flex flex-col gap-2">
+          <MSRadio
+            v-model="systemMatchOption"
+            value="use_default"
+            label="Sử dụng thành phần lương mặc định"
+          />
+          <MSRadio
+            v-model="systemMatchOption"
+            value="continue_new"
+            label="Tiếp tục thêm mới thành phần lương này"
+          />
+        </div>
+      </div>
+    </MSPopup>
   </div>
 </template>
 
@@ -339,7 +375,9 @@ import MSDropdownTree from '@/components/dropdown/MSDropdownTree.vue'
 import MSRadio from '@/components/radio/MSRadio.vue'
 import MSCheckBox from '@/components/checkbox/MSCheckBox.vue'
 import MSToast from '@/components/toast/MSToast.vue'
+import MSPopup from '@/components/popup/MSPopup.vue'
 import SalaryCompositionApi from '@/apis/components/SalaryCompositionApi'
+import SalaryCompositionSystemApi from '@/apis/components/SalaryCompositionSystemApi'
 import { CompositionType, CompositionTypeLabel } from '@/enums/CompositionType'
 import { CompositionNature, CompositionNatureLabel } from '@/enums/CompositionNature'
 import { ValueType, ValueTypeLabel } from '@/enums/ValueType'
@@ -753,6 +791,55 @@ const setFormData = (data: any, isClone: boolean = false) => {
     }
   } else if (data.compositionNature === CompositionNature.Deduction) {
     form.isTaxDeduction = data.taxDeduction
+  }
+}
+
+const showSystemMatchPopup = ref(false)
+const systemMatchData = ref<any>(null)
+const systemMatchOption = ref('use_default')
+
+const popupButtons = [
+  { label: 'Hủy', variant: 'secondary' as const },
+  { label: 'Đồng ý', variant: 'primary' as const },
+]
+
+const checkExistCode = async () => {
+  if (props.id) return
+  if (!form.code) return
+
+  try {
+    const res = await SalaryCompositionSystemApi.existCompositionCode(form.code)
+    if (res.data.data) {
+      systemMatchData.value = res.data.data
+      systemMatchOption.value = 'use_default'
+      showSystemMatchPopup.value = true
+    }
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+const onPopupAction = ({ button }: any) => {
+  if (button.label === 'Hủy') {
+    showSystemMatchPopup.value = false
+  } else if (button.label === 'Đồng ý') {
+    if (systemMatchOption.value === 'use_default') {
+      isLoading.value = true
+      SalaryCompositionApi.createFromSystem([systemMatchData.value.id])
+        .then((res) => {
+          emit('saved', res)
+          showSystemMatchPopup.value = false
+        })
+        .catch((err) => {
+          console.error(err)
+          showToast('failed', 'Có lỗi xảy ra khi tạo từ hệ thống.')
+        })
+        .finally(() => {
+          isLoading.value = false
+        })
+    } else {
+      showSystemMatchPopup.value = false
+    }
   }
 }
 
