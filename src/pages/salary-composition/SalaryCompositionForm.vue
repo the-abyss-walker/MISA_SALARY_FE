@@ -723,9 +723,9 @@ const closeToast = () => {
   toast.show = false
 }
 
-const setFormData = (data: any) => {
-  form.code = data.salaryCompositionCode
-  form.name = data.salaryCompositionName
+const setFormData = (data: any, isClone: boolean = false) => {
+  form.name = isClone ? '' : data.salaryCompositionName
+  form.code = isClone ? '' : data.salaryCompositionCode
   form.compositionType = data.compositionType
   form.unit = data.organizationUnitIds
   form.nature = data.compositionNature

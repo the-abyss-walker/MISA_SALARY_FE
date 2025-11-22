@@ -103,7 +103,7 @@ import { OptionShowPaycheckLabel } from '@/enums/OptionShowPaycheck'
 import { StatusLabel, Status } from '@/enums/Status'
 import { ValueTypeLabel } from '@/enums/ValueType'
 
-const emit = defineEmits(['edit', 'delete', 'delete-multiple'])
+const emit = defineEmits(['edit', 'delete', 'delete-multiple', 'clone'])
 
 const gridColumns = [
   { dataField: 'SalaryCompositionCode', caption: 'Mã thành phần' },
@@ -377,7 +377,7 @@ async function onPopupAction({ button }: any) {
 }
 
 function onCloneItem(item: any) {
-  console.log('Clone item', item)
+  emit('clone', item)
 }
 
 function onEditItem(item: any) {

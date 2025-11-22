@@ -85,6 +85,7 @@
         @edit="handleEdit"
         @delete="handleDelete"
         @delete-multiple="handleDeleteList"
+        @clone="handleCloneFromTable"
       />
     </div>
 
@@ -327,6 +328,25 @@ const handleDelete = async (id?: any) => {
 const handleDeleteList = (items: any[]) => {
   checkAndDelete(items)
 }
+const handleCloneFromTable = async (item: any) => {
+  try {
+    const res = await SalaryCompositionApi.getById(item.id)
+    const data = res.data.data
+
+    isAdd.value = true
+    editId.value = null
+    editItemName.value = ''
+
+    setTimeout(() => {
+      if (addComp.value) {
+        addComp.value.setFormData(data, true)
+      }
+    }, 100)
+  } catch (e) {
+    showToast('failed', 'Không thể nhân bản')
+  }
+}
+
 const handleDuplicate = async () => {
   if (!editId.value) return
   try {
@@ -340,7 +360,7 @@ const handleDuplicate = async () => {
 
     setTimeout(() => {
       if (addComp.value) {
-        addComp.value.setFormData(data)
+        addComp.value.setFormData(data, true)
       }
     }, 100)
   } catch (e) {
