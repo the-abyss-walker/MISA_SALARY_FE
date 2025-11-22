@@ -23,6 +23,7 @@
             v-model="compositionType"
             :options="compositionTypeOptions"
             placeholder="Tất cả thành phần"
+            label-position="right"
             @select="onCompositionTypeSelect"
           />
         </div>

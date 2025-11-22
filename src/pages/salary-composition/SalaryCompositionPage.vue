@@ -27,10 +27,10 @@
           ></div>
           <div
             v-if="showAddDropdown"
-            class="absolute right-0 top-full mt-1 px-[6px] py-[8px] bg-white border border-gray-200 shadow-lg rounded z-20 w-max"
+            class="ms-page-dropdown absolute right-0 top-full mt-1 bg-white border border-gray-200 shadow-lg rounded z-20 w-max"
           >
             <div
-              class="px-[8px] py-[8px] hover:bg-[#EAFBF2] cursor-pointer text-normal"
+              class="ms-page-dropdown-item hover:bg-[#EAFBF2] cursor-pointer text-normal"
               @click="handleSelectFromSystem"
             >
               Chọn từ danh mục của hệ thống
@@ -196,5 +196,15 @@ const onSaveAndAddFromHeader = () => {
 h2 {
   font-weight: 700;
   font-size: 20px;
+}
+
+.ms-page-dropdown {
+  padding-inline: 6px;
+  padding-block: 8px;
+}
+
+.ms-page-dropdown-item {
+  padding-inline: 8px;
+  padding-block: 8px;
 }
 </style>
