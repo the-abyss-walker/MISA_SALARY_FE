@@ -116,7 +116,7 @@ const gridColumns = [
   { dataField: 'Value', caption: 'Giá trị' },
   { dataField: 'Description', caption: 'Mô tả' },
   { dataField: 'OptionShowPaycheck', caption: 'Hiển thị trên phiếu lương' },
-  { dataField: 'Formula', caption: 'Nguồn tạo' },
+  { dataField: 'IsDefault', caption: 'Nguồn tạo' },
   { dataField: 'Status', caption: 'Trạng thái', cellTemplate: 'statusTemplate' },
 ]
 
@@ -160,15 +160,77 @@ const showUnfollowButton = computed(() => {
 })
 
 function onFollow() {
-  console.log('Follow', selectedItems.value)
+  if (selectedItems.value.length === 0) return
+  currentActionItem.value = { status: Status.Following }
+  popupActionType.value = 'status-multiple'
+  popupTitle.value = 'Chuyển trạng thái'
+  popupContent.value =
+    'Bạn có chắc chắn muốn chuyển trạng thái các thành phần lương đã chọn sang đang theo dõi không?'
+  popupButtons.value = [
+    { label: 'Hủy bỏ', variant: 'secondary' },
+    { label: 'Đồng ý', variant: 'primary' },
+  ]
+  popupVisible.value = true
 }
 
 function onUnfollow() {
-  console.log('Unfollow', selectedItems.value)
+  if (selectedItems.value.length === 0) return
+  currentActionItem.value = { status: Status.UnFollowing }
+  popupActionType.value = 'status-multiple'
+  popupTitle.value = 'Chuyển trạng thái'
+  popupContent.value =
+    'Bạn có chắc chắn muốn chuyển trạng thái các thành phần lương đã chọn sang ngừng theo dõi không?'
+  popupButtons.value = [
+    { label: 'Hủy bỏ', variant: 'secondary' },
+    { label: 'Đồng ý', variant: 'primary' },
+  ]
+  popupVisible.value = true
 }
 
-function onDelete() {
-  console.log('Delete', selectedItems.value)
+async function onDelete() {
+  if (selectedItems.value.length === 0) return
+
+  try {
+    const ids = selectedItems.value.map((item) => item.id)
+    const res = await SalaryCompositionApi.defaultComposition(ids)
+    const { defaultComposition, normalComposition } = res.data.data
+
+    if (defaultComposition && defaultComposition.length > 0) {
+      const names = defaultComposition.map((i: any) => i.salaryCompositionName).join(', ')
+
+      popupTitle.value = 'Xóa thành phần lương'
+      popupContent.value = `<b>${names}</b> là giá trị mặc định của hệ thống nên không thể xóa. Bạn có muốn xoá các thành phần còn lại không?`
+
+      if (normalComposition && normalComposition.length > 0) {
+        popupButtons.value = [
+          { label: 'Đóng', variant: 'primary' },
+          { label: 'Xóa', variant: 'secondary', class: 'btn-popup-delete' },
+        ]
+        currentActionItem.value = normalComposition
+        popupActionType.value = 'delete-multiple'
+      } else {
+        popupContent.value = `<b>${names}</b> là giá trị mặc định của hệ thống nên không thể xóa.`
+        popupButtons.value = [{ label: 'Đóng', variant: 'primary' }]
+        popupActionType.value = null
+      }
+      popupVisible.value = true
+    } else {
+      currentActionItem.value = normalComposition
+      popupActionType.value = 'delete-multiple'
+      popupTitle.value = 'Xóa thành phần lương'
+      popupContent.value = `Bạn có chắc chắn muốn xóa ${selectedItems.value.length} thành phần lương đã chọn không?`
+      popupButtons.value = [
+        { label: 'Không', variant: 'secondary' },
+        { label: 'Có', variant: 'primary' },
+      ]
+      popupVisible.value = true
+    }
+  } catch (error) {
+    console.error(error)
+    toastMessage.value = 'Có lỗi xảy ra khi kiểm tra dữ liệu.'
+    toastType.value = 'failed'
+    toastVisible.value = true
+  }
 }
 
 const statusOptions = [
@@ -216,6 +278,7 @@ async function loadData() {
         Value: item.value,
         Description: item.description,
         Formula: item.formula,
+        IsDefault: item.isDefault ? 'Mặc định' : 'Tự thêm',
       }
 
       for (const key in newItem) {
@@ -283,10 +346,12 @@ const popupVisible = ref(false)
 const popupTitle = ref('')
 const popupContent = ref('')
 const currentActionItem = ref<any>(null)
-const popupActionType = ref<'status' | 'delete' | null>(null)
-const popupButtons = ref([
-  { label: 'Không', variant: 'secondary' as const },
-  { label: 'Có', variant: 'primary' as const },
+const popupActionType = ref<'status' | 'delete' | 'delete-multiple' | 'status-multiple' | null>(
+  null,
+)
+const popupButtons = ref<{ label: string; variant: 'primary' | 'secondary'; class?: string }[]>([
+  { label: 'Không', variant: 'secondary' },
+  { label: 'Có', variant: 'primary' },
 ])
 
 function getActionIcon(item: any) {
@@ -340,6 +405,45 @@ async function onPopupAction({ button }: any) {
       toastType.value = 'failed'
       toastVisible.value = true
     }
+  } else if (
+    popupActionType.value === 'delete-multiple' &&
+    (button.label === 'Xóa' || button.label === 'Có')
+  ) {
+    try {
+      const ids = currentActionItem.value.map((i: any) => i.id)
+      await SalaryCompositionApi.bulkDelete(ids)
+      await loadData()
+      toastMessage.value = 'Xóa thành phần lương thành công'
+      toastType.value = 'success'
+      toastVisible.value = true
+      if (tableRef.value) {
+        tableRef.value.clearSelection()
+      }
+      selectedItems.value = []
+      selectedCount.value = 0
+    } catch (error) {
+      toastMessage.value = 'Xóa thành phần lương thất bại'
+      toastType.value = 'failed'
+      toastVisible.value = true
+    }
+  } else if (popupActionType.value === 'status-multiple' && button.label === 'Đồng ý') {
+    try {
+      const ids = selectedItems.value.map((i: any) => i.id)
+      await SalaryCompositionApi.updateListStatus(ids, currentActionItem.value.status)
+      await loadData()
+      toastMessage.value = 'Cập nhật thành công'
+      toastType.value = 'success'
+      toastVisible.value = true
+      if (tableRef.value) {
+        tableRef.value.clearSelection()
+      }
+      selectedItems.value = []
+      selectedCount.value = 0
+    } catch (error) {
+      toastMessage.value = 'Cập nhật thất bại'
+      toastType.value = 'failed'
+      toastVisible.value = true
+    }
   }
   popupVisible.value = false
 }
@@ -355,9 +459,9 @@ function onEditItem(item: any) {
 async function onDeleteItem(item: any) {
   try {
     const res = await SalaryCompositionApi.defaultComposition([item.id])
-    const { defaultCompositionIds, normalCompositionIds } = res.data.data
+    const { defaultComposition, normalComposition } = res.data.data
 
-    if (normalCompositionIds.includes(item.id)) {
+    if (normalComposition && normalComposition.length > 0) {
       currentActionItem.value = item
       popupActionType.value = 'delete'
       popupTitle.value = 'Thông báo'
@@ -367,7 +471,7 @@ async function onDeleteItem(item: any) {
         { label: 'Xóa', variant: 'primary' },
       ]
       popupVisible.value = true
-    } else if (defaultCompositionIds.includes(item.id)) {
+    } else if (defaultComposition && defaultComposition.length > 0) {
       popupActionType.value = null
       popupTitle.value = 'Thông báo'
       popupContent.value =
@@ -407,5 +511,15 @@ async function onDeleteItem(item: any) {
 .toast-slide-leave-to {
   transform: translate(100vw, -50%) !important;
   opacity: 0;
+}
+
+.btn-popup-delete {
+  background-color: #ef292f !important;
+  color: white !important;
+  border: none !important;
+}
+
+.btn-popup-delete:hover {
+  background-color: #d91b20 !important;
 }
 </style>

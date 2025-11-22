@@ -32,6 +32,7 @@
               :variant="btn.variant ?? 'secondary'"
               :icon="btn.icon"
               :disabled="btn.disabled"
+              :class="btn.class"
               @click="onButtonClick(btn, idx)"
             >
               {{ btn.label }}
@@ -54,6 +55,7 @@ type ButtonDef = {
   variant?: 'primary' | 'secondary' | 'icon'
   icon?: string
   disabled?: boolean
+  class?: string
 }
 
 const props = withDefaults(

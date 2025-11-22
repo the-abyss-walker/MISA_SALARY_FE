@@ -11,6 +11,10 @@ class SalaryCompositionApi extends BaseApi {
     return api.patch(`${this.controller}/status/${id}`, { status })
   }
 
+  updateListStatus(ids: Array<string | number>, status: number) {
+    return api.patch(`${this.controller}/list-status?status=${status}`, ids)
+  }
+
   defaultComposition(ids: Array<string | number>) {
     return api.post(`${this.controller}/default-composition`, ids)
   }
