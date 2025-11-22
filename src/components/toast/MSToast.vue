@@ -6,9 +6,6 @@
     <div class="toast-message">
       <span>{{ message }}</span>
     </div>
-    <div class="exit-icon" @click.stop="$emit('close')">
-      <MSIcon name="close" />
-    </div>
   </div>
 </template>
 
@@ -108,11 +105,5 @@ const iconName = computed(() => {
   display: flex;
   align-items: center;
   flex: 1;
-}
-
-.exit-icon {
-  display: flex;
-  align-items: end;
-  cursor: pointer;
 }
 </style>

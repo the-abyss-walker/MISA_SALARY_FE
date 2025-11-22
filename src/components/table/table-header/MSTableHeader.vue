@@ -39,6 +39,16 @@
     </div>
     <template v-if="actionMode === 'manage'">
       <MSButton
+        v-if="canFollow"
+        variant="secondary"
+        class="btn-follow"
+        icon="check_circle"
+        @click="$emit('follow')"
+      >
+        Đang theo dõi
+      </MSButton>
+      <MSButton
+        v-if="canUnfollow"
         variant="secondary"
         class="btn-unfollow"
         icon="minus_circle"
@@ -84,6 +94,8 @@ const props = withDefaults(
     showRight?: boolean
     selectedCount?: number
     actionMode?: 'manage' | 'add'
+    canFollow?: boolean
+    canUnfollow?: boolean
   }>(),
   {
     left: undefined,
@@ -105,6 +117,8 @@ const props = withDefaults(
     showRight: true,
     selectedCount: 0,
     actionMode: 'manage',
+    canFollow: false,
+    canUnfollow: true,
   },
 )
 
@@ -118,6 +132,7 @@ const emit = defineEmits([
   'filter',
   'search',
   'unfollow',
+  'follow',
   'delete',
   'deselect',
   'add-to-list',
@@ -166,6 +181,18 @@ function onRightSelect(opt: any) {
 .btn-unfollow:hover {
   color: #ff9900 !important;
   --ms-icon-color: #ff9900 !important;
+}
+
+.btn-follow {
+  background-color: white !important;
+  border: 1px solid #34b057 !important;
+  color: #34b057 !important;
+  --ms-icon-color: #34b057 !important;
+}
+
+.btn-follow:hover {
+  color: #34b057 !important;
+  --ms-icon-color: #34b057 !important;
 }
 
 .btn-delete {

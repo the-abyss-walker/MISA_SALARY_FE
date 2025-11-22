@@ -7,7 +7,6 @@
       :data-source="treeDataSource"
       value-expr="id"
       display-expr="organizationName"
-      :placeholder="placeholder"
       :width="width"
       :height="height"
       class="custom-dropdown-box"
@@ -352,5 +351,9 @@ function treeViewItemSelectionChanged(e: DxTreeViewTypes.ItemSelectionChangedEve
   border-radius: 4px;
   background-color: white;
   color: white;
+}
+
+.dx-dropdowneditor-input-wrapper.dx-selectbox-container {
+  width: 100% !important;
 }
 </style>

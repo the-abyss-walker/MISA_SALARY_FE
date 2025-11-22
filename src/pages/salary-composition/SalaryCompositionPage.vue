@@ -116,9 +116,6 @@ const showToast = (type: 'success' | 'information' | 'warning' | 'failed', messa
   toast.type = type
   toast.message = message
   toast.show = true
-  setTimeout(() => {
-    toast.show = false
-  }, 3000)
 }
 
 const closeToast = () => {

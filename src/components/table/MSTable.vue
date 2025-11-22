@@ -250,6 +250,12 @@ defineExpose({
   background-color: #34b057 !important;
 }
 
+.dx-row.dx-selection,
+.dx-datagrid
+  .dx-datagrid-sticky-columns
+  .dx-datagrid-table
+  .dx-row.dx-state-hover.dx-selection
+  td.dx-datagrid-sticky-column-border-left,
 .mstable__grid .dx-datagrid-rowsview .dx-selection.dx-row > td,
 .mstable__grid .dx-datagrid-rowsview .dx-selection.dx-row:hover > td {
   background-color: #eafbf2 !important;

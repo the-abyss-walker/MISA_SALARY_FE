@@ -24,12 +24,15 @@
       v-model:search="searchQuery"
       v-bind="headerBindings"
       :selectedCount="selectedCount"
+      :canFollow="showFollowButton"
+      :canUnfollow="showUnfollowButton"
       @left-select="onLeftSelect"
       @right-select="onRightSelect"
       @filter="onFilter"
       @config="onConfig"
       @search="onSearchInput"
       @unfollow="onUnfollow"
+      @follow="onFollow"
       @delete="onDelete"
       @deselect="onDeselect"
     />
@@ -46,11 +49,12 @@
         <div class="status-cell">
           <div
             class="status-dot"
-            :style="{ backgroundColor: data.value === 'Đang theo dõi' ? '#34B057' : '#FF9900' }"
+            :style="{
+              backgroundColor: data.data.value === 'Đang theo dõi' ? '#34B057' : '#FF9900',
+            }"
           ></div>
-          <span :style="{ color: data.value === 'Đang theo dõi' ? '#34B057' : '#FF9900' }">
-            {{ data.value }}
-            {{ console.log(data) }}
+          <span :style="{ color: data.data.value === 'Đang theo dõi' ? '#34B057' : '#FF9900' }">
+            {{ data.data.value }}
           </span>
         </div>
       </template>
@@ -147,6 +151,18 @@ function onDeselect() {
   }
 }
 
+const showFollowButton = computed(() => {
+  return selectedItems.value.some((item) => item.status === Status.UnFollowing)
+})
+
+const showUnfollowButton = computed(() => {
+  return selectedItems.value.some((item) => item.status === Status.Following)
+})
+
+function onFollow() {
+  console.log('Follow', selectedItems.value)
+}
+
 function onUnfollow() {
   console.log('Unfollow', selectedItems.value)
 }
@@ -214,7 +230,7 @@ async function loadData() {
     toastVisible.value = false
   } catch (error) {
     // show toast with error message
-    const errMsg = 'Lỗi'
+    const errMsg = 'Lỗi khi tải dữ liệu.'
     toastMessage.value = String(errMsg)
     toastType.value = 'failed'
     toastVisible.value = true
@@ -267,10 +283,11 @@ const popupVisible = ref(false)
 const popupTitle = ref('')
 const popupContent = ref('')
 const currentActionItem = ref<any>(null)
-const popupButtons = [
+const popupActionType = ref<'status' | 'delete' | null>(null)
+const popupButtons = ref([
   { label: 'Không', variant: 'secondary' as const },
   { label: 'Có', variant: 'primary' as const },
-]
+])
 
 function getActionIcon(item: any) {
   return item.status === Status.Following ? 'minus_circle' : 'check_circle'
@@ -282,6 +299,11 @@ function getActionTitle(item: any) {
 
 function onActionClick(item: any) {
   currentActionItem.value = item
+  popupActionType.value = 'status'
+  popupButtons.value = [
+    { label: 'Không', variant: 'secondary' },
+    { label: 'Có', variant: 'primary' },
+  ]
   popupTitle.value = 'Chuyển trạng thái'
   const actionText = item.status === Status.Following ? 'ngừng theo dõi' : 'theo dõi'
   popupContent.value = `Bạn có chắc chắn muốn chuyển trạng thái thành phần lương <b>${item.SalaryCompositionName}</b> sang ${actionText} không?`
@@ -289,7 +311,7 @@ function onActionClick(item: any) {
 }
 
 async function onPopupAction({ button }: any) {
-  if (button.label === 'Có') {
+  if (popupActionType.value === 'status' && button.label === 'Có') {
     try {
       const newStatus =
         currentActionItem.value.status === Status.Following ? Status.UnFollowing : Status.Following
@@ -306,6 +328,18 @@ async function onPopupAction({ button }: any) {
       toastType.value = 'failed'
       toastVisible.value = true
     }
+  } else if (popupActionType.value === 'delete' && button.label === 'Xóa') {
+    try {
+      await SalaryCompositionApi.delete(currentActionItem.value.id)
+      await loadData()
+      toastMessage.value = 'Xóa thành phần lương thành công'
+      toastType.value = 'success'
+      toastVisible.value = true
+    } catch (error) {
+      toastMessage.value = 'Xóa thành phần lương thất bại'
+      toastType.value = 'failed'
+      toastVisible.value = true
+    }
   }
   popupVisible.value = false
 }
@@ -318,8 +352,32 @@ function onEditItem(item: any) {
   console.log('Edit item', item)
 }
 
-function onDeleteItem(item: any) {
-  console.log('Delete item', item)
+async function onDeleteItem(item: any) {
+  try {
+    const res = await SalaryCompositionApi.defaultComposition([item.id])
+    const { defaultCompositionIds, normalCompositionIds } = res.data.data
+
+    if (normalCompositionIds.includes(item.id)) {
+      currentActionItem.value = item
+      popupActionType.value = 'delete'
+      popupTitle.value = 'Thông báo'
+      popupContent.value = `Bạn có chắc chắn muốn xóa thành phần lương <b>${item.SalaryCompositionName}</b> không?`
+      popupButtons.value = [
+        { label: 'Hủy', variant: 'secondary' },
+        { label: 'Xóa', variant: 'primary' },
+      ]
+      popupVisible.value = true
+    } else if (defaultCompositionIds.includes(item.id)) {
+      popupActionType.value = null
+      popupTitle.value = 'Thông báo'
+      popupContent.value =
+        'Đây là thành phần lương mặc định của hệ thống nên không thể xóa. Vui lòng kiểm tra lại.'
+      popupButtons.value = [{ label: 'Đóng', variant: 'primary' }]
+      popupVisible.value = true
+    }
+  } catch (error) {
+    console.error(error)
+  }
 }
 </script>
 
