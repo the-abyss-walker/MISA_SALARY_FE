@@ -237,18 +237,18 @@ const checkAndDelete = async (items: any | any[]) => {
         : `Bạn có chắc chắn muốn xóa thành phần lương <b>${name}</b> không?`
 
       deletePopupButtons.value = [
-        { label: 'Không', variant: 'secondary' },
-        { label: 'Có', variant: 'primary' },
+        { label: 'Hủy', variant: 'secondary' },
+        { label: 'Xóa', variant: 'primary', class: 'btn-popup-delete' },
       ]
       if (isMultiple) {
         deletePopupButtons.value = [
-          { label: 'Không', variant: 'secondary' },
-          { label: 'Có', variant: 'primary' },
+          { label: 'Hủy', variant: 'secondary' },
+          { label: 'Xóa', variant: 'primary', class: 'btn-popup-delete' },
         ]
       } else {
         deletePopupButtons.value = [
           { label: 'Hủy', variant: 'secondary' },
-          { label: 'Xóa', variant: 'primary' },
+          { label: 'Xóa', variant: 'primary', class: 'btn-popup-delete' },
         ]
       }
 

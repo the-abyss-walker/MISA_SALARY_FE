@@ -44,6 +44,7 @@
       :columns="gridColumns"
       :show-selection="true"
       @selection-change="onSelectionChange"
+      @row-click="onRowClick"
     >
       <template #statusTemplate="{ data }">
         <div class="status-cell">
@@ -374,6 +375,12 @@ async function onPopupAction({ button }: any) {
     }
   }
   popupVisible.value = false
+}
+
+function onRowClick(e: any) {
+  if (e && e.data) {
+    onEditItem(e.data)
+  }
 }
 
 function onCloneItem(item: any) {
