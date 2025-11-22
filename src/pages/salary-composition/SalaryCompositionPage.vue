@@ -27,10 +27,10 @@
           ></div>
           <div
             v-if="showAddDropdown"
-            class="ms-page-dropdown absolute right-0 top-full mt-1 bg-white border border-gray-200 shadow-lg rounded z-20 w-max"
+            class="ms-system-dropdown absolute right-0 top-full mt-1 bg-white border border-gray-200 shadow-lg rounded z-20 w-max"
           >
             <div
-              class="ms-page-dropdown-item hover:bg-[#EAFBF2] cursor-pointer text-normal"
+              class="ms-system-dropdown-item hover:bg-[#EAFBF2] cursor-pointer text-normal"
               @click="handleSelectFromSystem"
             >
               Chọn từ danh mục của hệ thống
@@ -80,7 +80,12 @@
 
     <!-- Body: render list or add form via children -->
     <div v-if="!isAdd">
-      <SalayryCompositionTable @edit="handleEdit" />
+      <SalayryCompositionTable
+        ref="tableRef"
+        @edit="handleEdit"
+        @delete="handleDelete"
+        @delete-multiple="handleDeleteList"
+      />
     </div>
 
     <div v-else>
@@ -107,6 +112,16 @@
       @action="onConfirmAction"
     />
 
+    <!-- Delete Popup -->
+    <MSPopup
+      v-model:visible="deletePopupVisible"
+      :title="deletePopupTitle"
+      :buttons="deletePopupButtons"
+      @action="onDeletePopupAction"
+    >
+      <div v-html="deletePopupContent"></div>
+    </MSPopup>
+
     <!-- System Category Popup -->
     <SalaryCompositionPopup
       v-model:visible="showSystemCategoryPopup"
@@ -129,6 +144,7 @@ import SalaryCompositionPopup from './SalaryCompositionPopup.vue'
 
 const isAdd = ref(false)
 const addComp = ref<any>(null)
+const tableRef = ref<any>(null)
 const router = useRouter()
 const showConfirmPopup = ref(false)
 const showAddDropdown = ref(false)
@@ -136,6 +152,14 @@ const showEditDropdown = ref(false)
 const showSystemCategoryPopup = ref(false)
 const editId = ref<string | null>(null)
 const editItemName = ref('')
+
+// Delete Popup State
+const deletePopupVisible = ref(false)
+const deletePopupTitle = ref('')
+const deletePopupContent = ref('')
+const deletePopupButtons = ref<any[]>([])
+const deleteTargetItems = ref<any[]>([])
+const isDeleteMultiple = ref(false)
 
 const toast = reactive({
   show: false,
@@ -171,20 +195,138 @@ const toggleEditDropdown = () => {
   showEditDropdown.value = !showEditDropdown.value
 }
 
-const handleDelete = async () => {
-  if (!editId.value) return
+const checkAndDelete = async (items: any | any[]) => {
+  const isMultiple = Array.isArray(items)
+  const targetList = isMultiple ? items : [items]
+  const ids = targetList.map((i: any) => i.id)
+
+  deleteTargetItems.value = targetList
+  isDeleteMultiple.value = isMultiple
+
   try {
-    await SalaryCompositionApi.delete(editId.value)
-    showToast('success', 'Xóa thành công')
-    isAdd.value = false
-    editId.value = null
-    editItemName.value = ''
-    showEditDropdown.value = false
+    const res = await SalaryCompositionApi.defaultComposition(ids)
+    const { defaultComposition, normalComposition } = res.data.data
+
+    if (defaultComposition && defaultComposition.length > 0) {
+      const names = defaultComposition.map((i: any) => i.salaryCompositionName).join(', ')
+
+      deletePopupTitle.value = 'Xóa thành phần lương'
+
+      if (normalComposition && normalComposition.length > 0) {
+        deletePopupContent.value = `<b>${names}</b> là giá trị mặc định của hệ thống nên không thể xóa. Bạn có muốn xoá các thành phần còn lại không?`
+        deletePopupButtons.value = [
+          { label: 'Đóng', variant: 'primary' },
+          { label: 'Xóa', variant: 'secondary', class: 'btn-popup-delete' },
+        ]
+        deleteTargetItems.value = normalComposition
+      } else {
+        deletePopupContent.value = `<b>${names}</b> là giá trị mặc định của hệ thống nên không thể xóa.`
+        deletePopupButtons.value = [{ label: 'Đóng', variant: 'primary' }]
+        deleteTargetItems.value = [] // Nothing to delete
+      }
+      deletePopupVisible.value = true
+    } else {
+      // No default composition, normal delete
+      deletePopupTitle.value = isMultiple ? 'Xóa thành phần lương' : 'Thông báo'
+      const count = targetList.length
+      const name = targetList[0].SalaryCompositionName || targetList[0].salaryCompositionName
+
+      deletePopupContent.value = isMultiple
+        ? `Bạn có chắc chắn muốn xóa ${count} thành phần lương đã chọn không?`
+        : `Bạn có chắc chắn muốn xóa thành phần lương <b>${name}</b> không?`
+
+      deletePopupButtons.value = [
+        { label: 'Không', variant: 'secondary' },
+        { label: 'Có', variant: 'primary' },
+      ]
+      if (isMultiple) {
+        deletePopupButtons.value = [
+          { label: 'Không', variant: 'secondary' },
+          { label: 'Có', variant: 'primary' },
+        ]
+      } else {
+        deletePopupButtons.value = [
+          { label: 'Hủy', variant: 'secondary' },
+          { label: 'Xóa', variant: 'primary' },
+        ]
+      }
+
+      deletePopupVisible.value = true
+    }
   } catch (e) {
-    showToast('failed', 'Xóa thất bại')
+    console.error(e)
+    showToast('failed', 'Có lỗi xảy ra khi kiểm tra dữ liệu.')
   }
 }
 
+const onDeletePopupAction = async ({ button }: any) => {
+  if (!button) return
+  const label = button.label
+
+  if (label === 'Xóa' || label === 'Có') {
+    if (deleteTargetItems.value.length === 0) {
+      deletePopupVisible.value = false
+      return
+    }
+
+    const ids = deleteTargetItems.value.map((i: any) => i.id)
+    try {
+      if (isDeleteMultiple.value || ids.length > 1) {
+        await SalaryCompositionApi.bulkDelete(ids)
+      } else {
+        await SalaryCompositionApi.delete(ids[0])
+      }
+
+      showToast('success', 'Xóa thành công')
+      deletePopupVisible.value = false
+
+      if (isAdd.value) {
+        // If we were in add/edit mode
+        isAdd.value = false
+        editId.value = null
+        editItemName.value = ''
+        showEditDropdown.value = false
+      } else {
+        // Refresh table
+        if (tableRef.value?.loadData) {
+          tableRef.value.loadData()
+          tableRef.value.clearSelection?.()
+        }
+      }
+    } catch (e) {
+      showToast('failed', 'Xóa thất bại')
+    }
+  } else {
+    // Close
+    deletePopupVisible.value = false
+  }
+}
+
+const handleDelete = async (id?: any) => {
+  debugger
+  let itemToDelete = null
+  const isEvent = id && (id instanceof Event || !!id.target)
+
+  if (id && typeof id === 'object' && !isEvent) {
+    // Passed from table event
+    itemToDelete = id
+  } else if (typeof id === 'string') {
+    // Passed ID string?
+    itemToDelete = { id: id, SalaryCompositionName: '' } // Name might be missing if just ID passed
+  } else {
+    // From header
+    if (!editId.value) return
+    itemToDelete = { id: editId.value, SalaryCompositionName: editItemName.value }
+  }
+
+  if (itemToDelete) {
+    checkAndDelete(itemToDelete)
+  }
+}
+
+const handleDeleteList = (items: any[]) => {
+  checkAndDelete(items)
+}
 const handleDuplicate = async () => {
   if (!editId.value) return
   try {
@@ -300,5 +442,25 @@ h2 {
 .ms-page-dropdown-item {
   padding-inline: 8px;
   padding-block: 8px;
+}
+.ms-system-dropdown {
+  padding-inline: 6px;
+  padding-block: 8px;
+  border-radius: 4px;
+}
+
+.ms-system-dropdown-item {
+  padding-inline: 8px;
+  padding-block: 8px;
+}
+
+.btn-popup-delete {
+  background-color: #ef292f !important;
+  color: white !important;
+  border: none !important;
+}
+
+.btn-popup-delete:hover {
+  background-color: #d91b20 !important;
 }
 </style>
