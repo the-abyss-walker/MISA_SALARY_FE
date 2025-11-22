@@ -74,7 +74,7 @@
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import MSIcon from '@/components/icons/MSIcon.vue'
 
-type Opt = { label: string; value: any; disabled?: boolean }
+type Opt = { label: string; value: any; disabled?: boolean; [key: string]: any }
 
 const props = withDefaults(
   defineProps<{
@@ -86,7 +86,7 @@ const props = withDefaults(
     labelAlign?: 'left' | 'right'
     searchable?: boolean
     searchPlaceholder?: string
-    width?: number
+    width?: number | string
     maxHeight?: number
     labelPosition?: 'left' | 'right'
     bordered?: boolean
@@ -136,10 +136,14 @@ const buttonClasses = computed(() => ({
   hoverable: !!props.hoverable,
 }))
 
-const containerStyle = computed(() => ({ width: `${props.width}px` }))
+const containerStyle = computed(() => {
+  const w = props.width
+  return { width: typeof w === 'number' ? `${w}px` : w }
+})
 const panelStyle = computed(() => {
+  const w = props.width
   const base: Record<string, string> = {
-    minWidth: `${props.width}px`,
+    minWidth: typeof w === 'number' ? `${w}px` : w,
     maxHeight: `${props.maxHeight}px`,
   }
 

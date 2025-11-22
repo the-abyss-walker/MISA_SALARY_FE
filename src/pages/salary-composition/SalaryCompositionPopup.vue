@@ -63,7 +63,6 @@ import SalaryCompositionSystemApi from '@/apis/components/SalaryCompositionSyste
 import { CompositionType, CompositionTypeLabel } from '@/enums/CompositionType'
 import { CompositionNatureLabel } from '@/enums/CompositionNature'
 import { OptionShowPaycheckLabel } from '@/enums/OptionShowPaycheck'
-import { StatusLabel, Status } from '@/enums/Status'
 import { ValueTypeLabel } from '@/enums/ValueType'
 
 const props = defineProps<{

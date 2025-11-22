@@ -108,7 +108,7 @@ const props = withDefaults(defineProps<Props>(), {
   modelValue: () => [],
 })
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue', 'loaded'])
 
 const actualMaxDisplayedTags = computed(() => {
   return props.maxDisplayedTags === null ? undefined : props.maxDisplayedTags
@@ -134,6 +134,7 @@ const getOrganizationUnit = async () => {
   try {
     const res = await OrganizationApi.getAll()
     treeDataSource.value = res.data.data
+    emit('loaded', res.data.data)
   } catch (error) {
     console.error(error)
   }
@@ -142,6 +143,13 @@ const getOrganizationUnit = async () => {
 onMounted(() => {
   getOrganizationUnit()
 })
+
+watch(
+  () => props.modelValue,
+  () => {
+    syncTreeViewSelection()
+  },
+)
 
 function treeViewContentReady({ component }: DxTreeViewTypes.ContentReadyEvent) {
   treeView = component
@@ -355,5 +363,9 @@ function treeViewItemSelectionChanged(e: DxTreeViewTypes.ItemSelectionChangedEve
 
 .dx-dropdowneditor-input-wrapper.dx-selectbox-container {
   width: 100% !important;
+}
+
+.dx-placeholder {
+  font-size: 14px;
 }
 </style>

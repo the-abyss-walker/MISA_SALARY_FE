@@ -3,7 +3,7 @@
     <div class="bg-white rounded shadow add-form">
       <form @submit.prevent="onSubmit" class="flex flex-col">
         <!-- Row 1: Tên thành phần (required) -->
-        <div class="ms-row flex items-center">
+        <div class="ms-row flex items-start">
           <div class="width-186px">
             <label class="pd-r-8">
               <b>Tên thành phần</b>
@@ -11,18 +11,11 @@
             </label>
           </div>
 
-          <MSInputItem
-            ref="nameRef"
-            v-model="form.name"
-            :width="675"
-            :maxLength="100"
-            required
-            placeholder="Nhập tên thành phần"
-          />
+          <MSInputItem ref="nameRef" v-model="form.name" :width="675" :maxLength="100" required />
         </div>
 
         <!-- Row 2: Mã thành phần (required) -->
-        <div class="ms-row flex items-center">
+        <div class="ms-row flex items-start">
           <div class="width-186px">
             <label class="pd-r-8">
               <b>Mã thành phần</b>
@@ -36,11 +29,13 @@
             :maxLength="20"
             required
             placeholder="Nhập mã thành phần"
+            pattern="^[A-Za-z0-9_]*$"
+            errorMessage="Mã thành phần chỉ có thể chứa các kí tự chữ (A-Z a-z), số (0-9) và gạch dưới (_)."
           />
         </div>
 
         <!-- Row 3: Đơn vị áp dụng (required) -->
-        <div class="ms-row flex items-center">
+        <div class="ms-row flex items-start">
           <div class="width-186px">
             <label class="pd-r-8">
               <b>Đơn vị áp dụng</b>
@@ -60,11 +55,12 @@
             :hoverable="true"
             labelPosition="left"
             labelAlign="left"
+            @loaded="onUnitLoaded"
           />
         </div>
 
         <!-- Row 4: Loại thành phần (required) -->
-        <div class="ms-row flex items-center">
+        <div class="ms-row flex items-start">
           <div class="width-186px">
             <label class="pd-r-8">
               <b>Loại thành phần</b>
@@ -88,7 +84,7 @@
         </div>
 
         <!-- Row 5: Tính chất (required) -->
-        <div class="ms-row flex items-center">
+        <div class="ms-row flex items-start">
           <div class="width-186px">
             <label class="pd-r-8">
               <b>Tính chất</b>
@@ -146,7 +142,7 @@
         </div>
 
         <!-- Row 7: Kiểu giá trị -->
-        <div class="ms-row flex items-center">
+        <div class="ms-row flex items-start">
           <div class="width-186px">
             <label class="pd-r-8"><b>Kiểu giá trị</b></label>
           </div>
@@ -180,30 +176,77 @@
               v-if="[ValueType.Number, ValueType.Money].includes(form.valueType)"
               class="flex flex-col mb-2 gap-2"
             >
-              <div class="flex items-center gap-2">
+              <div class="flex flex-col">
+                <div class="flex items-center gap-2">
+                  <MSRadio
+                    v-model="form.valueCalculationMethod"
+                    :value="FormulaCompositionType.AutoSumFormula"
+                    label="Tự động cộng tổng giá trị của các nhân viên"
+                  />
+                  <div
+                    v-if="form.valueCalculationMethod === FormulaCompositionType.AutoSumFormula"
+                    class="flex items-center gap-2"
+                  >
+                    <MSDropdown
+                      v-model="form.autoSumScope"
+                      :options="autoSumScopeOptions"
+                      width="fit-content"
+                      :bordered="true"
+                      :hoverable="true"
+                      labelPosition="left"
+                      labelAlign="left"
+                    />
+                    <MSDropdown
+                      v-if="form.autoSumScope === AutoSumEmployeeType.BelongToOrganization"
+                      v-model="form.autoSumLevel"
+                      :options="levelOptions"
+                      :width="110"
+                      :bordered="true"
+                      :hoverable="true"
+                      placeholder="Chọn cấp"
+                      labelPosition="left"
+                      labelAlign="left"
+                    />
+                  </div>
+                </div>
+                <div
+                  v-if="form.valueCalculationMethod === FormulaCompositionType.AutoSumFormula"
+                  class="mt-2"
+                >
+                  <MSDropdown
+                    v-model="form.autoSumCompositionCode"
+                    :options="salaryCompositions"
+                    :width="'100%'"
+                    :bordered="true"
+                    :hoverable="true"
+                    :searchable="true"
+                    :inlineSearch="true"
+                    searchPlaceholder="Chọn thành phần lương để cộng giá trị"
+                    labelPosition="left"
+                    labelAlign="left"
+                  >
+                    <template #option="{ option }">
+                      <div class="truncate">
+                        {{ option.name }} (<b>{{ option.code }}</b
+                        >)
+                      </div>
+                    </template>
+                  </MSDropdown>
+                </div>
+              </div>
+              <div class="flex items-center mt-2">
                 <MSRadio
                   v-model="form.valueCalculationMethod"
-                  :value="FormulaCompositionType.AutoSumFormula"
-                  label="Tự động cộng giá trị của nhân viên"
-                />
-                <MSDropdown
-                  v-model="form.autoSumScope"
-                  :options="autoSumScopeOptions"
-                  :disabled="form.valueCalculationMethod !== FormulaCompositionType.AutoSumFormula"
-                  :width="250"
-                  :bordered="true"
-                  :hoverable="true"
-                  labelPosition="left"
-                  labelAlign="left"
+                  :value="FormulaCompositionType.CustomFormula"
+                  label="Tính theo công thức tự đặt"
                 />
               </div>
-              <MSRadio
-                v-model="form.valueCalculationMethod"
-                :value="FormulaCompositionType.CustomFormula"
-                label="Tính theo công thức tự đặt"
-              />
             </div>
             <MSInputItem
+              v-if="
+                ![ValueType.Number, ValueType.Money].includes(form.valueType) ||
+                form.valueCalculationMethod === FormulaCompositionType.CustomFormula
+              "
               ref="valueRef"
               v-model="form.value"
               :width="675"
@@ -252,9 +295,12 @@
         </div>
 
         <!-- Row 11: Nguồn tạo (fixed label) -->
-        <div class="ms-row flex items-center gap-4">
-          <b>Nguồn tạo</b>
-          <div class="px-3 py-2 border rounded bg-gray-50">Tự thêm</div>
+        <div class="ms-row flex items-center">
+          <div class="width-186px">
+            <label class="pd-r-8"><b>Nguồn tạo</b></label>
+          </div>
+
+          <div class="source">Tự thêm</div>
         </div>
       </form>
     </div>
@@ -280,6 +326,7 @@ import { AutoSumEmployeeType, AutoSumEmployeeTypeLabel } from '@/enums/AutoSumEm
 import { OptionShowPaycheck } from '@/enums/OptionShowPaycheck'
 import { Status } from '@/enums/Status'
 import { FormulaCompositionType } from '@/enums/FormulaCompositionType'
+import { AutoSumOrgLevel, AutoSumOrgLevelLabel } from '@/enums/AutoSumOrgLevel'
 
 const emit = defineEmits<{
   (e: 'saved', payload: any): void
@@ -304,6 +351,23 @@ const form = reactive({
   valueCalculationMethod: FormulaCompositionType.CustomFormula,
   allowExceedNorm: false,
   autoSumScope: AutoSumEmployeeType.SameWorkingUnit,
+  autoSumLevel: AutoSumOrgLevel.Level1,
+  autoSumCompositionCode: null,
+})
+
+const salaryCompositions = ref<any[]>([])
+
+// Fetch salary compositions
+SalaryCompositionApi.getAll().then((res) => {
+  console.log(res.data.data)
+  if (res.data.data) {
+    salaryCompositions.value = res.data.data.map((item: any) => ({
+      label: item.salaryCompositionName + ' (' + item.salaryCompositionCode + ')',
+      value: item.salaryCompositionCode,
+      name: item.salaryCompositionName,
+      code: item.salaryCompositionCode,
+    }))
+  }
 })
 
 const toast = reactive({
@@ -364,6 +428,13 @@ const autoSumScopeOptions = Object.values(AutoSumEmployeeType)
     value: v,
   }))
 
+const levelOptions = Object.values(AutoSumOrgLevel)
+  .filter((v) => typeof v === 'number')
+  .map((v) => ({
+    label: AutoSumOrgLevelLabel[v as AutoSumOrgLevel],
+    value: v,
+  }))
+
 watch(
   () => form.compositionType,
   (newType) => {
@@ -393,6 +464,49 @@ watch(
     }
   },
 )
+
+const isLoading = ref(false)
+
+const removeVietnameseTones = (str: string) => {
+  str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, 'a')
+  str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, 'e')
+  str = str.replace(/ì|í|ị|ỉ|ĩ/g, 'i')
+  str = str.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, 'o')
+  str = str.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, 'u')
+  str = str.replace(/ỳ|ý|ỵ|ỷ|ỹ/g, 'y')
+  str = str.replace(/đ/g, 'd')
+  str = str.replace(/À|Á|Ạ|Ả|Ã|Â|Ầ|Ấ|Ậ|Ẩ|Ẫ|Ă|Ằ|Ắ|Ặ|Ẳ|Ẵ/g, 'A')
+  str = str.replace(/È|É|Ẹ|Ẻ|Ẽ|Ê|Ề|Ế|Ệ|Ể|Ễ/g, 'E')
+  str = str.replace(/Ì|Í|Ị|Ỉ|Ĩ/g, 'I')
+  str = str.replace(/Ò|Ó|Ọ|Ỏ|Õ|Ô|Ồ|Ố|Ộ|Ổ|Ỗ|Ơ|Ờ|Ớ|Ợ|Ở|Ỡ/g, 'O')
+  str = str.replace(/Ù|Ú|Ụ|Ủ|Ũ|Ư|Ừ|Ứ|Ự|Ử|Ữ/g, 'U')
+  str = str.replace(/Ỳ|Ý|Ỵ|Ỷ|Ỹ/g, 'Y')
+  str = str.replace(/Đ/g, 'D')
+  str = str.replace(/\u0300|\u0301|\u0303|\u0309|\u0323/g, '')
+  str = str.replace(/\u02C6|\u0306|\u031B/g, '')
+  return str
+}
+
+watch(
+  () => form.name,
+  (newVal) => {
+    if (newVal) {
+      let code = removeVietnameseTones(newVal)
+      code = code.toUpperCase()
+      code = code.replace(/\s+/g, '_')
+      code = code.replace(/[^A-Z0-9_]/g, '')
+      form.code = code
+    } else {
+      form.code = ''
+    }
+  },
+)
+
+const onUnitLoaded = (data: any[]) => {
+  if (data && data.length > 0 && (!form.unit || form.unit.length === 0)) {
+    form.unit = [data[0].id]
+  }
+}
 
 const submit = (mode: 'save' | 'saveAndAdd' = 'save') => {
   // validate fields before emitting
@@ -444,14 +558,23 @@ const submit = (mode: 'save' | 'saveAndAdd' = 'save') => {
     IsNotAllowDelete: false,
     OrganizationUnitIds: form.unit?.map(String) || [],
     IsDefault: false,
-    AutoSumCompositionCode: null,
+    AutoSumCompositionCode:
+      form.valueCalculationMethod === FormulaCompositionType.AutoSumFormula
+        ? form.autoSumCompositionCode
+        : null,
     IsAutoSumEmployee: form.valueCalculationMethod === FormulaCompositionType.AutoSumFormula,
     AutoSumEmployeeType:
       form.valueCalculationMethod === FormulaCompositionType.AutoSumFormula
         ? form.autoSumScope
         : null,
+    AutoSumOrgLevel:
+      form.valueCalculationMethod === FormulaCompositionType.AutoSumFormula &&
+      form.autoSumScope === AutoSumEmployeeType.BelongToOrganization
+        ? form.autoSumLevel
+        : null,
     FormulaCompositionType: form.valueCalculationMethod,
   }
+  isLoading.value = true
   SalaryCompositionApi.create(payload)
     .then((res) => {
       if (mode === 'save') {
@@ -464,6 +587,9 @@ const submit = (mode: 'save' | 'saveAndAdd' = 'save') => {
     .catch((err) => {
       console.error(err)
       showToast('failed', err.response.data.errors[0].message || 'Có lỗi xảy ra vui lòng thử lại.')
+    })
+    .finally(() => {
+      isLoading.value = false
     })
 }
 
@@ -492,6 +618,8 @@ const onReset = () => {
   form.valueCalculationMethod = FormulaCompositionType.CustomFormula
   form.allowExceedNorm = false
   form.autoSumScope = AutoSumEmployeeType.SameWorkingUnit
+  form.autoSumLevel = 1
+  form.autoSumCompositionCode = null
 
   // Reset dirty state after reset
   setTimeout(() => {
@@ -543,5 +671,10 @@ defineExpose({ submit, isDirty })
 
 :deep(.ms-dropdown-btn.pointer-events-none) {
   background-color: #e0e0e0 !important;
+}
+
+.source {
+  width: 675px;
+  border-bottom: 1px solid #e3e5ee;
 }
 </style>
