@@ -7,7 +7,7 @@
           <MSIcon name="arrow_left" />
         </button>
 
-        <h2 v-if="isAdd">Thêm thành phần</h2>
+        <h2 v-if="isAdd">{{ editId ? editItemName : 'Thêm thành phần' }}</h2>
         <h2 v-else>Thành phần lương</h2>
       </div>
 
@@ -40,19 +40,52 @@
 
         <template v-if="isAdd">
           <MSButton variant="secondary" @click="goBack">Hủy bỏ</MSButton>
-          <MSButton variant="secondary" @click="onSaveAndAddFromHeader">Lưu và thêm</MSButton>
-          <MSButton variant="primary" @click="onSaveFromHeader">Lưu</MSButton>
+          <template v-if="!editId">
+            <MSButton variant="secondary" @click="onSaveAndAddFromHeader">Lưu và thêm</MSButton>
+            <MSButton variant="primary" @click="onSaveFromHeader">Lưu</MSButton>
+          </template>
+          <template v-else>
+            <MSButton variant="primary" @click="onSaveFromHeader">Lưu</MSButton>
+            <div class="relative">
+              <MSButton variant="icon" icon="threedot" @click="toggleEditDropdown" />
+              <div
+                v-if="showEditDropdown"
+                class="fixed inset-0 z-10"
+                @click="showEditDropdown = false"
+              ></div>
+              <div
+                v-if="showEditDropdown"
+                class="ms-page-dropdown absolute right-0 top-full mt-1 bg-white border border-gray-200 shadow-lg rounded z-20"
+              >
+                <div
+                  class="flex items-center ms-page-dropdown-item hover:bg-[#EAFBF2] cursor-pointer text-normal"
+                  @click="handleDuplicate"
+                >
+                  <MSIcon name="copy" class="mr-2" />
+                  Nhân bản
+                </div>
+                <div
+                  class="flex items-center ms-page-dropdown-item hover:bg-[#EAFBF2] cursor-pointer text-normal"
+                  @click="handleDelete"
+                >
+                  <MSIcon name="trash" class="mr-2" />
+                  Xóa
+                </div>
+              </div>
+            </div>
+          </template>
         </template>
       </div>
     </div>
 
     <!-- Body: render list or add form via children -->
     <div v-if="!isAdd">
-      <SalayryCompositionTable />
+      <SalayryCompositionTable @edit="handleEdit" />
     </div>
 
     <div v-else>
-      <SalaryCompositionAdd
+      <SalaryCompositionForm
+        :id="editId"
         @saved="onSaved"
         @savedAndAdd="onSavedAndAdd"
         @cancel="goBack"
@@ -89,7 +122,8 @@ import MSButton from '@/components/button/MSButton.vue'
 import MSIcon from '@/components/icons/MSIcon.vue'
 import MSToast from '@/components/toast/MSToast.vue'
 import MSPopup from '@/components/popup/MSPopup.vue'
-import SalaryCompositionAdd from './SalaryCompositionForm.vue'
+import SalaryCompositionApi from '@/apis/components/SalaryCompositionApi'
+import SalaryCompositionForm from './SalaryCompositionForm.vue'
 import SalayryCompositionTable from './SalayryCompositionTable.vue'
 import SalaryCompositionPopup from './SalaryCompositionPopup.vue'
 
@@ -98,7 +132,10 @@ const addComp = ref<any>(null)
 const router = useRouter()
 const showConfirmPopup = ref(false)
 const showAddDropdown = ref(false)
+const showEditDropdown = ref(false)
 const showSystemCategoryPopup = ref(false)
+const editId = ref<string | null>(null)
+const editItemName = ref('')
 
 const toast = reactive({
   show: false,
@@ -130,6 +167,45 @@ const toggleAddDropdown = () => {
   showAddDropdown.value = !showAddDropdown.value
 }
 
+const toggleEditDropdown = () => {
+  showEditDropdown.value = !showEditDropdown.value
+}
+
+const handleDelete = async () => {
+  if (!editId.value) return
+  try {
+    await SalaryCompositionApi.delete(editId.value)
+    showToast('success', 'Xóa thành công')
+    isAdd.value = false
+    editId.value = null
+    editItemName.value = ''
+    showEditDropdown.value = false
+  } catch (e) {
+    showToast('failed', 'Xóa thất bại')
+  }
+}
+
+const handleDuplicate = async () => {
+  if (!editId.value) return
+  try {
+    const res = await SalaryCompositionApi.getById(editId.value)
+    const data = res.data.data
+
+    isAdd.value = true
+    editId.value = null
+    editItemName.value = ''
+    showEditDropdown.value = false
+
+    setTimeout(() => {
+      if (addComp.value) {
+        addComp.value.setFormData(data)
+      }
+    }, 100)
+  } catch (e) {
+    showToast('failed', 'Không thể nhân bản')
+  }
+}
+
 const handleSelectFromSystem = () => {
   showAddDropdown.value = false
   showSystemCategoryPopup.value = true
@@ -141,6 +217,14 @@ const onSystemCategorySave = (items: any[]) => {
 
 const openAdd = () => {
   isAdd.value = true
+  editId.value = null
+  editItemName.value = ''
+}
+
+const handleEdit = (item: any) => {
+  editId.value = item.id
+  editItemName.value = item.SalaryCompositionName
+  isAdd.value = true
 }
 
 const goBack = () => {
@@ -148,6 +232,8 @@ const goBack = () => {
     showConfirmPopup.value = true
   } else {
     isAdd.value = false
+    editId.value = null
+    editItemName.value = ''
   }
 }
 
@@ -158,6 +244,8 @@ const onConfirmAction = ({ button }: { button?: any }) => {
   } else if (button.id === 'no-save') {
     showConfirmPopup.value = false
     isAdd.value = false
+    editId.value = null
+    editItemName.value = ''
   } else if (button.id === 'save') {
     showConfirmPopup.value = false
     onSaveFromHeader()
@@ -166,8 +254,11 @@ const onConfirmAction = ({ button }: { button?: any }) => {
 
 const onSaved = (payload?: any) => {
   // payload can contain saved item; for now return to list
+  const message = editId.value ? 'Cập nhật thành công' : 'Thêm thành công'
   isAdd.value = false
-  showToast('success', 'Thêm thành công')
+  editId.value = null
+  editItemName.value = ''
+  showToast('success', message)
 }
 
 const onSavedAndAdd = (payload?: any) => {
@@ -201,6 +292,9 @@ h2 {
 .ms-page-dropdown {
   padding-inline: 6px;
   padding-block: 8px;
+  width: 175px;
+  height: 90px;
+  border-radius: 4px;
 }
 
 .ms-page-dropdown-item {

@@ -28,6 +28,7 @@
             :width="675"
             :maxLength="20"
             required
+            :disabled="!!props.id"
             placeholder="Nhập mã thành phần"
             pattern="^[A-Za-z0-9_]*$"
             errorMessage="Mã thành phần chỉ có thể chứa các kí tự chữ (A-Z a-z), số (0-9) và gạch dưới (_)."
@@ -80,6 +81,7 @@
             :hoverable="true"
             labelPosition="left"
             labelAlign="left"
+            :disabled="isDefault && !!props.id"
           />
         </div>
 
@@ -99,20 +101,39 @@
             :inlineSearch="true"
             :searchPlaceholder="''"
             :required="true"
-            placeholder="Thu nhập"
             :width="237"
             :bordered="true"
             :hoverable="true"
             labelPosition="left"
             labelAlign="left"
+            :disabled="isDefault && !!props.id"
           />
           <div v-if="form.nature === CompositionNature.Income" class="flex items-center ml-4 gap-4">
-            <MSRadio v-model="form.taxType" value="taxable" label="Chịu thuế" />
-            <MSRadio v-model="form.taxType" value="fully_exempt" label="Miễn thuế toàn phần" />
-            <MSRadio v-model="form.taxType" value="partially_exempt" label="Miễn thuế một phần" />
+            <MSRadio
+              v-model="form.taxType"
+              value="taxable"
+              label="Chịu thuế"
+              :disabled="isDefault && !!props.id"
+            />
+            <MSRadio
+              v-model="form.taxType"
+              value="fully_exempt"
+              label="Miễn thuế toàn phần"
+              :disabled="isDefault && !!props.id"
+            />
+            <MSRadio
+              v-model="form.taxType"
+              value="partially_exempt"
+              label="Miễn thuế một phần"
+              :disabled="isDefault && !!props.id"
+            />
           </div>
           <div v-if="form.nature === CompositionNature.Deduction" class="flex items-center ml-4">
-            <MSCheckBox v-model="form.isTaxDeduction" label="Giảm trừ khi tính thuế" />
+            <MSCheckBox
+              v-model="form.isTaxDeduction"
+              label="Giảm trừ khi tính thuế"
+              :disabled="isDefault && !!props.id"
+            />
           </div>
         </div>
 
@@ -311,7 +332,7 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, watch } from 'vue'
+import { reactive, ref, watch, onMounted } from 'vue'
 import MSInputItem from '@/components/inputs/MSInputItem.vue'
 import MSDropdown from '@/components/dropdown/MSDropdown.vue'
 import MSDropdownTree from '@/components/dropdown/MSDropdownTree.vue'
@@ -327,6 +348,10 @@ import { OptionShowPaycheck } from '@/enums/OptionShowPaycheck'
 import { Status } from '@/enums/Status'
 import { FormulaCompositionType } from '@/enums/FormulaCompositionType'
 import { AutoSumOrgLevel, AutoSumOrgLevelLabel } from '@/enums/AutoSumOrgLevel'
+
+const props = defineProps<{
+  id?: string | null
+}>()
 
 const emit = defineEmits<{
   (e: 'saved', payload: any): void
@@ -356,10 +381,10 @@ const form = reactive({
 })
 
 const salaryCompositions = ref<any[]>([])
+const isDefault = ref(false)
 
 // Fetch salary compositions
 SalaryCompositionApi.getAll().then((res) => {
-  console.log(res.data.data)
   if (res.data.data) {
     salaryCompositions.value = res.data.data.map((item: any) => ({
       label: item.salaryCompositionName + ' (' + item.salaryCompositionCode + ')',
@@ -490,6 +515,7 @@ const removeVietnameseTones = (str: string) => {
 watch(
   () => form.name,
   (newVal) => {
+    if (props.id) return
     if (newVal) {
       let code = removeVietnameseTones(newVal)
       code = code.toUpperCase()
@@ -503,10 +529,58 @@ watch(
 )
 
 const onUnitLoaded = (data: any[]) => {
-  if (data && data.length > 0 && (!form.unit || form.unit.length === 0)) {
+  if (!props.id && data && data.length > 0 && (!form.unit || form.unit.length === 0)) {
     form.unit = [data[0].id]
   }
 }
+
+onMounted(async () => {
+  if (props.id) {
+    isLoading.value = true
+    try {
+      const res = await SalaryCompositionApi.getById(props.id)
+      const data = res.data.data
+      form.code = data.salaryCompositionCode
+      form.name = data.salaryCompositionName
+      form.compositionType = data.compositionType
+      form.unit = data.organizationUnitIds
+      form.nature = data.compositionNature
+      form.quota = data.quota
+      form.valueType = data.valueType
+      form.description = data.description
+      form.optionShowPaycheck = data.optionShowPaycheck
+      form.valueCalculationMethod = data.formulaCompositionType
+
+      if (data.formulaCompositionType === FormulaCompositionType.CustomFormula) {
+        form.value = data.formula
+      } else {
+        form.autoSumCompositionCode = data.autoSumCompositionCode
+        form.autoSumScope = data.autoSumEmployeeType
+        form.autoSumLevel = data.autoSumOrgLevel
+      }
+
+      if (data.compositionNature === CompositionNature.Income) {
+        if (data.taxDeduction) {
+          form.taxType = 'fully_exempt'
+        } else if (data.taxable) {
+          form.taxType = 'taxable'
+        } else {
+          // Default or handle other cases
+          form.taxType = 'taxable'
+        }
+      } else if (data.compositionNature === CompositionNature.Deduction) {
+        form.isTaxDeduction = data.taxDeduction
+      }
+
+      isDefault.value = data.isDefault
+    } catch (e) {
+      console.error(e)
+      showToast('failed', 'Không thể tải dữ liệu')
+    } finally {
+      isLoading.value = false
+    }
+  }
+})
 
 const submit = (mode: 'save' | 'saveAndAdd' = 'save') => {
   // validate fields before emitting
@@ -534,8 +608,9 @@ const submit = (mode: 'save' | 'saveAndAdd' = 'save') => {
   if (!validNature) return
 
   const payload = {
+    Id: props.id,
     SalaryCompositionName: form.name,
-    SalaryCompositionCode: form.code,
+    ...(props.id ? {} : { SalaryCompositionCode: form.code }),
     CompositionType: form.compositionType,
     CompositionNature: form.nature,
     Taxable:
@@ -575,7 +650,11 @@ const submit = (mode: 'save' | 'saveAndAdd' = 'save') => {
     FormulaCompositionType: form.valueCalculationMethod,
   }
   isLoading.value = true
-  SalaryCompositionApi.create(payload)
+  const apiCall = props.id
+    ? SalaryCompositionApi.update(payload)
+    : SalaryCompositionApi.create(payload)
+
+  apiCall
     .then((res) => {
       if (mode === 'save') {
         emit('saved', res)
@@ -586,7 +665,11 @@ const submit = (mode: 'save' | 'saveAndAdd' = 'save') => {
     })
     .catch((err) => {
       console.error(err)
-      showToast('failed', err.response.data.errors[0].message || 'Có lỗi xảy ra vui lòng thử lại.')
+      const message =
+        err.response?.data?.userMsg ||
+        err.response?.data?.errors?.[0]?.message ||
+        'Có lỗi xảy ra vui lòng thử lại.'
+      showToast('failed', message)
     })
     .finally(() => {
       isLoading.value = false
@@ -640,7 +723,40 @@ const closeToast = () => {
   toast.show = false
 }
 
-defineExpose({ submit, isDirty })
+const setFormData = (data: any) => {
+  form.code = data.salaryCompositionCode
+  form.name = data.salaryCompositionName
+  form.compositionType = data.compositionType
+  form.unit = data.organizationUnitIds
+  form.nature = data.compositionNature
+  form.quota = data.quota
+  form.valueType = data.valueType
+  form.description = data.description
+  form.optionShowPaycheck = data.optionShowPaycheck
+  form.valueCalculationMethod = data.formulaCompositionType
+
+  if (data.formulaCompositionType === FormulaCompositionType.CustomFormula) {
+    form.value = data.formula
+  } else {
+    form.autoSumCompositionCode = data.autoSumCompositionCode
+    form.autoSumScope = data.autoSumEmployeeType
+    form.autoSumLevel = data.autoSumOrgLevel
+  }
+
+  if (data.compositionNature === CompositionNature.Income) {
+    if (data.taxDeduction) {
+      form.taxType = 'fully_exempt'
+    } else if (data.taxable) {
+      form.taxType = 'taxable'
+    } else {
+      form.taxType = 'taxable'
+    }
+  } else if (data.compositionNature === CompositionNature.Deduction) {
+    form.isTaxDeduction = data.taxDeduction
+  }
+}
+
+defineExpose({ submit, isDirty, setFormData })
 </script>
 
 <style scoped>

@@ -29,8 +29,8 @@ export default class BaseApi {
    * @param id Id của bản ghi cần cập nhật
    * @param data Dữ liệu cần cập nhật
    */
-  update(id: string | number, data: any) {
-    return api.put(`${this.controller}/${id}`, data)
+  update(data: any) {
+    return api.put(`${this.controller}`, data)
   }
 
   /**

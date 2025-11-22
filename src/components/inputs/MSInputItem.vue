@@ -170,9 +170,9 @@ defineExpose({ validate })
 }
 
 .ms-input__field:disabled {
-  opacity: 0.6;
   pointer-events: none;
-  background: #f8fafc;
+  background-color: #e8eaef;
+  color: #6e6a67;
 }
 
 .ms-input__error {

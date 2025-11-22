@@ -12,7 +12,7 @@
     <div class="ms-radio__icon-container">
       <MSIcon
         :name="isChecked ? 'radio_check' : 'radio_uncheck'"
-        :color="disabled ? '#e8eaef' : undefined"
+        :color="isChecked ? '#34B057' : '#6E6A67'"
       />
     </div>
     <span class="ms-radio__label" v-if="label || $slots.default">
@@ -56,7 +56,6 @@ const onChange = () => {
 }
 
 .ms-radio--disabled {
-  cursor: not-allowed;
   opacity: 0.6;
 }
 

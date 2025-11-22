@@ -103,6 +103,8 @@ import { OptionShowPaycheckLabel } from '@/enums/OptionShowPaycheck'
 import { StatusLabel, Status } from '@/enums/Status'
 import { ValueTypeLabel } from '@/enums/ValueType'
 
+const emit = defineEmits(['edit'])
+
 const gridColumns = [
   { dataField: 'SalaryCompositionCode', caption: 'Mã thành phần' },
   { dataField: 'SalaryCompositionName', caption: 'Tên thành phần' },
@@ -453,7 +455,7 @@ function onCloneItem(item: any) {
 }
 
 function onEditItem(item: any) {
-  console.log('Edit item', item)
+  emit('edit', item)
 }
 
 async function onDeleteItem(item: any) {

@@ -3,11 +3,7 @@
     <button
       type="button"
       class="w-full flex items-center justify-between px-3 py-2 rounded bg-white text-left cursor-pointer ms-dropdown-btn"
-      :class="[
-        { 'opacity-60 pointer-events-none': disabled },
-        buttonClasses,
-        { 'border-red-500': error },
-      ]"
+      :class="[{ 'dropdown-disabled': disabled }, buttonClasses, { 'border-red-500': error }]"
       @click="toggle"
       :aria-expanded="open"
       :aria-disabled="disabled"
@@ -262,7 +258,9 @@ watch(
   selectedLabel,
   (val) => {
     if (props.inlineSearch) {
+      suppressOpen.value = true
       search.value = val
+      setTimeout(() => (suppressOpen.value = false), 0)
     }
   },
   { immediate: true },
@@ -304,5 +302,11 @@ defineExpose({ validate })
 }
 .ms-dropdown-btn.bordered.hoverable:hover {
   border-color: #34b057;
+}
+
+.dropdown-disabled {
+  background-color: #e8eaef;
+  color: #6e6a67;
+  pointer-events: none;
 }
 </style>
