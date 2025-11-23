@@ -58,13 +58,16 @@
 
 <script setup lang="ts">
 import MSIcon from '@/components/icons/MSIcon.vue'
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 
 const props = defineProps({
   collapsed: Boolean,
 })
 
 const activeId = ref<string | null>(null)
+const router = useRouter()
+const route = useRoute()
 
 const menuItems = [
   { label: 'Tổng quan', id: 'dashboard', icon: 'dashboard', path: '/dashboard' },
@@ -82,8 +85,16 @@ const menuItems = [
   { label: 'Thiết lập', id: 'settings', icon: 'settings' },
 ]
 
-import { useRouter } from 'vue-router'
-const router = useRouter()
+watch(
+  () => route.path,
+  (newPath) => {
+    const found = menuItems.find((item) => item.path && newPath.startsWith(item.path))
+    if (found) {
+      activeId.value = found.id
+    }
+  },
+  { immediate: true },
+)
 
 function onItemClick(item: any) {
   activeId.value = item.id

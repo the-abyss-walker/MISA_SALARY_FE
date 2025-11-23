@@ -96,7 +96,7 @@ const props = withDefaults(
   {
     data: () => [],
     columns: () => [],
-    gridHeight: 'calc(100vh - 258px)',
+    gridHeight: 'calc(100vh - 270px)',
     columnWidth: 200,
     remoteOperations: false,
     showSelection: false,
