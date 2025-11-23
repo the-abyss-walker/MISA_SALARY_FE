@@ -1,6 +1,7 @@
 <template>
   <div ref="root" :style="containerStyle" class="relative inline-block">
     <button
+      ref="buttonRef"
       type="button"
       class="w-full flex items-center justify-between px-3 py-2 rounded bg-white text-left cursor-pointer ms-dropdown-btn"
       :class="[{ 'dropdown-disabled': disabled }, buttonClasses, { 'border-red-500': error }]"
@@ -10,6 +11,7 @@
     >
       <template v-if="props.inlineSearch">
         <input
+          ref="inputRef"
           v-model="search"
           class="w-full px-0 py-0 bg-transparent text-left outline-none"
           style="font-size: 14px"
@@ -113,6 +115,8 @@ const props = withDefaults(
 const emit = defineEmits(['update:modelValue', 'select', 'open', 'close'])
 
 const root = ref<HTMLElement | null>(null)
+const buttonRef = ref<HTMLButtonElement | null>(null)
+const inputRef = ref<HTMLInputElement | null>(null)
 const open = ref(false)
 const search = ref('')
 const error = ref('')
@@ -266,7 +270,15 @@ watch(
   { immediate: true },
 )
 
-defineExpose({ validate })
+const focus = () => {
+  if (props.inlineSearch && inputRef.value) {
+    inputRef.value.focus()
+  } else if (buttonRef.value) {
+    buttonRef.value.focus()
+  }
+}
+
+defineExpose({ validate, focus })
 </script>
 
 <style scoped>

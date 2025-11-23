@@ -137,7 +137,11 @@ const onBlur = (e: FocusEvent) => {
   emit('blur')
 }
 
-defineExpose({ validate })
+const focus = () => {
+  inputRef.value?.focus()
+}
+
+defineExpose({ validate, focus })
 </script>
 
 <style scoped>

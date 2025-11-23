@@ -329,7 +329,7 @@
             <label class="pd-r-8"><b>Nguồn tạo</b></label>
           </div>
 
-          <div class="source">Tự thêm</div>
+          <div class="source">{{ isDefault ? 'Mặc định' : 'Tự thêm' }}</div>
         </div>
       </form>
     </div>
@@ -566,9 +566,18 @@ watch(
   },
 )
 
+const unitOptions = ref<any[]>([])
+
 const onUnitLoaded = (data: any[]) => {
+  unitOptions.value = data
   if (!props.id && data && data.length > 0 && (!form.unit || form.unit.length === 0)) {
+    const wasDirty = isDirty.value
     form.unit = [data[0].id]
+    if (!wasDirty) {
+      setTimeout(() => {
+        isDirty.value = false
+      }, 0)
+    }
   }
 }
 
@@ -616,76 +625,91 @@ onMounted(async () => {
       showToast('failed', 'Không thể tải dữ liệu')
     } finally {
       isLoading.value = false
+      setTimeout(() => {
+        isDirty.value = false
+      }, 0)
     }
   }
+  setTimeout(() => {
+    nameRef.value?.focus()
+  }, 100)
 })
 
 const submit = (mode: 'save' | 'saveAndAdd' = 'save') => {
   // validate fields before emitting
-  const validCode = codeRef.value ? codeRef.value.validate() : true
+  let firstErrorInput: any = null
+
   const validName = nameRef.value ? nameRef.value.validate() : true
-  const validFormula = formulaRef.value ? formulaRef.value.validate() : true
+  if (!validName && !firstErrorInput) firstErrorInput = nameRef.value
+
+  const validCode = codeRef.value ? codeRef.value.validate() : true
+  if (!validCode && !firstErrorInput) firstErrorInput = codeRef.value
+
   const validUnit = unitRef.value ? (unitRef.value.validate?.() ?? true) : true
+  if (!validUnit && !firstErrorInput) firstErrorInput = unitRef.value
+
   const validType = typeRef.value
     ? (typeRef.value.validate?.() ?? form.compositionType !== null)
     : form.compositionType !== null
-  const validNature = natureRef.value ? (natureRef.value.validate?.() ?? true) : true
+  if (!validType && !firstErrorInput) firstErrorInput = typeRef.value
 
-  if (!validCode) {
+  const validNature = natureRef.value ? (natureRef.value.validate?.() ?? true) : true
+  if (!validNature && !firstErrorInput) firstErrorInput = natureRef.value
+
+  const validFormula = formulaRef.value ? formulaRef.value.validate() : true
+  if (!validFormula && !firstErrorInput) firstErrorInput = formulaRef.value
+
+  if (firstErrorInput) {
+    firstErrorInput.focus?.()
     return
   }
-  if (!validName) {
-    return
-  }
-  if (!validFormula) {
-    // formula is optional, but validate() may check pattern/maxLength; continue only if valid
-    return
-  }
-  if (!validUnit) return
-  if (!validType) return
-  if (!validNature) return
 
   const payload = {
-    Id: props.id,
-    SalaryCompositionName: form.name,
+    id: props.id,
+    salaryCompositionName: form.name,
     ...(props.id ? {} : { SalaryCompositionCode: form.code }),
-    CompositionType: form.compositionType,
-    CompositionNature: form.nature,
-    Taxable:
+    compositionType: form.compositionType,
+    compositionNature: form.nature,
+    taxable:
       form.nature === CompositionNature.Income
         ? ['taxable', 'partially_exempt'].includes(form.taxType)
         : null,
-    TaxDeduction:
+    taxDeduction:
       form.nature === CompositionNature.Income
         ? form.taxType === 'fully_exempt'
         : form.nature === CompositionNature.Deduction
           ? form.isTaxDeduction
           : null,
-    Quota: form.quota,
-    Formula:
+    quota: form.quota,
+    formula:
       form.valueCalculationMethod === FormulaCompositionType.CustomFormula ? form.value : null,
-    ValueType: form.valueType,
-    Description: form.description,
-    Status: Status.Following,
-    OptionShowPaycheck: form.optionShowPaycheck,
-    IsNotAllowDelete: false,
+    valueType: form.valueType,
+    description: form.description,
+    status: Status.Following,
+    optionShowPaycheck: form.optionShowPaycheck,
+    isNotAllowDelete: false,
     OrganizationUnitIds: form.unit?.map(String) || [],
-    IsDefault: false,
-    AutoSumCompositionCode:
+    OrganizationUnitNames:
+      form.unit?.map((id) => {
+        const unit = unitOptions.value.find((u: any) => u.id === id)
+        return unit ? unit.organizationName : ''
+      }) || [],
+    ...(props.id ? {} : { isDefault: false }),
+    autoSumCompositionCode:
       form.valueCalculationMethod === FormulaCompositionType.AutoSumFormula
         ? form.autoSumCompositionCode
         : null,
-    IsAutoSumEmployee: form.valueCalculationMethod === FormulaCompositionType.AutoSumFormula,
-    AutoSumEmployeeType:
+    isAutoSumEmployee: form.valueCalculationMethod === FormulaCompositionType.AutoSumFormula,
+    autoSumEmployeeType:
       form.valueCalculationMethod === FormulaCompositionType.AutoSumFormula
         ? form.autoSumScope
         : null,
-    AutoSumOrgLevel:
+    autoSumOrgLevel:
       form.valueCalculationMethod === FormulaCompositionType.AutoSumFormula &&
       form.autoSumScope === AutoSumEmployeeType.BelongToOrganization
         ? form.autoSumLevel
         : null,
-    FormulaCompositionType: form.valueCalculationMethod,
+    formulaCompositionType: form.valueCalculationMethod,
   }
   isLoading.value = true
   const apiCall = props.id
@@ -745,6 +769,7 @@ const onReset = () => {
   // Reset dirty state after reset
   setTimeout(() => {
     isDirty.value = false
+    nameRef.value?.focus()
   }, 0)
 }
 
@@ -792,6 +817,10 @@ const setFormData = (data: any, isClone: boolean = false) => {
   } else if (data.compositionNature === CompositionNature.Deduction) {
     form.isTaxDeduction = data.taxDeduction
   }
+  isDefault.value = isClone ? false : data.isDefault
+  setTimeout(() => {
+    isDirty.value = false
+  }, 0)
 }
 
 const showSystemMatchPopup = ref(false)

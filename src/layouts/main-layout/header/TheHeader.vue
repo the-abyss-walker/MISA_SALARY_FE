@@ -22,7 +22,9 @@
         <div class="icon-help" />
         <div class="icon-more-menu" />
         <div class="icon-knowledge" />
-        <div class="icon-knowledge" />
+        <div class="user-avatar">
+          <img src="@/assets/images/Avatar.svg" />
+        </div>
       </div>
     </div>
   </header>

@@ -16,7 +16,6 @@
               :base-class="'bg-white border-gray-300'"
               v-model="searchQuery"
               placeholder="Tìm kiếm"
-              @search="onSearch"
             />
           </div>
           <div class="w-1/4">
@@ -94,6 +93,16 @@ const totalCount = ref(0)
 const pageIndex = ref(1)
 const pageSize = ref(15)
 const searchQuery = ref('')
+let searchTimeout: ReturnType<typeof setTimeout> | null = null
+
+watch(searchQuery, () => {
+  if (searchTimeout) clearTimeout(searchTimeout)
+  searchTimeout = setTimeout(() => {
+    pageIndex.value = 1
+    loadData()
+  }, 200)
+})
+
 const compositionType = ref(null)
 const selectedItems = ref<any[]>([])
 const toast = ref<{
@@ -253,12 +262,6 @@ async function onPopupAction({ button }: { button: any }) {
       toast.value = { show: true, type: 'failed', message: 'Thêm thất bại' }
     }
   }
-}
-
-function onSearch(val: string) {
-  searchQuery.value = val
-  pageIndex.value = 1
-  loadData()
 }
 
 function onCompositionTypeSelect(opt: any) {

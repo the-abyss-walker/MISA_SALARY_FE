@@ -23,7 +23,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import MSIcon from '@/components/icons/MSIcon.vue'
 
 interface Props {
@@ -53,6 +53,13 @@ const props = withDefaults(defineProps<Props>(), {
 const isHover = ref(false)
 const inputRef = ref<HTMLInputElement | null>(null)
 const modelValueLocal = ref(props.modelValue)
+
+watch(
+  () => props.modelValue,
+  (newVal) => {
+    modelValueLocal.value = newVal
+  },
+)
 
 const sizeStyle = computed(() => {
   return {
