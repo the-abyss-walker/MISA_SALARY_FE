@@ -415,21 +415,6 @@ defineExpose({
   border-radius: 50%;
 }
 
-.toast-slide-enter-active,
-.toast-slide-leave-active {
-  transition: all 0.5s ease;
-}
-
-.toast-slide-enter-from {
-  transform: translate(-100vw, -50%) !important;
-  opacity: 0;
-}
-
-.toast-slide-leave-to {
-  transform: translate(100vw, -50%) !important;
-  opacity: 0;
-}
-
 .btn-popup-delete {
   background-color: #ef292f !important;
   color: white !important;

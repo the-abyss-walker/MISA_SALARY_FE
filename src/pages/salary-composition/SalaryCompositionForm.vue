@@ -333,9 +333,9 @@
         </div>
       </form>
     </div>
-    <div v-if="toast.show" class="fixed top-4 right-4 z-50">
-      <MSToast :type="toast.type" :message="toast.message" @close="closeToast" />
-    </div>
+    <Transition name="toast-slide">
+      <MSToast v-if="toast.show" :type="toast.type" :message="toast.message" @close="closeToast" />
+    </Transition>
 
     <MSPopup
       v-model:visible="showSystemMatchPopup"

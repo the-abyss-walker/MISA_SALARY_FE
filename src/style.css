@@ -11,3 +11,18 @@ label,
   padding: 0;
   color: #212121;
 }
+
+.toast-slide-enter-active,
+.toast-slide-leave-active {
+  transition: all 0.5s ease;
+}
+
+.toast-slide-enter-from {
+  transform: translate(-100vw, -50%) !important;
+  opacity: 0;
+}
+
+.toast-slide-leave-to {
+  transform: translate(100vw, -50%) !important;
+  opacity: 0;
+}
