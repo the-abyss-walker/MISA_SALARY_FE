@@ -22,6 +22,10 @@ class SalaryCompositionApi extends BaseApi {
   createFromSystem(ids: Array<string | number>) {
     return api.post(`${this.controller}/from-system`, ids)
   }
+
+  updateSalaryCompositionsFromSystem(payload: any) {
+    return api.put(`${this.controller}/from-system`, payload)
+  }
 }
 
 export default new SalaryCompositionApi()

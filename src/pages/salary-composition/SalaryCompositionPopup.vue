@@ -51,6 +51,14 @@
         />
       </div>
     </MSPopup>
+    <MSPopup
+      v-model:visible="confirmPopup.visible"
+      :title="confirmPopup.title"
+      :content="confirmPopup.content"
+      :buttons="confirmPopup.buttons"
+      @action="onConfirmPopupAction"
+    />
+
     <div v-if="toast.show" class="fixed top-4 right-4 z-50">
       <MSToast :type="toast.type" :message="toast.message" @close="closeToast" />
     </div>
@@ -58,7 +66,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, reactive } from 'vue'
 import MSPopup from '@/components/popup/MSPopup.vue'
 import MSTable from '@/components/table/MSTable.vue'
 import MSPagination from '@/components/pagination/MSPagination.vue'
@@ -95,6 +103,34 @@ const toast = ref<{
 }>({ show: false, type: 'success', message: '' })
 const closeToast = () => {
   toast.value.show = false
+}
+
+const confirmPopup = reactive({
+  visible: false,
+  title: 'Thông báo',
+  content: '',
+  buttons: [
+    { label: 'Hủy bỏ', variant: 'secondary' as const },
+    { label: 'Đồng ý', variant: 'primary' as const },
+  ],
+})
+
+async function onConfirmPopupAction({ index }: any) {
+  if (index === 1) {
+    try {
+      const salaryCompositionSystemIds = selectedItems.value.map((item) => item.id)
+      await SalaryCompositionApi.updateSalaryCompositionsFromSystem({
+        salaryCompositionSystemIds,
+        isAllowanceUpdate: true,
+      })
+      emit('save', selectedItems.value)
+      updateVisible(false)
+      toast.value = { show: true, type: 'success', message: 'Thêm thành công' }
+    } catch (error) {
+      toast.value = { show: true, type: 'failed', message: 'Thêm thất bại' }
+    }
+  }
+  confirmPopup.visible = false
 }
 
 const compositionTypeOptions = [
@@ -195,8 +231,19 @@ async function onPopupAction({ button }: { button: any }) {
     updateVisible(false)
   } else if (button.id === 'agree') {
     try {
-      const ids = selectedItems.value.map((item) => item.id)
-      await SalaryCompositionApi.createFromSystem(ids)
+      const salaryCompositionSystemIds = selectedItems.value.map((item) => item.id)
+      const res = await SalaryCompositionApi.updateSalaryCompositionsFromSystem({
+        salaryCompositionSystemIds,
+      })
+      const resData = res?.data
+
+      if (resData?.data && resData.data.length > 0) {
+        confirmPopup.title = 'Chuyển trạng thái'
+        confirmPopup.content = `Đã tồn tại ${resData.data.length} thành phần lương trùng mã trên danh sách. Chương trình sẽ cập nhật thông tin của thành phần lương mặc định vào bản ghi hiện có. Bạn có muốn tiếp tục không?`
+        confirmPopup.visible = true
+        return
+      }
+
       emit('save', selectedItems.value)
       setTimeout(() => {
         updateVisible(false)

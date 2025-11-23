@@ -33,7 +33,7 @@
             ref="codeRef"
             v-model="form.code"
             :width="675"
-            :maxLength="20"
+            :maxLength="255"
             required
             :disabled="!!props.id"
             placeholder="Nhập mã thành phần"

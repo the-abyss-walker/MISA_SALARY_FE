@@ -206,6 +206,8 @@ function onDeselect() {
 function onAddToList() {
   if (selectedItems.value.length === 0) return
   popup.itemsToAdd = selectedItems.value
+  popup.mode = 'confirm_add'
+  popup.title = 'Thông báo'
   if (selectedItems.value.length === 1) {
     popup.content = `Bạn có chắc chắn muốn đưa thành phần lương mặc định ${selectedItems.value[0].salaryCompositionSystemName} vào danh sách sử dụng không?`
   } else {
@@ -217,6 +219,8 @@ function onAddToList() {
 
 function handleAdd(data: any) {
   popup.itemsToAdd = [data]
+  popup.mode = 'confirm_add'
+  popup.title = 'Thông báo'
   popup.content = `Bạn có chắc chắn muốn đưa thành phần lương mặc định ${data.data.salaryCompositionSystemName} vào danh sách sử dụng không?`
   popup.visible = true
 }
@@ -230,6 +234,7 @@ const popup = reactive({
     { label: 'Đồng ý', variant: 'primary' as const },
   ],
   itemsToAdd: [] as any[],
+  mode: 'confirm_add',
 })
 
 const toast = reactive({
@@ -251,17 +256,37 @@ const closeToast = () => {
   toast.show = false
 }
 
-async function onPopupAction({ button, index }: any) {
+async function onPopupAction({ index }: any) {
   if (index === 1) {
     try {
-      const ids = popup.itemsToAdd.map((item) => {
+      const salaryCompositionSystemIds = popup.itemsToAdd.map((item) => {
         if (item.data) {
           return item.data.id
         } else {
           return item.id
         }
       })
-      await SalaryCompositionApi.createFromSystem(ids)
+
+      if (popup.mode === 'confirm_add') {
+        const res = await SalaryCompositionApi.updateSalaryCompositionsFromSystem({
+          salaryCompositionSystemIds,
+        })
+        const resData = res.data
+        console.log(resData)
+
+        if (resData?.data && resData.data.length > 0) {
+          popup.mode = 'confirm_update'
+          popup.title = 'Chuyển trạng thái'
+          popup.content = `Đã tồn tại ${resData.data.length} thành phần lương trùng mã trên danh sách. Chương trình sẽ cập nhật thông tin của thành phần lương mặc định vào bản ghi hiện có. Bạn có muốn tiếp tục không?`
+          return
+        }
+      } else if (popup.mode === 'confirm_update') {
+        await SalaryCompositionApi.updateSalaryCompositionsFromSystem({
+          salaryCompositionSystemIds,
+          isAllowanceUpdate: true,
+        })
+      }
+
       showToast('success', 'Thêm thành công')
       selectedItems.value = []
       if (tableRef.value) {
