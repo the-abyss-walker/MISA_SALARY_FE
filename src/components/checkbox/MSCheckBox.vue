@@ -95,4 +95,10 @@ const onChange = (event: Event) => {
   width: 20px;
   height: 20px;
 }
+
+/* Focus state */
+.ms-checkbox__input:focus + div {
+  background-color: #e0e0e0;
+  border-radius: 2px;
+}
 </style>

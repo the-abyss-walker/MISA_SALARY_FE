@@ -309,10 +309,14 @@ defineExpose({ validate, focus })
 }
 
 /* Button border and hover control */
+.ms-dropdown-btn:focus {
+  outline: none;
+}
 .ms-dropdown-btn.bordered {
   border: 1px solid #e5e7eb;
 }
-.ms-dropdown-btn.bordered.hoverable:hover {
+.ms-dropdown-btn.bordered.hoverable:hover,
+.ms-dropdown-btn.bordered:focus {
   border-color: #34b057;
 }
 

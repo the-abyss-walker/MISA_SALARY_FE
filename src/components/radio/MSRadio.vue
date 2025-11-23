@@ -86,6 +86,12 @@ const onChange = () => {
   background-color: #bdbdbd;
 }
 
+/* Focus state */
+.ms-radio__input:focus + .ms-radio__icon-container {
+  background-color: #e0e0e0;
+  border-radius: 50%;
+}
+
 .ms-radio__label {
   margin-left: 8px;
 }

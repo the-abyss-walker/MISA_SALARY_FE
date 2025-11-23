@@ -211,6 +211,7 @@ function treeViewItemSelectionChanged(e: DxTreeViewTypes.ItemSelectionChangedEve
 .custom-dropdown-box.dx-dropdownbox.dx-state-focused {
   border-color: #34b057 !important;
   box-shadow: none !important;
+  outline: none !important;
 }
 
 /* Style for the inner TagBox to remove its borders so it blends in */
