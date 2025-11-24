@@ -347,6 +347,15 @@ defineExpose({
   background-color: #f6f6f6 !important;
 }
 
+.dx-datagrid-headers
+  .dx-datagrid-table
+  .dx-row
+  > td:hover:not(.dx-command-select):not(.dx-command-expand):not(.dx-editor-cell):not(
+    .dx-command-edit
+  ):not(.dx-datagrid-group-space):last-child {
+  background-color: transparent !important;
+}
+
 .mstable-loading-overlay {
   position: absolute;
   top: 0;

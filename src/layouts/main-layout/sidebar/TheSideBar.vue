@@ -70,7 +70,7 @@ const router = useRouter()
 const route = useRoute()
 
 const menuItems = [
-  { label: 'Tổng quan', id: 'dashboard', icon: 'dashboard', path: '/dashboard' },
+  { label: 'Tổng quan', id: 'dashboard', icon: 'dashboard' },
   {
     label: 'Thành phần lương',
     id: 'salary_composition',
@@ -101,7 +101,7 @@ function onItemClick(item: any) {
   if (item.path) {
     router.push(item.path)
   } else {
-    console.log('Clicked (no route):', item)
+    router.push({ path: '/coming-soon' })
   }
 }
 </script>
