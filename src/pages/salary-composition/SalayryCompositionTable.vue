@@ -27,9 +27,6 @@
       :canFollow="showFollowButton"
       :canUnfollow="showUnfollowButton"
       @left-select="onLeftSelect"
-      @right-select="onRightSelect"
-      @filter="onFilter"
-      @config="onConfig"
       @search="onSearchInput"
       @unfollow="onUnfollow"
       @follow="onFollow"
@@ -91,7 +88,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch } from 'vue'
 import MSTableHeader from '@/components/table/table-header/MSTableHeader.vue'
 import MSTable from '@/components/table/MSTable.vue'
 import MSPagination from '@/components/pagination/MSPagination.vue'
@@ -136,7 +133,7 @@ const isLoading = ref(false)
 
 const searchQuery = ref('')
 const leftDropdown = ref(null as any)
-const rightDropdown = ref(null as any)
+const rightDropdown = ref([])
 
 const pageSize = ref(15)
 const page = ref(1)
@@ -206,6 +203,8 @@ const statusOptions = [
 
 const headerBindings = computed(() => ({
   leftOptions: statusOptions,
+  showRight: true,
+  rightPlaceholder: 'Tất cả đơn vị',
 }))
 
 const pagedData = computed(() => [...tableData.value])
@@ -218,7 +217,9 @@ async function loadData() {
       status: leftDropdown.value,
       pageSize: pageSize.value,
       pageIndex: page.value,
+      organizationUnitIds: rightDropdown.value,
     }
+    console.log('Payload:', payload)
     const res = await SalaryCompositionApi.paging(payload)
     const resData = res?.data?.data
     const items = resData?.items ?? []
@@ -285,10 +286,14 @@ function onLeftSelect(opt: any) {
   loadData()
 }
 
-function onRightSelect(opt: any) {
-  // store the option value so v-model bindings match MSDropdown's modelValue
-  rightDropdown.value = opt && opt.value !== undefined ? opt.value : opt
-}
+watch(
+  rightDropdown,
+  () => {
+    page.value = 1
+    loadData()
+  },
+  { deep: true },
+)
 
 function onPageChange(p: number) {
   page.value = p
@@ -299,14 +304,6 @@ function onSizeChange(s: number) {
   pageSize.value = s
   page.value = 1
   loadData()
-}
-
-function onFilter() {
-  // bubble up or handle filter
-}
-
-function onConfig() {
-  // handle export
 }
 
 // Popup state
