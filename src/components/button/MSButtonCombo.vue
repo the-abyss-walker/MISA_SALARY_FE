@@ -29,6 +29,7 @@
 import { computed } from 'vue'
 import MSIcon from '@/components/icons/MSIcon.vue'
 
+//#region Props
 const props = withDefaults(
   defineProps<{
     variant?: 'primary' | 'secondary'
@@ -49,6 +50,7 @@ const props = withDefaults(
     dropdownWidth: 40,
   },
 )
+//#endregion
 
 const variant = computed(() => props.variant || 'primary')
 const comboVariant = computed(() => props.comboVariant ?? props.variant)

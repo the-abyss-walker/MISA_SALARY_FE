@@ -391,12 +391,15 @@ const props = defineProps<{
   id?: string | null
 }>()
 
+//#region Emits
 const emit = defineEmits<{
   (e: 'saved', payload: any): void
   (e: 'savedAndAdd', payload: any): void
   (e: 'cancel'): void
 }>()
+//#endregion
 
+//#region Data
 const form = reactive({
   code: '',
   name: '',
@@ -420,8 +423,10 @@ const form = reactive({
 
 const salaryCompositions = ref<any[]>([])
 const isDefault = ref(false)
+//#endregion
 
-// Fetch salary compositions
+//#region Methods
+/** Hàm xử lý sự kiện khi dữ liệu đơn vị được load thành công */
 SalaryCompositionApi.getAll().then((res) => {
   if (res.data.data) {
     salaryCompositions.value = res.data.data.map((item: any) => ({
@@ -432,15 +437,23 @@ SalaryCompositionApi.getAll().then((res) => {
     }))
   }
 })
+//#endregion
 
+//#region Toast
 const toast = reactive({
   show: false,
   type: 'success' as 'success' | 'information' | 'warning' | 'failed',
   message: '',
 })
+//#endregion
 
+//#region Dirty Check
+// Biến theo dõi trạng thái chỉnh sửa form
 const isDirty = ref(false)
+//#endregion
 
+//#region Watchers
+/** Watcher để theo dõi thay đổi form và đánh dấu là đã chỉnh sửa */
 watch(
   form,
   () => {
@@ -448,7 +461,9 @@ watch(
   },
   { deep: true },
 )
+//#endregion
 
+//#region Refs
 const codeRef = ref<any>(null)
 const nameRef = ref<any>(null)
 const formulaRef = ref<any>(null)
@@ -459,7 +474,9 @@ const normRef = ref<any>(null)
 const valueTypeRef = ref<any>(null)
 const valueRef = ref<any>(null)
 const descriptionRef = ref<any>(null)
+//#endregion
 
+//#region Composition Type Options
 // Loại thành phần
 const typeOptions = Object.values(CompositionType)
   .filter((v) => typeof v === 'number')
@@ -467,7 +484,9 @@ const typeOptions = Object.values(CompositionType)
     label: CompositionTypeLabel[v as CompositionType],
     value: v,
   }))
+//#endregion
 
+//#region Nature Options
 // Tính chất
 const natureOptions = Object.values(CompositionNature)
   .filter((v) => typeof v === 'number')
@@ -475,7 +494,9 @@ const natureOptions = Object.values(CompositionNature)
     label: CompositionNatureLabel[v as CompositionNature],
     value: v,
   }))
+//#endregion
 
+//#region Value Type Options
 // Kiểu giá trị
 const valueTypeOptions = Object.values(ValueType)
   .filter((v) => typeof v === 'number')
@@ -483,21 +504,28 @@ const valueTypeOptions = Object.values(ValueType)
     label: ValueTypeLabel[v as ValueType],
     value: v,
   }))
+//#endregion
 
+//#region Auto Sum Scope Options
 const autoSumScopeOptions = Object.values(AutoSumEmployeeType)
   .filter((v) => typeof v === 'number')
   .map((v) => ({
     label: AutoSumEmployeeTypeLabel[v as AutoSumEmployeeType],
     value: v,
   }))
+//#endregion
 
+//#region Level Options
 const levelOptions = Object.values(AutoSumOrgLevel)
   .filter((v) => typeof v === 'number')
   .map((v) => ({
     label: AutoSumOrgLevelLabel[v as AutoSumOrgLevel],
     value: v,
   }))
+//#endregion
 
+//#region Watchers for Dependent Fields
+/** Watcher để tự động điều chỉnh Tính chất dựa trên Loại thành phần */
 watch(
   () => form.compositionType,
   (newType) => {
@@ -518,7 +546,10 @@ watch(
     }
   },
 )
+//#endregion
 
+//#region Watchers for Dependent Fields
+/** Watcher để tự động điều chỉnh Kiểu giá trị dựa trên Tính chất */
 watch(
   () => form.nature,
   (newNature) => {
@@ -527,9 +558,13 @@ watch(
     }
   },
 )
+//#endregion
 
+//#region Loading State
 const isLoading = ref(false)
+//#endregion
 
+//#region Utility Functions
 const removeVietnameseTones = (str: string) => {
   str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, 'a')
   str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, 'e')
@@ -549,7 +584,9 @@ const removeVietnameseTones = (str: string) => {
   str = str.replace(/\u02C6|\u0306|\u031B/g, '')
   return str
 }
+//#endregion
 
+//#region Watcher để tự động tạo Mã thành phần từ Tên thành phần nếu không phải là chỉnh sửa
 watch(
   () => form.name,
   (newVal) => {
@@ -565,9 +602,15 @@ watch(
     }
   },
 )
+//#endregion
 
+//#region Value Type Options
+// Kiểu giá trị
 const unitOptions = ref<any[]>([])
+//#endregion
 
+//#region Methods
+/** Hàm xử lý khi dữ liệu đơn vị được load thành công */
 const onUnitLoaded = (data: any[]) => {
   unitOptions.value = data
   if (!props.id && data && data.length > 0 && (!form.unit || form.unit.length === 0)) {
@@ -580,7 +623,10 @@ const onUnitLoaded = (data: any[]) => {
     }
   }
 }
+//#endregion
 
+//#region Load Existing Data on Edit
+/** Hàm tải dữ liệu thành phần lương khi chỉnh sửa */
 onMounted(async () => {
   if (props.id) {
     isLoading.value = true
@@ -634,11 +680,15 @@ onMounted(async () => {
     nameRef.value?.focus()
   }, 100)
 })
+//#endregion
 
+//#region method to submit the form
+/** Hàm xử lý gửi form */
 const submit = (mode: 'save' | 'saveAndAdd' = 'save') => {
   // validate fields before emitting
   let firstErrorInput: any = null
 
+  // Validate từng trường và lưu trữ tham chiếu đến trường đầu tiên có lỗi
   const validName = nameRef.value ? nameRef.value.validate() : true
   if (!validName && !firstErrorInput) firstErrorInput = nameRef.value
 
@@ -664,6 +714,7 @@ const submit = (mode: 'save' | 'saveAndAdd' = 'save') => {
     return
   }
 
+  // Payload để gửi lên API
   const payload = {
     id: props.id,
     salaryCompositionName: form.name,
@@ -738,14 +789,13 @@ const submit = (mode: 'save' | 'saveAndAdd' = 'save') => {
     })
 }
 
+//#region Handle form submission
 const onSubmit = () => {
   submit('save')
 }
+//#endregion
 
-const onCancel = () => {
-  emit('cancel')
-}
-
+//#region Reset form to initial state
 const onReset = () => {
   form.code = ''
   form.name = ''
@@ -772,7 +822,9 @@ const onReset = () => {
     nameRef.value?.focus()
   }, 0)
 }
+//#endregion
 
+//#region Toast functions
 const showToast = (type: 'success' | 'information' | 'warning' | 'failed', message: string) => {
   toast.type = type
   toast.message = message
@@ -785,7 +837,10 @@ const showToast = (type: 'success' | 'information' | 'warning' | 'failed', messa
 const closeToast = () => {
   toast.show = false
 }
+//#endregion
 
+//#region Set form data function
+// Hàm thiết lập dữ liệu cho form (dùng khi chỉnh sửa hoặc nhân bản)
 const setFormData = (data: any, isClone: boolean = false) => {
   form.name = isClone ? '' : data.salaryCompositionName
   form.code = isClone ? '' : data.salaryCompositionCode
@@ -822,16 +877,23 @@ const setFormData = (data: any, isClone: boolean = false) => {
     isDirty.value = false
   }, 0)
 }
+//#endregion
 
+//#region data
 const showSystemMatchPopup = ref(false)
 const systemMatchData = ref<any>(null)
 const systemMatchOption = ref('use_default')
+//#endregion
 
+//#region Popup buttons
 const popupButtons = [
   { label: 'Hủy', variant: 'secondary' as const },
   { label: 'Đồng ý', variant: 'primary' as const },
 ]
+//#endregion
 
+//#region methods
+/** Hàm kiểm tra mã thành phần có tồn tại trong hệ thống không */
 const checkExistCode = async () => {
   if (props.id) return
   if (!form.code) return
@@ -847,7 +909,10 @@ const checkExistCode = async () => {
     console.error(e)
   }
 }
+//#endregion
 
+//#region methods
+/** Hàm xử lý sự kiện khi người dùng chọn hành động trong popup */
 const onPopupAction = ({ button }: any) => {
   if (button.label === 'Hủy') {
     showSystemMatchPopup.value = false
@@ -871,6 +936,7 @@ const onPopupAction = ({ button }: any) => {
     }
   }
 }
+//#endregion
 
 defineExpose({ submit, isDirty, setFormData })
 </script>

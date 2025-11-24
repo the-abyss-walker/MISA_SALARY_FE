@@ -72,8 +72,11 @@
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import MSIcon from '@/components/icons/MSIcon.vue'
 
+//#region Types
 type Opt = { label: string; value: any; disabled?: boolean; [key: string]: any }
+//#endregion
 
+//#region Props
 const props = withDefaults(
   defineProps<{
     options?: Opt[]
@@ -111,9 +114,13 @@ const props = withDefaults(
     requiredMessage: 'Không được để trống',
   },
 )
+//#endregion
 
+//#region Emits
 const emit = defineEmits(['update:modelValue', 'select', 'open', 'close'])
+//#endregion
 
+//#region Data
 const root = ref<HTMLElement | null>(null)
 const buttonRef = ref<HTMLButtonElement | null>(null)
 const inputRef = ref<HTMLInputElement | null>(null)
@@ -121,7 +128,12 @@ const open = ref(false)
 const search = ref('')
 const error = ref('')
 const suppressOpen = ref(false)
+//#endregion
 
+//#region Computed
+/**
+ * Lớp CSS cho label
+ */
 const labelClasses = computed(() => {
   const alignClass = props && props.labelAlign === 'right' ? 'text-right' : 'text-left'
   if (props && props.labelPosition === 'right') {
@@ -157,7 +169,12 @@ const panelStyle = computed(() => {
 
   return base
 })
+//#endregion
 
+//#region Computed
+/**
+ * Các tùy chọn hiển thị trong dropdown
+ */
 const options = computed(() => props.options || [])
 
 const selectedLabel = computed(() => {
@@ -206,14 +223,21 @@ function select(opt: Opt) {
 function clearSearch() {
   search.value = ''
 }
+//#endregion
 
-// when searching inline, open the panel to show results
+//#region Watchers
+// Khi dùng inline search, mở dropdown khi có tìm kiếm
 watch(search, (v) => {
   if (props.inlineSearch) {
     if (v && v.length > 0 && !suppressOpen.value) open.value = true
   }
 })
+//#endregion
 
+//#region Methods
+/** * Hàm validate giá trị dropdown
+ * @returns true nếu hợp lệ, false nếu không hợp lệ
+ */
 function validate() {
   if (props.required) {
     const val = props.modelValue
@@ -226,10 +250,19 @@ function validate() {
   return true
 }
 
+/**
+ * Hàm kiểm tra tùy chọn có được chọn hay không
+ * @param opt Tùy chọn cần kiểm tra
+ * @returns true nếu được chọn, false nếu không được chọn
+ */
 function isSelected(opt: Opt) {
   return opt.value === props.modelValue
 }
 
+/**
+ * Hàm xử lý sự kiện click ngoài dropdown
+ * @param e MouseEvent đối tượng sự kiện
+ */
 function onDocumentClick(e: MouseEvent) {
   if (!root.value) return
   if (!(e.target instanceof Node)) return
@@ -243,21 +276,32 @@ function onDocumentClick(e: MouseEvent) {
   }
 }
 
+/**
+ * Hàm xử lý sự kiện nhấn phím Enter
+ */
 function onEnter() {
   const first = filteredOptions.value[0]
   if (first) select(first)
 }
+//#endregion
 
 onMounted(() => document.addEventListener('click', onDocumentClick))
 onBeforeUnmount(() => document.removeEventListener('click', onDocumentClick))
 
+//#region Watchers
+/**
+ * Watcher để xóa lỗi khi giá trị modelValue thay đổi
+ */
 watch(
   () => props.modelValue,
   () => {
     if (error.value) error.value = ''
   },
 )
+//#endregion
 
+//#region Watchers
+// Watcher để đồng bộ giá trị tìm kiếm với nhãn đã chọn
 watch(
   selectedLabel,
   (val) => {
@@ -269,7 +313,12 @@ watch(
   },
   { immediate: true },
 )
+//#endregion
 
+//#region Methods
+/**
+ * Hàm focus vào dropdown
+ */
 const focus = () => {
   if (props.inlineSearch && inputRef.value) {
     inputRef.value.focus()
@@ -277,6 +326,7 @@ const focus = () => {
     buttonRef.value.focus()
   }
 }
+//#endregion
 
 defineExpose({ validate, focus })
 </script>

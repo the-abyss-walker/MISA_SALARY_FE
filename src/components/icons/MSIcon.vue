@@ -62,6 +62,7 @@ const positionMap: Record<string, string> = {
   success: '-182px -42px',
   failed: '-242px -42px',
   threedot: '-160px -40px',
+  pin: '-180px -80px',
 }
 
 const sizeMap: Record<string, { width: number; height: number }> = {
@@ -96,6 +97,7 @@ const sizeMap: Record<string, { width: number; height: number }> = {
   success: { width: 16, height: 16 },
   failed: { width: 16, height: 16 },
   threedot: { width: 20, height: 20 },
+  pin: { width: 20, height: 20 },
 }
 
 const iconSize = computed(() => sizeMap[props.name] || { width: 20, height: 20 })
@@ -133,6 +135,7 @@ const colorMap: Record<string, string> = {
   radio_check: '#34b057',
   radio_uncheck: '#666666',
   threedot: '#6E737A',
+  pin: '#6E737A',
 }
 
 const defaultColor = computed(() => props.color ?? colorMap[props.name] ?? 'currentColor')

@@ -102,8 +102,13 @@ import { OptionShowPaycheckLabel } from '@/enums/OptionShowPaycheck'
 import { StatusLabel, Status } from '@/enums/Status'
 import { ValueTypeLabel } from '@/enums/ValueType'
 
+//#region Emits
+// Sự kiện được emit ra cho parent (edit, delete, delete-multiple, clone)
 const emit = defineEmits(['edit', 'delete', 'delete-multiple', 'clone'])
+//#endregion
 
+//#region Table configuration
+// Cấu hình cột cho MSTable (dataField tương ứng với key của mỗi row)
 const gridColumns = [
   { dataField: 'SalaryCompositionCode', caption: 'Mã thành phần' },
   { dataField: 'SalaryCompositionName', caption: 'Tên thành phần' },
@@ -120,29 +125,37 @@ const gridColumns = [
   { dataField: 'IsDefault', caption: 'Nguồn tạo' },
   { dataField: 'Status', caption: 'Trạng thái', cellTemplate: 'statusTemplate' },
 ]
+//#endregion
 
+//#region Reactive state
 const tableData = ref<Array<Record<string, any>>>([])
 const totalCount = ref(0)
 
-// toast state
+// Toast state used for inline notifications
 const toastVisible = ref(false)
 const toastMessage = ref('')
 const toastType = ref<'information' | 'warning' | 'success' | 'failed'>('failed')
 
 const isLoading = ref(false)
 
+// Filters / UI bindings
 const searchQuery = ref('')
 const leftDropdown = ref(null as any)
 const rightDropdown = ref([])
 
+// Pagination
 const pageSize = ref(15)
 const page = ref(1)
 
+// Selection state
 const selectedCount = ref(0)
 const selectedItems = ref<any[]>([])
 
+// Reference to the table component (used to clear selection)
 const tableRef = ref<any>(null)
+//#endregion
 
+//#region Selection helpers
 function onSelectionChange(items: any[]) {
   selectedItems.value = items
   selectedCount.value = items.length
@@ -153,7 +166,10 @@ function onDeselect() {
     tableRef.value.clearSelection()
   }
 }
+//#endregion
 
+//#region Header action visibility
+// Hiển thị/ẩn nút Theo dõi / Ngừng theo dõi dựa trên selection
 const showFollowButton = computed(() => {
   return selectedItems.value.some((item) => item.status === Status.UnFollowing)
 })
@@ -161,7 +177,9 @@ const showFollowButton = computed(() => {
 const showUnfollowButton = computed(() => {
   return selectedItems.value.some((item) => item.status === Status.Following)
 })
+//#endregion
 
+//#region Bulk actions (follow/unfollow/delete)
 function onFollow() {
   if (selectedItems.value.length === 0) return
   currentActionItem.value = { status: Status.Following }
@@ -194,7 +212,9 @@ async function onDelete() {
   if (selectedItems.value.length === 0) return
   emit('delete-multiple', selectedItems.value)
 }
+//#endregion
 
+//#region Header bindings / paging
 const statusOptions = [
   { label: 'Tất cả trạng thái', value: null },
   { label: 'Đang theo dõi', value: Status.Following },
@@ -208,7 +228,13 @@ const headerBindings = computed(() => ({
 }))
 
 const pagedData = computed(() => [...tableData.value])
+//#endregion
 
+//#region Data loading & mapping
+/**
+ * Tải dữ liệu từ API và map sang định dạng hiển thị trong table.
+ * Thay thế giá trị null/undefined/'' bằng dấu '-' để bảng hiển thị gọn.
+ */
 async function loadData() {
   try {
     isLoading.value = true
@@ -267,11 +293,13 @@ async function loadData() {
     isLoading.value = false
   }
 }
+//#endregion
 
 onMounted(() => {
   loadData()
 })
 
+//#region User interactions (search/filter/paging)
 function onSearchInput(val: string) {
   searchQuery.value = val
   page.value = 1
@@ -304,8 +332,10 @@ function onSizeChange(s: number) {
   page.value = 1
   loadData()
 }
+//#endregion
 
-// Popup state
+//#region Popup state and actions
+// State used by confirmation popup for single/multiple actions
 const popupVisible = ref(false)
 const popupTitle = ref('')
 const popupContent = ref('')
@@ -378,7 +408,9 @@ async function onPopupAction({ button }: any) {
   }
   popupVisible.value = false
 }
+//#endregion
 
+//#region Row actions
 function onRowClick(e: any) {
   if (e && e.data) {
     onEditItem(e.data)
@@ -396,8 +428,9 @@ function onEditItem(item: any) {
 async function onDeleteItem(item: any) {
   emit('delete', item)
 }
+//#endregion
 
-// Expose to parent component
+// Expose helper functions to parent (loadData, clearSelection)
 defineExpose({
   loadData,
   clearSelection: onDeselect,

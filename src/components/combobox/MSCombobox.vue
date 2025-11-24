@@ -15,30 +15,47 @@
 <script setup lang="ts">
 import { ref, watch, defineProps, defineEmits, defineExpose } from 'vue'
 
+//#region Props
 const props = defineProps<{
   modelValue?: any
   options?: Array<{ label: string; value: any }>
   placeholder?: string
   required?: boolean
 }>()
+//#endregion
 
+//#region Emits
 const emit = defineEmits(['update:modelValue'])
+//#endregion
 
+//#region Data
 const internalValue = ref(props.modelValue ?? '')
+//#endregion
 
+//#region Watchers
 watch(
   () => props.modelValue,
   (v) => {
     internalValue.value = v ?? ''
   },
 )
+//#endregion
 
+//#region Methods
+/**
+ * Hàm xử lý sự kiện thay đổi giá trị combobox
+ * @param e Event đối tượng sự kiện
+ */
 const onChange = (e: Event) => {
   const val = (e.target as HTMLSelectElement).value
   internalValue.value = val
   emit('update:modelValue', val)
 }
 
+/**
+ * Hàm validate giá trị combobox
+ * @returns true nếu hợp lệ, false nếu không hợp lệ
+ */
 function validate() {
   if (props.required) {
     return (
@@ -49,6 +66,7 @@ function validate() {
   }
   return true
 }
+//#endregion
 
 defineExpose({ validate })
 </script>

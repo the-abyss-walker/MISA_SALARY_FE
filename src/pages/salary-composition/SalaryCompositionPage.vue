@@ -143,37 +143,52 @@ import SalaryCompositionForm from './SalaryCompositionForm.vue'
 import SalayryCompositionTable from './SalayryCompositionTable.vue'
 import SalaryCompositionPopup from './SalaryCompositionPopup.vue'
 
+//#region Reactive state & refs
+// Chỉ báo xem trang đang ở chế độ thêm/chỉnh sửa hay danh sách
 const isAdd = ref(false)
+// Tham chiếu tới component form (dùng để gọi submit, kiểm tra isDirty...)
 const addComp = ref<any>(null)
+// Tham chiếu tới bảng để gọi loadData/clearSelection khi cần
 const tableRef = ref<any>(null)
 const router = useRouter()
+// Popup xác nhận khi có thay đổi nhưng chưa lưu
 const showConfirmPopup = ref(false)
+// Dropdown UI state
 const showAddDropdown = ref(false)
 const showEditDropdown = ref(false)
+// Popup chọn danh mục hệ thống
 const showSystemCategoryPopup = ref(false)
+// Id và tên phần tử đang chỉnh sửa
 const editId = ref<string | null>(null)
 const editItemName = ref('')
+//#endregion
 
-// Delete Popup State
+//#region Delete Popup State
+// Trạng thái và nội dung popup xoá (được tùy biến dựa trên kiểm tra server)
 const deletePopupVisible = ref(false)
 const deletePopupTitle = ref('')
 const deletePopupContent = ref('')
 const deletePopupButtons = ref<any[]>([])
 const deleteTargetItems = ref<any[]>([])
 const isDeleteMultiple = ref(false)
+//#endregion
 
+//#region Toast notification
+// Trạng thái toast hiển thị thông báo nhanh
 const toast = reactive({
   show: false,
   type: 'success' as 'success' | 'information' | 'warning' | 'failed',
   message: '',
 })
 
+// Các nút mặc định cho popup xác nhận lưu
 const confirmButtons = [
   { label: 'Hủy', variant: 'secondary' as const, id: 'cancel' },
   { label: 'Không lưu', variant: 'secondary' as const, id: 'no-save' },
   { label: 'Lưu', variant: 'primary' as const, id: 'save' },
 ]
 
+// Hiển thị toast với type và message
 const showToast = (type: 'success' | 'information' | 'warning' | 'failed', message: string) => {
   toast.type = type
   toast.message = message
@@ -183,7 +198,10 @@ const showToast = (type: 'success' | 'information' | 'warning' | 'failed', messa
 const closeToast = () => {
   toast.show = false
 }
+//#endregion
 
+//#region Simple UI helpers
+// Điều hướng sang trang danh mục hệ thống
 const goToSystemCategory = () => {
   router.push({ name: 'SystemCategory' })
 }
@@ -195,7 +213,13 @@ const toggleAddDropdown = () => {
 const toggleEditDropdown = () => {
   showEditDropdown.value = !showEditDropdown.value
 }
+//#endregion
 
+//#region Delete flow (checks + confirmation + perform)
+/**
+ * Kiểm tra phần tử có phải là mặc định hệ thống hay không trước khi xóa.
+ * Nếu có phần tử mặc định thì hiển thị nội dung tương ứng và chỉ cho xóa phần còn lại.
+ */
 const checkAndDelete = async (items: any | any[]) => {
   const isMultiple = Array.isArray(items)
   const targetList = isMultiple ? items : [items]
@@ -223,11 +247,11 @@ const checkAndDelete = async (items: any | any[]) => {
       } else {
         deletePopupContent.value = `<b>${names}</b> là giá trị mặc định của hệ thống nên không thể xóa.`
         deletePopupButtons.value = [{ label: 'Đóng', variant: 'primary' }]
-        deleteTargetItems.value = [] // Nothing to delete
+        deleteTargetItems.value = [] // Không có gì để xóa
       }
       deletePopupVisible.value = true
     } else {
-      // No default composition, normal delete
+      // Không có giá trị mặc định, hiển thị popup xóa bình thường
       deletePopupTitle.value = isMultiple ? 'Xóa thành phần lương' : 'Thông báo'
       const count = targetList.length
       const name = targetList[0].SalaryCompositionName || targetList[0].salaryCompositionName
@@ -240,17 +264,6 @@ const checkAndDelete = async (items: any | any[]) => {
         { label: 'Hủy', variant: 'secondary' },
         { label: 'Xóa', variant: 'primary', class: 'btn-popup-delete' },
       ]
-      if (isMultiple) {
-        deletePopupButtons.value = [
-          { label: 'Hủy', variant: 'secondary' },
-          { label: 'Xóa', variant: 'primary', class: 'btn-popup-delete' },
-        ]
-      } else {
-        deletePopupButtons.value = [
-          { label: 'Hủy', variant: 'secondary' },
-          { label: 'Xóa', variant: 'primary', class: 'btn-popup-delete' },
-        ]
-      }
 
       deletePopupVisible.value = true
     }
@@ -260,6 +273,9 @@ const checkAndDelete = async (items: any | any[]) => {
   }
 }
 
+/**
+ * Xử lý hành động từ popup xóa (button press)
+ */
 const onDeletePopupAction = async ({ button }: any) => {
   if (!button) return
   const label = button.label
@@ -281,14 +297,13 @@ const onDeletePopupAction = async ({ button }: any) => {
       showToast('success', 'Xóa thành công')
       deletePopupVisible.value = false
 
+      // Nếu đang ở form (thêm/chỉnh sửa) quay về danh sách, nếu không làm mới bảng
       if (isAdd.value) {
-        // If we were in add/edit mode
         isAdd.value = false
         editId.value = null
         editItemName.value = ''
         showEditDropdown.value = false
       } else {
-        // Refresh table
         if (tableRef.value?.loadData) {
           tableRef.value.loadData()
           tableRef.value.clearSelection?.()
@@ -298,24 +313,29 @@ const onDeletePopupAction = async ({ button }: any) => {
       showToast('failed', 'Xóa thất bại')
     }
   } else {
-    // Close
+    // Đóng popup (Hủy/Đóng)
     deletePopupVisible.value = false
   }
 }
+//#endregion
 
+//#region Table / header actions
+/**
+ * Xử lý xóa từ bảng hoặc header. Có thể nhận object (row), id string hoặc undefined (xóa current edit)
+ */
 const handleDelete = async (id?: any) => {
   debugger
   let itemToDelete = null
   const isEvent = id && (id instanceof Event || !!id.target)
 
   if (id && typeof id === 'object' && !isEvent) {
-    // Passed from table event
+    // Được gọi từ event của bảng, truyền object row
     itemToDelete = id
   } else if (typeof id === 'string') {
-    // Passed ID string?
-    itemToDelete = { id: id, SalaryCompositionName: '' } // Name might be missing if just ID passed
+    // Chỉ truyền id
+    itemToDelete = { id: id, SalaryCompositionName: '' }
   } else {
-    // From header
+    // Từ header (xóa bản đang chỉnh sửa)
     if (!editId.value) return
     itemToDelete = { id: editId.value, SalaryCompositionName: editItemName.value }
   }
@@ -328,6 +348,10 @@ const handleDelete = async (id?: any) => {
 const handleDeleteList = (items: any[]) => {
   checkAndDelete(items)
 }
+
+/**
+ * Nhân bản / clone từ bảng: tải dữ liệu gốc, bật form mới và truyền dữ liệu
+ */
 const handleCloneFromTable = async (item: any) => {
   try {
     const res = await SalaryCompositionApi.getById(item.id)
@@ -347,6 +371,9 @@ const handleCloneFromTable = async (item: any) => {
   }
 }
 
+/**
+ * Nhân bản khi đang xem một bản ghi (header)
+ */
 const handleDuplicate = async () => {
   if (!editId.value) return
   try {
@@ -388,7 +415,12 @@ const handleEdit = (item: any) => {
   editItemName.value = item.SalaryCompositionName
   isAdd.value = true
 }
+//#endregion
 
+//#region Navigation / form-confirm flow
+/**
+ * Quay lại danh sách. Nếu form bẩn (isDirty) thì hiển thị popup xác nhận
+ */
 const goBack = () => {
   if (addComp.value && addComp.value.isDirty) {
     showConfirmPopup.value = true
@@ -399,6 +431,9 @@ const goBack = () => {
   }
 }
 
+/**
+ * Xử lý các nút của popup xác nhận (Hủy, Không lưu, Lưu)
+ */
 const onConfirmAction = ({ button }: { button?: any }) => {
   if (!button) return
   if (button.id === 'cancel') {
@@ -413,9 +448,13 @@ const onConfirmAction = ({ button }: { button?: any }) => {
     onSaveFromHeader()
   }
 }
+//#endregion
 
+//#region Save callbacks from child form
+/**
+ * Callback khi form con emit 'saved' — thoát về danh sách và show toast
+ */
 const onSaved = (payload?: any) => {
-  // payload can contain saved item; for now return to list
   const message = editId.value ? 'Cập nhật thành công' : 'Thêm thành công'
   isAdd.value = false
   editId.value = null
@@ -427,8 +466,10 @@ const onSavedAndAdd = (payload?: any) => {
   showToast('success', 'Thêm thành công')
 }
 
+/**
+ * Gọi hàm submit trên form con từ header (Lưu)
+ */
 const onSaveFromHeader = () => {
-  // call save on the child component if available
   if (addComp.value && typeof addComp.value.submit === 'function') {
     addComp.value.submit('save')
   }
@@ -439,6 +480,7 @@ const onSaveAndAddFromHeader = () => {
     addComp.value.submit('saveAndAdd')
   }
 }
+//#endregion
 </script>
 
 <style scoped>

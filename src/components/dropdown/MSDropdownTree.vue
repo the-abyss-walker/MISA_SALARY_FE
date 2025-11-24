@@ -99,6 +99,7 @@ interface Props {
   modelValue?: any
 }
 
+//#region Props
 const props = withDefaults(defineProps<Props>(), {
   width: '100%',
   height: '36',
@@ -108,15 +109,27 @@ const props = withDefaults(defineProps<Props>(), {
   modelValue: () => [],
 })
 
-const emit = defineEmits(['update:modelValue', 'loaded'])
+//#endregion
 
+//#region Emits
+const emit = defineEmits(['update:modelValue', 'loaded'])
+//#endregion
+
+//#region Computed
+/** Số lượng thẻ hiển thị thực tế */
 const actualMaxDisplayedTags = computed(() => {
   return props.maxDisplayedTags === null ? undefined : props.maxDisplayedTags
 })
+//#endregion
 
+//#region Data
 const searchValue = ref('')
 let treeView: DxTreeView['instance']
+const treeDataSource = ref([])
+//#endregion
 
+//#region Computed
+// Giá trị của TreeBox
 const treeBoxValue = computed({
   get: () => props.modelValue,
   set: (val: any) => {
@@ -127,9 +140,12 @@ const treeBoxValue = computed({
     emit('update:modelValue', newVal)
   },
 })
+//#endregion
 
-const treeDataSource = ref([])
-
+//#region Methods
+/**
+ * Hàm lấy dữ liệu đơn vị tổ chức
+ */
 const getOrganizationUnit = async () => {
   try {
     const res = await OrganizationApi.getAll()
@@ -139,23 +155,40 @@ const getOrganizationUnit = async () => {
     console.error(error)
   }
 }
+//#endregion
 
+//#region Lifecycle Hooks
+/** Lấy dữ liệu đơn vị tổ chức khi component được mounted */
 onMounted(() => {
   getOrganizationUnit()
 })
+//#endregion
 
+//#region Watchers
+/** Watcher để đồng bộ lựa chọn trong TreeView khi giá trị modelValue thay đổi */
 watch(
   () => props.modelValue,
   () => {
     syncTreeViewSelection()
   },
 )
+//#endregion
 
+//#region Methods
+/**
+ *  Hàm xử lý sự kiện khi nội dung TreeView sẵn sàng
+ * @param component Đối tượng TreeView
+ */
 function treeViewContentReady({ component }: DxTreeViewTypes.ContentReadyEvent) {
   treeView = component
   syncTreeViewSelection()
 }
+//#endregion
 
+//#region Methods
+/**
+ * Hàm đồng bộ lựa chọn trong TreeView với giá trị của TreeBox
+ */
 function syncTreeViewSelection() {
   if (!treeView) return
   const component = treeView
@@ -188,12 +221,19 @@ function syncTreeViewSelection() {
     }
   })
 }
+//#endregion
 
+//#region Methods
+/**
+ * Hàm xử lý sự kiện khi lựa chọn trong TreeView thay đổi
+ * @param e Đối tượng sự kiện
+ */
 function treeViewItemSelectionChanged(e: DxTreeViewTypes.ItemSelectionChangedEvent) {
   const nodes = e.component.getSelectedNodes()
   const roots = nodes.filter((node: any) => !node.parent || !node.parent.selected)
   treeBoxValue.value = roots.map((node: any) => node.key)
 }
+//#endregion
 </script>
 
 <style>

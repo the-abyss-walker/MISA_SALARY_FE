@@ -67,6 +67,8 @@ import { ValueTypeLabel } from '@/enums/ValueType'
 import SalaryCompositionSystemApi from '@/apis/components/SalaryCompositionSystemApi'
 import SalaryCompositionApi from '@/apis/components/SalaryCompositionApi'
 
+//#region Table configuration
+// Các cột hiển thị trên bảng (dataField tương ứng key của mỗi dòng dữ liệu)
 const gridColumns = [
   { dataField: 'SalaryCompositionSystemCode', caption: 'Mã thành phần' },
   { dataField: 'SalaryCompositionSystemName', caption: 'Tên thành phần' },
@@ -80,15 +82,21 @@ const gridColumns = [
   { dataField: 'Description', caption: 'Mô tả' },
   { dataField: 'OptionShowPaycheck', caption: 'Hiển thị trên phiếu lương' },
 ]
+//#endregion
 
+//#region Reactive state
 const tableData = ref<any[]>([])
 const totalCount = ref(0)
 
+// Selection state exposed to parent
 const selectedCount = ref(0)
 const selectedItems = ref<any[]>([])
 const tableRef = ref<any>(null)
 const isLoading = ref(false)
+//#endregion
 
+//#region Filter options
+// Các option để lọc theo loại thành phần (dùng cho header dropdown)
 const compositionTypeOptions = [
   { label: 'Tất cả thành phần', value: null },
   { label: 'Thông tin nhân viên', value: CompositionType.EmployeeInfomation },
@@ -101,7 +109,13 @@ const compositionTypeOptions = [
   { label: 'Bảo hiểm - Công đoàn', value: CompositionType.Insurance },
   { label: 'Khác', value: CompositionType.Other },
 ]
+//#endregion
 
+//#region Data loading
+/**
+ * Tải dữ liệu paging từ API hệ thống và map sang định dạng hiển thị.
+ * Thay thế giá trị null/undefined/'' bằng dấu '-' để bảng không hiển thị ô trống.
+ */
 const loadData = async () => {
   try {
     isLoading.value = true
@@ -150,11 +164,13 @@ const loadData = async () => {
     isLoading.value = false
   }
 }
+//#endregion
 
 onMounted(() => {
   loadData()
 })
 
+//#region Filters / pagination state
 const searchQuery = ref('')
 const leftDropdown = ref(null as any)
 
@@ -166,7 +182,9 @@ const headerBindings = computed(() => ({
 }))
 
 const pagedData = computed(() => tableData.value)
+//#endregion
 
+//#region User interactions (search / filter / paging)
 function onSearchInput(val: string) {
   searchQuery.value = val
   page.value = 1
@@ -192,13 +210,15 @@ function onSizeChange(s: number) {
 }
 
 function onFilter() {
-  // bubble up or handle filter
+  // bubble up or handle filter (placeholder for future logic)
 }
 
 function onConfig() {
-  // handle export
+  // handle export or configuration actions (placeholder)
 }
+//#endregion
 
+//#region Selection helpers
 function onSelectionChange(items: any[]) {
   selectedItems.value = items
   selectedCount.value = items.length
@@ -209,7 +229,9 @@ function onDeselect() {
     tableRef.value.clearSelection()
   }
 }
+//#endregion
 
+//#region Add to list (single / multiple)
 function onAddToList() {
   if (selectedItems.value.length === 0) return
   popup.itemsToAdd = selectedItems.value
@@ -225,13 +247,16 @@ function onAddToList() {
 }
 
 function handleAdd(data: any) {
+  // Called from the action button in the table row to add a single item
   popup.itemsToAdd = [data]
   popup.mode = 'confirm_add'
   popup.title = 'Thông báo'
   popup.content = `Bạn có chắc chắn muốn đưa thành phần lương mặc định ${data.data.salaryCompositionSystemName} vào danh sách sử dụng không?`
   popup.visible = true
 }
+//#endregion
 
+//#region Popup + Toast state
 const popup = reactive({
   visible: false,
   title: 'Thông báo',
@@ -262,7 +287,13 @@ const showToast = (type: 'success' | 'failed' | 'information' | 'warning', messa
 const closeToast = () => {
   toast.show = false
 }
+//#endregion
 
+//#region Popup action handler
+/**
+ * Xử lý hành động khi người dùng click 'Đồng ý' trong popup.
+ * Thực hiện thêm hoặc cập nhật các thành phần từ hệ thống vào danh sách sử dụng.
+ */
 async function onPopupAction({ index }: any) {
   if (index === 1) {
     try {
@@ -282,6 +313,7 @@ async function onPopupAction({ index }: any) {
         console.log(resData)
 
         if (resData?.data && resData.data.length > 0) {
+          // Server returned conflicts: ask user to confirm update
           popup.mode = 'confirm_update'
           popup.title = 'Chuyển trạng thái'
           popup.content = `Đã tồn tại ${resData.data.length} thành phần lương trùng mã trên danh sách. Chương trình sẽ cập nhật thông tin của thành phần lương mặc định vào bản ghi hiện có. Bạn có muốn tiếp tục không?`
@@ -307,7 +339,9 @@ async function onPopupAction({ index }: any) {
   }
   popup.visible = false
 }
+//#endregion
 
+// Expose selection to parent component
 defineExpose({
   selectedItems,
 })

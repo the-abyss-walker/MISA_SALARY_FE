@@ -37,6 +37,7 @@ import { computed, ref } from 'vue'
 import MSIcon from '@/components/icons/MSIcon.vue'
 import MSButtonCombo from './MSButtonCombo.vue'
 
+//#region Props
 const props = withDefaults(
   defineProps<{
     variant?: 'primary' | 'secondary' | 'combo' | 'icon'
@@ -65,6 +66,7 @@ const props = withDefaults(
     width: null,
   },
 )
+//#endregion
 
 const variantClass = computed(() => {
   if (props.variant === 'icon') return 'msbtn--icon'
@@ -89,7 +91,6 @@ const btnStyle = computed(() => {
   }
 
   if (props.width) s.width = `${props.width}px`
-  // if width is small (icon-only dropdown e.g. 40px) center content and remove paddings
   if (props.width && typeof props.width === 'number' && props.width <= 40) {
     s.paddingLeft = '0px'
     s.paddingRight = '0px'
@@ -97,7 +98,6 @@ const btnStyle = computed(() => {
     s.gap = '0px'
     s.minWidth = `${props.width}px`
   }
-  // icon-only variant: fixed 36x36 with specific padding (top/bottom 6px, left/right 5px)
   if (props.variant === 'icon') {
     s.height = '36px'
     s.width = '36px'
@@ -112,7 +112,6 @@ const btnStyle = computed(() => {
   return s
 })
 
-// icon wrapper padding rules: padding-left 12px (handled above on button), but internal wrapper uses right padding 4px
 const isHovered = ref(false)
 
 const iconWrapperStyle = computed(() => {
@@ -121,9 +120,6 @@ const iconWrapperStyle = computed(() => {
     alignItems: 'center',
     justifyContent: 'center',
   }
-  // Do not force a fixed width/height here so MSIcon can apply its own size (e.g. 24x24)
-  // Keep the wrapper centered; spacing is handled by button padding.
-  // if user provided explicit colors for icon, set CSS variable so MSIcon picks it up
   if (props.iconColor) base['--ms-icon-color'] = props.iconColor
   if (isHovered.value && props.iconColorHover) base['--ms-icon-color'] = props.iconColorHover
   return base

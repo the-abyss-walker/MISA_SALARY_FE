@@ -15,6 +15,7 @@
       :hover-state-enabled="true"
       :column-width="props.columnWidth"
       :column-min-width="60"
+      :no-data-text="props.loading ? '' : 'Không có dữ liệu'"
     >
       <DxPaging :enabled="false" />
       <DxScrolling column-rendering-mode="virtual" />
@@ -26,6 +27,7 @@
         show-check-boxes-mode="always"
       />
 
+      <DxColumnFixing :enabled="true" />
       <DxColumn
         v-for="col in usedColumns"
         :key="col.dataField"
@@ -35,6 +37,8 @@
         :allow-resizing="col.allowResizing !== true"
         :cell-template="col.cellTemplate"
         :header-cell-template="col.headerTemplate"
+        :fixed="col.fixed"
+        :fixed-position="col.fixedPosition"
       />
       <template
         v-for="col in columnsWithTemplates"
@@ -43,12 +47,26 @@
       >
         <slot :name="col.cellTemplate" :data="cellInfo"></slot>
       </template>
-      <template
-        v-for="col in columnsWithHeaderTemplates"
-        :key="col.dataField"
-        #[col.headerTemplate]="headerInfo"
-      >
-        <slot :name="col.headerTemplate" :data="headerInfo"></slot>
+
+      <template #universalHeaderTemplate="{ data }">
+        <div class="header-content flex items-center w-full group">
+          <div class="header-text truncate flex-1" :title="data.column.caption">
+            <slot
+              v-if="data.column.originalHeaderTemplate"
+              :name="data.column.originalHeaderTemplate"
+              :data="data"
+            ></slot>
+            <span v-else>{{ data.column.caption }}</span>
+          </div>
+          <div
+            class="pin-icon cursor-pointer ml-2 opacity-0 group-hover:opacity-100 transition-opacity"
+            :class="{ 'opacity-100': data.column.fixed }"
+            @click.stop="togglePin(data.column)"
+            title="Ghim cột"
+          >
+            <MSIcon name="pin" :color="data.column.fixed ? '#34B057' : '#6E737A'" />
+          </div>
+        </div>
       </template>
       <DxColumn
         v-if="props.showActionColumn"
@@ -82,7 +100,14 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { DxDataGrid, DxColumn, DxScrolling, DxPaging, DxSelection } from 'devextreme-vue/data-grid'
+import {
+  DxDataGrid,
+  DxColumn,
+  DxScrolling,
+  DxPaging,
+  DxSelection,
+  DxColumnFixing,
+} from 'devextreme-vue/data-grid'
 import MSIcon from '../icons/MSIcon.vue'
 
 const props = withDefaults(
@@ -128,15 +153,23 @@ const handleDelete = (e: any) => {
 }
 
 const usedColumns = computed(() => {
-  return props.columns && props.columns.length ? props.columns : []
+  const cols = props.columns && props.columns.length ? props.columns : []
+  return cols.map((col: any) => ({
+    ...col,
+    originalHeaderTemplate: col.headerTemplate,
+    headerTemplate: 'universalHeaderTemplate',
+  }))
 })
+
+const togglePin = (column: any) => {
+  if (gridRef.value && gridRef.value.instance) {
+    const isFixed = column.fixed
+    gridRef.value.instance.columnOption(column.dataField, 'fixed', !isFixed)
+  }
+}
 
 const columnsWithTemplates = computed(() => {
   return usedColumns.value.filter((col) => col.cellTemplate)
-})
-
-const columnsWithHeaderTemplates = computed(() => {
-  return usedColumns.value.filter((col) => col.headerTemplate)
 })
 
 const tableDataSource = computed(() => {
@@ -191,15 +224,6 @@ defineExpose({
 .dx-datagrid-headers .dx-datagrid-table .dx-row > td {
   line-height: 16px;
   font-weight: 700;
-}
-
-.dx-datagrid-headers
-  .dx-datagrid-table
-  .dx-row
-  > td:hover:not(.dx-command-select):not(.dx-command-expand):not(.dx-editor-cell):not(
-    .dx-command-edit
-  ):not(.dx-datagrid-group-space) {
-  background-color: transparent !important;
 }
 
 .dx-datagrid .dx-datagrid-table .dx-header-row > td {
@@ -303,11 +327,24 @@ defineExpose({
     .dx-edit-row
   ):not(.dx-row-focused)
   > td {
-  background-color: #f2f9ff !important;
+  background-color: #eafbf2 !important;
 }
 
 .mstable__grid {
   position: relative;
+}
+
+.dx-datagrid-sticky-column-left.dx-datagrid-action.dx-cell-focus-disabled {
+  background-color: #f6f6f6 !important;
+}
+
+.dx-datagrid-headers
+  .dx-datagrid-table
+  .dx-row
+  > td:hover:not(.dx-command-select):not(.dx-command-expand):not(.dx-editor-cell):not(
+    .dx-command-edit
+  ):not(.dx-datagrid-group-space) {
+  background-color: #f6f6f6 !important;
 }
 
 .mstable-loading-overlay {

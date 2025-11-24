@@ -47,37 +47,51 @@ interface Props {
   pageSizeOptions?: number[]
 }
 
+//#region Props
 const props = withDefaults(defineProps<Props>(), {
   totalRecords: 0,
   pageSize: 15,
   currentPage: 1,
   pageSizeOptions: () => [15, 25, 50, 100],
 })
+//#endregion
 
+//#region Emits
 const emit = defineEmits<{
   (e: 'update:currentPage', page: number): void
   (e: 'update:pageSize', size: number): void
   (e: 'page-change', page: number): void
   (e: 'size-change', size: number): void
 }>()
+//#endregion
 
+//#region Data
 const localPageSize = ref(props.pageSize)
 const localPage = ref(props.currentPage)
+//#endregion
 
+//#region Watchers
+/** Watcher để đồng bộ giá trị pageSize từ props vào localPageSize */
 watch(
   () => props.pageSize,
   (v) => {
     localPageSize.value = v
   },
 )
+//#endregion
 
+//#region Watchers
+/** Watcher để đồng bộ giá trị currentPage từ props vào localPage */
 watch(
   () => props.currentPage,
   (v) => {
     localPage.value = v
   },
 )
+//#endregion
 
+//#region Watchers
+/** Watcher để xử lý khi localPageSize thay đổi */
 watch(localPageSize, (newSize, old) => {
   // when page size changes, reset to page 1
   localPage.value = 1
@@ -86,40 +100,47 @@ watch(localPageSize, (newSize, old) => {
   emit('update:currentPage', 1)
   emit('page-change', 1)
 })
+//#endregion
 
+//#region Computed
+/** Tổng số trang */
 const totalPages = computed(() => {
   return props.totalRecords > 0
     ? Math.max(1, Math.ceil(props.totalRecords / localPageSize.value))
     : 1
 })
+//#endregion
 
+//#region Computed
 const isFirst = computed(() => localPage.value <= 1)
 const isLast = computed(() => localPage.value >= totalPages.value)
-
 const rangeStart = computed(() => {
   if (props.totalRecords === 0) return 0
   return (localPage.value - 1) * localPageSize.value + 1
 })
 
 const rangeEnd = computed(() => Math.min(localPage.value * localPageSize.value, props.totalRecords))
+//#endregion
 
-function onSizeChange() {
-  // handled by watcher on localPageSize
-}
-
+//#region Methods
+/** Hàm chuyển đến trang trước */
 function goPrev() {
   if (isFirst.value) return
   localPage.value = Math.max(1, localPage.value - 1)
   emit('update:currentPage', localPage.value)
   emit('page-change', localPage.value)
 }
+//#endregion
 
+//#region Methods
+/** Hàm chuyển đến trang sau */
 function goNext() {
   if (isLast.value) return
   localPage.value = Math.min(totalPages.value, localPage.value + 1)
   emit('update:currentPage', localPage.value)
   emit('page-change', localPage.value)
 }
+//#endregion
 </script>
 
 <style scoped>

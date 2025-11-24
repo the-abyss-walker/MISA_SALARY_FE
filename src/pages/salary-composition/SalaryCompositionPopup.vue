@@ -80,15 +80,21 @@ import { CompositionNatureLabel } from '@/enums/CompositionNature'
 import { OptionShowPaycheckLabel } from '@/enums/OptionShowPaycheck'
 import { ValueTypeLabel } from '@/enums/ValueType'
 
+//#region Props & Emits
+// Props nhận từ cha: điều khiển hiển thị popup
 const props = defineProps<{
   visible: boolean
 }>()
 
+// Các sự kiện emit ra ngoài (cập nhật visible, trả về danh sách item đã chọn)
 const emit = defineEmits<{
   (e: 'update:visible', value: boolean): void
   (e: 'save', items: any[]): void
 }>()
+//#endregion
 
+//#region Reactive data & UI state
+// Data hiển thị trong bảng sau khi map
 const tableData = ref<any[]>([])
 const totalCount = ref(0)
 const pageIndex = ref(1)
@@ -97,16 +103,11 @@ const searchQuery = ref('')
 const isLoading = ref(false)
 let searchTimeout: ReturnType<typeof setTimeout> | null = null
 
-watch(searchQuery, () => {
-  if (searchTimeout) clearTimeout(searchTimeout)
-  searchTimeout = setTimeout(() => {
-    pageIndex.value = 1
-    loadData()
-  }, 200)
-})
-
+// Lọc loại thành phần, các item được chọn trên bảng
 const compositionType = ref(null)
 const selectedItems = ref<any[]>([])
+
+// Toast đơn giản dùng trong popup để hiển thị thông báo nhanh
 const toast = ref<{
   show: boolean
   type: 'success' | 'failed' | 'warning' | 'information'
@@ -115,7 +116,10 @@ const toast = ref<{
 const closeToast = () => {
   toast.value.show = false
 }
+//#endregion
 
+//#region Confirm popup state
+// Popup phụ để xác nhận khi có bản ghi trùng (server trả về)
 const confirmPopup = reactive({
   visible: false,
   title: 'Thông báo',
@@ -126,6 +130,10 @@ const confirmPopup = reactive({
   ],
 })
 
+/**
+ * Xử lý hành động trên confirmPopup (cập nhật các bản ghi trùng)
+ * index === 1 tương ứng với nút 'Đồng ý'
+ */
 async function onConfirmPopupAction({ index }: any) {
   if (index === 1) {
     try {
@@ -143,7 +151,10 @@ async function onConfirmPopupAction({ index }: any) {
   }
   confirmPopup.visible = false
 }
+//#endregion
 
+//#region Options / computed helpers
+// Các option cho filter loại thành phần
 const compositionTypeOptions = [
   { label: 'Tất cả thành phần', value: null },
   { label: 'Thông tin nhân viên', value: CompositionType.EmployeeInfomation },
@@ -157,6 +168,7 @@ const compositionTypeOptions = [
   { label: 'Khác', value: CompositionType.Other },
 ]
 
+// Nút của popup chính: Đồng ý disabled khi chưa chọn item
 const popupButtons = computed(() => [
   { label: 'Hủy bỏ', variant: 'secondary' as const, id: 'cancel' },
   {
@@ -167,6 +179,7 @@ const popupButtons = computed(() => [
   },
 ])
 
+// Cấu hình cột của bảng (caption hiển thị)
 const gridColumns = [
   { dataField: 'SalaryCompositionSystemCode', caption: 'Mã thành phần' },
   { dataField: 'SalaryCompositionSystemName', caption: 'Tên thành phần' },
@@ -180,7 +193,12 @@ const gridColumns = [
   { dataField: 'Description', caption: 'Mô tả' },
   { dataField: 'OptionShowPaycheck', caption: 'Hiển thị trên phiếu lương' },
 ]
+//#endregion
 
+//#region Data loading & mapping
+/**
+ * Tải dữ liệu từ API hệ thống (paging) và ánh xạ sang định dạng hiển thị
+ */
 const loadData = async () => {
   try {
     isLoading.value = true
@@ -213,6 +231,7 @@ const loadData = async () => {
         Formula: item.formula,
         Description: item.description,
       }
+      // Thay thế giá trị trống/null bằng dấu '-'
       for (const key in newItem) {
         if (newItem[key] === null || newItem[key] === undefined || newItem[key] === '') {
           newItem[key] = '-'
@@ -227,7 +246,19 @@ const loadData = async () => {
     isLoading.value = false
   }
 }
+//#endregion
 
+//#region Watchers (search + visible)
+// Debounce cho ô tìm kiếm
+watch(searchQuery, () => {
+  if (searchTimeout) clearTimeout(searchTimeout)
+  searchTimeout = setTimeout(() => {
+    pageIndex.value = 1
+    loadData()
+  }, 200)
+})
+
+// Khi popup được mở, tải dữ liệu
 watch(
   () => props.visible,
   (newVal) => {
@@ -236,11 +267,17 @@ watch(
     }
   },
 )
+//#endregion
 
+//#region UI helpers / actions
 function updateVisible(val: boolean) {
   emit('update:visible', val)
 }
 
+/**
+ * Xử lý nút của popup chính: Hủy hoặc Đồng ý.
+ * - Nếu 'agree' gọi API cập nhật và xử lí trường hợp trùng mã trả về từ server.
+ */
 async function onPopupAction({ button }: { button: any }) {
   if (button.id === 'cancel') {
     updateVisible(false)
@@ -252,6 +289,7 @@ async function onPopupAction({ button }: { button: any }) {
       })
       const resData = res?.data
 
+      // Nếu server trả về danh sách trùng, hiển thị confirmPopup để hỏi tiếp
       if (resData?.data && resData.data.length > 0) {
         confirmPopup.title = 'Chuyển trạng thái'
         confirmPopup.content = `Đã tồn tại ${resData.data.length} thành phần lương trùng mã trên danh sách. Chương trình sẽ cập nhật thông tin của thành phần lương mặc định vào bản ghi hiện có. Bạn có muốn tiếp tục không?`
@@ -290,6 +328,7 @@ function onSizeChange(s: number) {
 function onSelectionChange(items: any[]) {
   selectedItems.value = items
 }
+//#endregion
 </script>
 
 <style scoped>

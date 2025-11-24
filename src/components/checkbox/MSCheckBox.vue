@@ -18,6 +18,7 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 
+//#region Props
 const props = defineProps<{
   modelValue?: boolean | any[]
   value?: any
@@ -25,16 +26,29 @@ const props = defineProps<{
   label?: string
   disabled?: boolean
 }>()
+//#endregion
 
+//#region Emits
 const emit = defineEmits(['update:modelValue'])
+//#endregion
 
+//#region Computed
+/**
+ * Trạng thái checked của checkbox
+ */
 const isChecked = computed(() => {
   if (Array.isArray(props.modelValue)) {
     return props.modelValue.includes(props.value)
   }
   return props.modelValue === true
 })
+//#endregion
 
+//#region Methods
+/**
+ * Hàm xử lý sự kiện thay đổi trạng thái checkbox
+ * @param event Event đối tượng sự kiện
+ */
 const onChange = (event: Event) => {
   if (props.disabled) return
 
