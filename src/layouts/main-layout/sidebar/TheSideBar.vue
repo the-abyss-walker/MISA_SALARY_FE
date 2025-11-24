@@ -23,7 +23,7 @@
         <span
           class="text-[#FFFFFFB2] whitespace-nowrap transition-all duration-300 sidebar-label"
           :class="[
-            collapsed ? 'opacity-0 -translate-x-2.5 w-0' : 'opacity-100 translate-x-0 w-auto',
+            collapsed ? 'hidden -translate-x-2.5 w-0' : 'opacity-100 translate-x-0 w-auto',
             activeId === item.id ? 'text-white' : '',
           ]"
         >

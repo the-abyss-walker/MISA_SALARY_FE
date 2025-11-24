@@ -19,6 +19,7 @@
       ref="tableRef"
       :data="pagedData"
       :columns="gridColumns"
+      :loading="isLoading"
       :show-selection="true"
       gridHeight="calc(100vh - 250px)"
       @selection-change="onSelectionChange"
@@ -86,6 +87,7 @@ const totalCount = ref(0)
 const selectedCount = ref(0)
 const selectedItems = ref<any[]>([])
 const tableRef = ref<any>(null)
+const isLoading = ref(false)
 
 const compositionTypeOptions = [
   { label: 'Tất cả thành phần', value: null },
@@ -102,6 +104,7 @@ const compositionTypeOptions = [
 
 const loadData = async () => {
   try {
+    isLoading.value = true
     const payload = {
       query: searchQuery.value,
       compositionType: leftDropdown.value,
@@ -139,7 +142,12 @@ const loadData = async () => {
       return newItem
     })
   } catch (error) {
-    console.error(error)
+    const errMsg = 'Lỗi khi tải dữ liệu.'
+    toast.message = String(errMsg)
+    toast.type = 'failed'
+    toast.show = true
+  } finally {
+    isLoading.value = false
   }
 }
 

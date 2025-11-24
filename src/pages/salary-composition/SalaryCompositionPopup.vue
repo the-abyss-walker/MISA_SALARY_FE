@@ -33,6 +33,7 @@
           ref="tableRef"
           :data="tableData"
           :columns="gridColumns"
+          :loading="isLoading"
           :show-selection="true"
           :show-action-column="false"
           gridHeight="calc(100vh - 390px)"
@@ -93,6 +94,7 @@ const totalCount = ref(0)
 const pageIndex = ref(1)
 const pageSize = ref(15)
 const searchQuery = ref('')
+const isLoading = ref(false)
 let searchTimeout: ReturnType<typeof setTimeout> | null = null
 
 watch(searchQuery, () => {
@@ -181,6 +183,7 @@ const gridColumns = [
 
 const loadData = async () => {
   try {
+    isLoading.value = true
     const payload = {
       query: searchQuery.value,
       compositionType: compositionType.value,
@@ -218,7 +221,10 @@ const loadData = async () => {
       return newItem
     })
   } catch (error) {
-    console.error(error)
+    const errMsg = 'Lỗi khi tải dữ liệu.'
+    toast.value = { show: true, type: 'failed', message: errMsg }
+  } finally {
+    isLoading.value = false
   }
 }
 
