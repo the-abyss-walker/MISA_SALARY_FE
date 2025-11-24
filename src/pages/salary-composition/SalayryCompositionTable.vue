@@ -43,6 +43,7 @@
       :data="pagedData"
       :columns="gridColumns"
       :show-selection="true"
+      :loading="isLoading"
       @selection-change="onSelectionChange"
       @row-click="onRowClick"
     >
@@ -131,6 +132,8 @@ const toastVisible = ref(false)
 const toastMessage = ref('')
 const toastType = ref<'information' | 'warning' | 'success' | 'failed'>('failed')
 
+const isLoading = ref(false)
+
 const searchQuery = ref('')
 const leftDropdown = ref(null as any)
 const rightDropdown = ref(null as any)
@@ -209,6 +212,7 @@ const pagedData = computed(() => [...tableData.value])
 
 async function loadData() {
   try {
+    isLoading.value = true
     const payload = {
       query: searchQuery.value,
       status: leftDropdown.value,
@@ -259,6 +263,8 @@ async function loadData() {
     toastMessage.value = String(errMsg)
     toastType.value = 'failed'
     toastVisible.value = true
+  } finally {
+    isLoading.value = false
   }
 }
 

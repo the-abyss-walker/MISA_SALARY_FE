@@ -1,5 +1,8 @@
 <template>
   <div class="mstable__grid">
+    <div v-if="loading" class="mstable-loading-overlay">
+      <div class="mstable-spinner"></div>
+    </div>
     <DxDataGrid
       ref="gridRef"
       :data-source="tableDataSource"
@@ -92,6 +95,7 @@ const props = withDefaults(
     pageSize?: number
     showSelection?: boolean
     showActionColumn?: boolean
+    loading?: boolean
   }>(),
   {
     data: () => [],
@@ -101,6 +105,7 @@ const props = withDefaults(
     remoteOperations: false,
     showSelection: false,
     showActionColumn: true,
+    loading: false,
   },
 )
 
@@ -297,7 +302,42 @@ defineExpose({
 .dx-data-row.dx-state-hover:not(.dx-selection):not(.dx-row-inserted):not(.dx-row-removed):not(
     .dx-edit-row
   ):not(.dx-row-focused)
-  > td:not(.dx-focused) {
-  background-color: #eafbf2 !important;
+  > td {
+  background-color: #f2f9ff !important;
+}
+
+.mstable__grid {
+  position: relative;
+}
+
+.mstable-loading-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(255, 255, 255, 0.7);
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.mstable-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #34b057;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 </style>
