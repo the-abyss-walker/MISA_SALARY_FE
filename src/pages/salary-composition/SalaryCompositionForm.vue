@@ -15,7 +15,7 @@
             ref="nameRef"
             v-model="form.name"
             :width="675"
-            :maxLength="100"
+            :maxLength="255"
             required
             @blur="checkExistCode"
           />

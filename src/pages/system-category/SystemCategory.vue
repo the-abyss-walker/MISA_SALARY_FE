@@ -3,11 +3,11 @@
     <!-- Header: changes depending on child route -->
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-4">
-        <button class="m-2 rounded flex items-center" @click="goBack">
+        <button class="rounded flex items-center btn-container" @click="goBack">
           <MSIcon name="arrow_left" />
         </button>
 
-        <h2 class="text-[20px] font-semibold">Danh mục thành phần lương của hệ thống</h2>
+        <h2 class="text-[20px] font-bold">Danh mục thành phần lương của hệ thống</h2>
       </div>
     </div>
 
@@ -28,4 +28,16 @@ const goBack = () => {
 }
 </script>
 
-<style scoped></style>
+<style scoped>
+.btn-container {
+  width: 32px;
+  height: 32px;
+  padding: 6px;
+}
+
+.btn-container:hover {
+  background-color: #dadce3;
+  border-radius: 50%;
+  cursor: pointer;
+}
+</style>

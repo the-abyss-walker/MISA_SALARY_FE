@@ -219,7 +219,6 @@ async function loadData() {
       pageIndex: page.value,
       organizationUnitIds: rightDropdown.value,
     }
-    console.log('Payload:', payload)
     const res = await SalaryCompositionApi.paging(payload)
     const resData = res?.data?.data
     const items = resData?.items ?? []

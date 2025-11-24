@@ -3,7 +3,7 @@
     <!-- Header: changes depending on child route -->
     <div class="flex items-center justify-between">
       <div class="flex items-center gap-4">
-        <button v-if="isAdd" class="m-2 rounded flex items-center" @click="goBack">
+        <button v-if="isAdd" class="flex items-center btn-container" @click="goBack">
           <MSIcon name="arrow_left" />
         </button>
 
@@ -449,6 +449,18 @@ const onSaveAndAddFromHeader = () => {
 h2 {
   font-weight: 700;
   font-size: 20px;
+}
+
+.btn-container {
+  width: 32px;
+  height: 32px;
+  padding: 6px;
+}
+
+.btn-container:hover {
+  background-color: #dadce3;
+  border-radius: 50%;
+  cursor: pointer;
 }
 
 .ms-page-dropdown {
