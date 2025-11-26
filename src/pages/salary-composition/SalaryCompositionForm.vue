@@ -59,7 +59,7 @@
             :required="true"
             :width="675"
             :bordered="true"
-            :max-displayed-tags="4"
+            :max-displayed-tags="3"
             :show-inactive-option="false"
             :hoverable="true"
             labelPosition="left"
@@ -642,9 +642,10 @@ onMounted(async () => {
       form.valueType = data.valueType
       form.description = data.description
       form.optionShowPaycheck = data.optionShowPaycheck
-      form.valueCalculationMethod = data.formulaCompositionType
+      form.valueCalculationMethod =
+        data.formulaCompositionType ?? FormulaCompositionType.CustomFormula
 
-      if (data.formulaCompositionType === FormulaCompositionType.CustomFormula) {
+      if (form.valueCalculationMethod === FormulaCompositionType.CustomFormula) {
         form.value = data.formula
       } else {
         form.autoSumCompositionCode = data.autoSumCompositionCode
@@ -800,7 +801,11 @@ const onReset = () => {
   form.code = ''
   form.name = ''
   form.compositionType = null
-  form.unit = []
+  if (unitOptions.value && unitOptions.value.length > 0) {
+    form.unit = [unitOptions.value[0].id]
+  } else {
+    form.unit = []
+  }
   form.nature = CompositionNature.Income
   form.quota = ''
   form.valueType = ValueType.Money
@@ -851,9 +856,9 @@ const setFormData = (data: any, isClone: boolean = false) => {
   form.valueType = data.valueType
   form.description = data.description
   form.optionShowPaycheck = data.optionShowPaycheck
-  form.valueCalculationMethod = data.formulaCompositionType
+  form.valueCalculationMethod = data.formulaCompositionType ?? FormulaCompositionType.CustomFormula
 
-  if (data.formulaCompositionType === FormulaCompositionType.CustomFormula) {
+  if (form.valueCalculationMethod === FormulaCompositionType.CustomFormula) {
     form.value = data.formula
   } else {
     form.autoSumCompositionCode = data.autoSumCompositionCode

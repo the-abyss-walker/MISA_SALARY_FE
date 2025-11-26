@@ -241,6 +241,7 @@ function treeViewItemSelectionChanged(e: DxTreeViewTypes.ItemSelectionChangedEve
   border: 1px solid #ddd !important;
   border-radius: 4px;
   background: white;
+  min-height: 36px;
 }
 
 .custom-dropdown-box.dx-dropdownbox.dx-state-hover {

@@ -324,7 +324,6 @@ const onDeletePopupAction = async ({ button }: any) => {
  * Xử lý xóa từ bảng hoặc header. Có thể nhận object (row), id string hoặc undefined (xóa current edit)
  */
 const handleDelete = async (id?: any) => {
-  debugger
   let itemToDelete = null
   const isEvent = id && (id instanceof Event || !!id.target)
 
