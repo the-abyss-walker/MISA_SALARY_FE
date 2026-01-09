@@ -7,7 +7,7 @@
     <div class="flex flex-1">
       <TheSideBar :collapsed="isCollapsed" @toggle="toggleSidebar" />
       <div>abc</div>
-
+      <div>bcd</div>
       <div class="content flex-1 overflow-x-hidden">
         <router-view />
       </div>
